@@ -5,11 +5,9 @@ namespace Larapress\Profiles;
 use Larapress\Profiles\Models\Domain;
 
 /**
- * Interface IProfileUser
+ * Interface IProfileUser.
  *
  * @property int        $flags
- *
- * @package Larapress\Profiles
  */
 interface IProfileUser
 {
@@ -17,6 +15,7 @@ interface IProfileUser
      * @return Domain
      */
     public function getRegistrationDomain();
+
     /**
      * @return int
      */

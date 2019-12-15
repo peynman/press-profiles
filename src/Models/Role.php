@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Larapress\CRUD\ICRUDUser;
 
 /**
- * Class Roles
+ * Class Roles.
  *
  * @property int $id
  * @property string $name
@@ -18,8 +18,6 @@ use Larapress\CRUD\ICRUDUser;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $deleted_at
- *
- * @package Larapress\CRUD\Models
  */
 class Role extends Model
 {
@@ -30,7 +28,7 @@ class Role extends Model
     public $fillable = [
         'name',
         'title',
-        'priority'
+        'priority',
     ];
 
     /**

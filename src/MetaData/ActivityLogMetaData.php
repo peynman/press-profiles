@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace Larapress\Profiles\MetaData;
 
 use Larapress\CRUD\Base\BasePermissionMetaData;
@@ -41,9 +39,8 @@ class ActivityLogMetaData extends SingleSourceBaseMetaData implements
         ];
     }
 
-
     /**
-     * Permission group name
+     * Permission group name.
      *
      * @return string
      */
@@ -56,10 +53,12 @@ class ActivityLogMetaData extends SingleSourceBaseMetaData implements
     {
         return trans('models.activity-logs.sidebar');
     }
+
     public function singular()
     {
         return trans('models.activity-logs.name.singular');
     }
+
     public function plural()
     {
         return trans('models.activity-logs.name.plural');
@@ -87,6 +86,7 @@ class ActivityLogMetaData extends SingleSourceBaseMetaData implements
     {
         return [$this->getViewPermission()];
     }
+
     public function viewRoles()
     {
         return [];
@@ -96,6 +96,7 @@ class ActivityLogMetaData extends SingleSourceBaseMetaData implements
     {
         return false;
     }
+
     public function hasDelete()
     {
         return false;
@@ -133,7 +134,7 @@ class ActivityLogMetaData extends SingleSourceBaseMetaData implements
             'with' => [
                 'user' => [],
                 'domain' => [],
-            ]
+            ],
         ];
     }
 
@@ -141,6 +142,7 @@ class ActivityLogMetaData extends SingleSourceBaseMetaData implements
     {
         return config('larapress.profiles.routes.activity-logs.name');
     }
+
     public function getCreateFields()
     {
         return [

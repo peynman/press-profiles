@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Support\Facades\Auth;
@@ -44,6 +43,7 @@ class PhoneNumberCRUDProvider implements ICRUDProvider
     public function onBeforeCreate($args)
     {
         $args = Helpers::getNormalizedNumbers($args, ['number']);
+
         return $args;
     }
 

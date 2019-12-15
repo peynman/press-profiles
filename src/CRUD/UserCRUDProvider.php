@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\CRUD;
 
 use Carbon\Carbon;
@@ -8,9 +7,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Larapress\Core\Extend\Helpers;
-use Larapress\CRUD\ICRUDUser;
 use Larapress\CRUD\Base\BaseCRUDProvider;
 use Larapress\CRUD\Base\ICRUDProvider;
+use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\Role;
 
@@ -86,7 +85,7 @@ class UserCRUDProvider implements ICRUDProvider
             $protectedRoles = config('security.roles.protect');
             $roles = [];
             foreach ($reqRoles as $role) {
-                if (!in_array($role, $protectedRoles)) {
+                if (! in_array($role, $protectedRoles)) {
                     $roles[] = $role;
                 }
             }
@@ -118,7 +117,7 @@ class UserCRUDProvider implements ICRUDProvider
      */
     public function onBeforeUpdate($args)
     {
-        if (!empty($args['password'])) {
+        if (! empty($args['password'])) {
             $args['password'] = self::makePassword($args['password']);
         } else {
             unset($args['password']);
@@ -194,7 +193,7 @@ class UserCRUDProvider implements ICRUDProvider
         $user = Auth::user();
 
         if ($user->hasRole(config('larapress.profile.security.roles.affiliate'))) {
-            if (!in_array($object->getMembershipDomainId(), $user->getAffiliateDomainIds())) {
+            if (! in_array($object->getMembershipDomainId(), $user->getAffiliateDomainIds())) {
                 return false;
             }
         }

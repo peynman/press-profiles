@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\MetaData;
 
 use Larapress\CRUD\Base\BasePermissionMetaData;
@@ -48,10 +47,12 @@ class RoleMetaData extends SingleSourceBaseMetaData implements
     {
         return trans('sidebar.title.roles');
     }
+
     public function singular()
     {
         return trans('models.role.name.singular');
     }
+
     public function plural()
     {
         return trans('models.role.name.plural');
@@ -79,6 +80,7 @@ class RoleMetaData extends SingleSourceBaseMetaData implements
     {
         return [$this->getViewPermission()];
     }
+
     public function viewRoles()
     {
         return [];
@@ -91,7 +93,7 @@ class RoleMetaData extends SingleSourceBaseMetaData implements
             TableViewColumn::column(trans('tables.column.name'), 'name'),
             TableViewColumn::column(trans('tables.column.title'), 'title'),
             TableViewColumn::datetime(trans('tables.column.created_at')),
-            TableViewColumn::options()
+            TableViewColumn::options(),
         ];
     }
 
@@ -105,11 +107,11 @@ class RoleMetaData extends SingleSourceBaseMetaData implements
         return [];
     }
 
-
     public function getViewControllerRouteName()
     {
         return config('larapress.profiles.routes.roles.name');
     }
+
     public function getCreateFields()
     {
         return [
@@ -121,7 +123,7 @@ class RoleMetaData extends SingleSourceBaseMetaData implements
                 Permission::all(['id', 'title', 'name', 'group_name', 'group_title']),
                 FormField::decorator('id', 'title', 'group_name', 'group_title'),
                 []
-            )
+            ),
         ];
     }
 
@@ -136,7 +138,7 @@ class RoleMetaData extends SingleSourceBaseMetaData implements
                 Permission::all(['id', 'title', 'name', 'group_name', 'group_title']),
                 FormField::decorator('id', 'title', 'group_name', 'group_title'),
                 []
-            )
+            ),
         ];
     }
 }

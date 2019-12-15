@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\CRUD;
 
 use Larapress\Core\Extend\Helpers;
@@ -37,8 +36,10 @@ class RoleCRUDProvider implements ICRUDProvider
         if (isset($args['permissions'])) {
             $args['permissions'] = Helpers::getNormalizedObjectIds($args['permissions']);
         }
+
         return $args;
     }
+
     public function onBeforeUpdate($args)
     {
         return $this->onBeforeCreate($args);

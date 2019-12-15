@@ -1,11 +1,11 @@
 <?php
 
 return [
-	'controllers' => [
+    'controllers' => [
 
-	],
+    ],
 
-	'permissions' => [
+    'permissions' => [
         \Larapress\Profiles\MetaData\UserMetaData::class,
         \Larapress\Profiles\MetaData\ActivityLogMetaData::class,
         \Larapress\Profiles\MetaData\ActivateCodeHistoryMetaData::class,
@@ -16,26 +16,26 @@ return [
         \Larapress\Profiles\MetaData\RoleMetaData::class,
         \Larapress\Profiles\MetaData\SettingsMetaData::class,
         \Larapress\Profiles\MetaData\FilterMetaData::class,
-	],
+    ],
 
     'security' => [
         'roles' => [
             'super-role' => [
-                'super-role'
+                'super-role',
             ],
             'affiliate' => [
                 'affiliate',
-                'master'
+                'master',
             ],
             'customer' => [
-                'customer'
+                'customer',
             ],
-        ]
+        ],
     ],
 
     'defaults' => [
         'date-filter-interval' => '-1y',
-        'cache-ttl' => '1d'
+        'cache-ttl' => '1d',
     ],
 
     'routes' => [
@@ -71,6 +71,6 @@ return [
         ],
         'activity-logs' => [
             'name' => 'activity-logs',
-        ]
-    ]
+        ],
+    ],
 ];

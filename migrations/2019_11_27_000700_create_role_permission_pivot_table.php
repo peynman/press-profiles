@@ -14,11 +14,11 @@ class CreateRolePermissionPivotTable extends Migration
     public function up()
     {
         Schema::create('role_permission', function (Blueprint $table) {
-	        $table->bigInteger('role_id', false, true);
-	        $table->bigInteger('permission_id', false, true);
+            $table->bigInteger('role_id', false, true);
+            $table->bigInteger('permission_id', false, true);
 
-	        $table->foreign('role_id')->references('id')->on('roles');
-	        $table->foreign('permission_id')->references('id')->on('permissions');
+            $table->foreign('role_id')->references('id')->on('roles');
+            $table->foreign('permission_id')->references('id')->on('permissions');
         });
     }
 

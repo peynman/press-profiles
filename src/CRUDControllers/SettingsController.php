@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\CRUDControllers;
 
 use Larapress\CRUD\Controllers\BaseCRUDController;
@@ -24,8 +23,8 @@ class SettingsController extends BaseCRUDController
                 'store.duplicate' => [
                     'methods' => ['POST'],
                     'uses' => '\\'.self::class.'@store',
-                    'url' => $name.'/duplicate'
-                ]
+                    'url' => $name.'/duplicate',
+                ],
             ],
             SettingsDuplicateDomainProvider::class
         );

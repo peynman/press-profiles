@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\MetaData;
 
 use Larapress\CRUD\Base\BasePermissionMetaData;
@@ -42,7 +41,7 @@ class PhoneNumberMetaData extends SingleSourceBaseMetaData implements
     }
 
     /**
-     * Permission group name
+     * Permission group name.
      *
      * @return string
      */
@@ -51,15 +50,16 @@ class PhoneNumberMetaData extends SingleSourceBaseMetaData implements
         return config('larapress.profiles.routes.phone-numbers.name');
     }
 
-
     public function title()
     {
         return trans('sidebar.title.numbers');
     }
+
     public function singular()
     {
         return trans('models.phone-number.name.singular');
     }
+
     public function plural()
     {
         return trans('models.phone-number.name.plural');
@@ -87,6 +87,7 @@ class PhoneNumberMetaData extends SingleSourceBaseMetaData implements
     {
         return [$this->getViewPermission()];
     }
+
     public function viewRoles()
     {
         return [];
@@ -113,7 +114,7 @@ class PhoneNumberMetaData extends SingleSourceBaseMetaData implements
             TableViewColumn::column(trans('tables.column.number'), 'number'),
             TableViewColumn::column(trans('tables.column.type'), 'type'),
             TableViewColumn::column(trans('tables.column.description'), 'desc'),
-            TableViewColumn::options()
+            TableViewColumn::options(),
         ];
     }
 
@@ -132,11 +133,11 @@ class PhoneNumberMetaData extends SingleSourceBaseMetaData implements
         ];
     }
 
-
     public function getViewControllerRouteName()
     {
         return config('larapress.profiles.routes.phone-numbers.name');
     }
+
     public function getCreateFields()
     {
         return [];

@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace Larapress\Profiles\MetaData;
 
 use Larapress\CRUD\Base\BasePermissionMetaData;
@@ -57,10 +55,12 @@ class DomainMetaData extends SingleSourceBaseMetaData implements
     {
         return trans('models.sub-domains.sidebar');
     }
+
     public function singular()
     {
         return trans('models.sub-domains.name.singular');
     }
+
     public function plural()
     {
         return trans('models.sub-domains.name.plural');
@@ -88,6 +88,7 @@ class DomainMetaData extends SingleSourceBaseMetaData implements
     {
         return [$this->getViewPermission()];
     }
+
     public function viewRoles()
     {
         return [];
@@ -109,7 +110,7 @@ class DomainMetaData extends SingleSourceBaseMetaData implements
             TableViewColumn::column(trans('tables.column.domain'), 'domain'),
             TableViewColumn::column(trans('tables.column.nameservers'), 'nameservers'),
             TableViewColumn::datetime(trans('tables.column.created_at'), 'created_at'),
-            TableViewColumn::options()
+            TableViewColumn::options(),
         ];
     }
 
@@ -123,7 +124,7 @@ class DomainMetaData extends SingleSourceBaseMetaData implements
         return [
             'with' => [
                 'author' => [],
-            ]
+            ],
         ];
     }
 
@@ -131,6 +132,7 @@ class DomainMetaData extends SingleSourceBaseMetaData implements
     {
         return config('larapress.profiles.routes.domains.name');
     }
+
     public function getCreateFields()
     {
         return [

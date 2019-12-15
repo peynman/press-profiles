@@ -15,16 +15,16 @@ class CreateDomainsTable extends Migration
     {
         Schema::create('domains', function (Blueprint $table) {
             $table->bigIncrements('id');
-	        $table->bigInteger('author_id', false, true)->nullable();
-	        $table->string('name')->unique();
-	        $table->string('ips')->nullable();
-	        $table->string('nameservers')->nullable();
-	        $table->integer('flags')->default(0);
-	        $table->json('data')->nullable();
-	        $table->timestamps();
-	        $table->softDeletes();
+            $table->bigInteger('author_id', false, true)->nullable();
+            $table->string('name')->unique();
+            $table->string('ips')->nullable();
+            $table->string('nameservers')->nullable();
+            $table->integer('flags')->default(0);
+            $table->json('data')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
 
-	        $table->foreign('author_id')->references('id')->on('users');
+            $table->foreign('author_id')->references('id')->on('users');
         });
     }
 

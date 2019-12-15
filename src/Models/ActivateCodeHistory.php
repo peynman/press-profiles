@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\Models;
 
 use Illuminate\Database\Eloquent\Model;

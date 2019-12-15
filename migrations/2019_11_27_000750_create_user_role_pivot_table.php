@@ -14,10 +14,10 @@ class CreateUserRolePivotTable extends Migration
     public function up()
     {
         Schema::create('user_role', function (Blueprint $table) {
-	        $table->bigInteger('user_id', false, true);
-	        $table->bigInteger('role_id', false, true);
-	        $table->foreign('user_id')->references('id')->on('users');
-	        $table->foreign('role_id')->references('id')->on('roles');
+            $table->bigInteger('user_id', false, true);
+            $table->bigInteger('role_id', false, true);
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('role_id')->references('id')->on('roles');
         });
     }
 

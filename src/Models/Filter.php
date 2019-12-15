@@ -33,7 +33,7 @@ class Filter extends Model
         'domain_id',
         'data',
         'flags',
-        'translations'
+        'translations',
     ];
 
     public $casts = [
@@ -60,14 +60,14 @@ class Filter extends Model
         $tags_array = [];
         if (is_string($tagsCandid)) {
             $tags_array = json_decode($tagsCandid);
-            if (is_null($tags_array) || !is_object($tags_array)) {
+            if (is_null($tags_array) || ! is_object($tags_array)) {
                 $tags_array = [$tagsCandid];
             }
         } elseif (is_array($tagsCandid)) {
             $tags_array = $tagsCandid;
         }
         /** @var Filter[] $tags */
-        $tags = Filter::whereIn('id', $tags_array)->get();
+        $tags = self::whereIn('id', $tags_array)->get();
         if (count($tags) < count($tags_array)) {
             foreach ($tags_array as $new_tag) {
                 $new = true;
@@ -79,7 +79,7 @@ class Filter extends Model
                 }
 
                 if ($new) {
-                    $created = Filter::create([
+                    $created = self::create([
                         'name' => $new_tag,
                         'type' => $type,
                         'flags' => 0,
@@ -109,6 +109,7 @@ class Filter extends Model
 
         return $tags;
     }
+
     public static function randomByType($type)
     {
         $objects = self::getByType($type);

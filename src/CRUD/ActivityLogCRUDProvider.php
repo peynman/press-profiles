@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Support\Facades\Auth;
@@ -36,7 +35,7 @@ class ActivityLogCRUDProvider implements ICRUDProvider
     public $filterFields = [
         'type' => 'equals:type',
         'subject' => 'subject',
-        'domain_id' => 'equals:domain_id'
+        'domain_id' => 'equals:domain_id',
     ];
     public $filterDefaults = [
         'type' => null,

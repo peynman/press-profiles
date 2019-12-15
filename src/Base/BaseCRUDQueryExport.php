@@ -14,7 +14,7 @@ class BaseCRUDQueryExport implements ICRUDExporter
     public function getResponseForQueryExport(Request $request, Builder $query, ICRUDProvider $provider)
     {
         $download = (new CRUDExcelQueryExporter($query, $provider));
-        if (!is_null($request->get('format'))) {
+        if (! is_null($request->get('format'))) {
             switch ($request->get('format')) {
                 case 'html':
                     return $download->download('export-'.Carbon::now()->timestamp.'.html', Excel::HTML);
@@ -22,6 +22,7 @@ class BaseCRUDQueryExport implements ICRUDExporter
                     return $download->download('export-'.Carbon::now()->timestamp.'.pdf', Excel::MPDF);
             }
         }
+
         return $download->download('export-'.Carbon::now()->timestamp.'.xlsx');
     }
 }

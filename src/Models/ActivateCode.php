@@ -2,11 +2,11 @@
 
 namespace Larapress\Profiles\Models;
 
-use Larapress\Profiles\Flags\ActivateCodeMode;
-use Larapress\Profiles\Flags\ActivateCodeStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Larapress\CRUD\ICRUDUser;
+use Larapress\Profiles\Flags\ActivateCodeMode;
+use Larapress\Profiles\Flags\ActivateCodeStatus;
 
 /**
  * @property \Carbon\Carbon        $created_at
@@ -39,17 +39,19 @@ class ActivateCode extends Model
     ];
 
     public $casts = [
-        'data' => 'array'
+        'data' => 'array',
     ];
 
     public function isMobile()
     {
         return $this->mode === ActivateCodeMode::BROWSER_MOBILE;
     }
+
     public function isPC()
     {
         return $this->mode === ActivateCodeMode::BROWSER_DESKTOP;
     }
+
     public function isUsed()
     {
         return $this->status === ActivateCodeStatus::USED;

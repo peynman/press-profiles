@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace Larapress\Profiles\MetaData;
 
 use Larapress\CRUDRender\Form\FormField;
@@ -28,10 +26,12 @@ class UserAffiliateMetaData extends UserMetaData
     {
         return trans('models.affiliate.sidebar');
     }
+
     public function singular()
     {
         return trans('models.affiliate.name.singular');
     }
+
     public function plural()
     {
         return trans('models.affiliate.name.plural');
@@ -46,6 +46,7 @@ class UserAffiliateMetaData extends UserMetaData
     {
         return config('larapress.profiles.routes.user-affiliates.name');
     }
+
     public function getViewControllerRouteName()
     {
         return config('larapress.profiles.routes.user-affiliates.name');
@@ -97,7 +98,7 @@ class UserAffiliateMetaData extends UserMetaData
         return [
             'with' => [
                 'roles' => [],
-            ]
+            ],
         ];
     }
 
@@ -139,6 +140,5 @@ class UserAffiliateMetaData extends UserMetaData
 
     public function getReportPages()
     {
-        return null;
     }
 }

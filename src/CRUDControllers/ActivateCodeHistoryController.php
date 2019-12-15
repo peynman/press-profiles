@@ -1,10 +1,7 @@
 <?php
 
-
 namespace Larapress\Profiles\CRUDControllers;
 
-use Illuminate\Support\Facades\Route;
-use Larapress\CRUD\Base\ICRUDService;
 use Larapress\CRUD\Controllers\BaseCRUDController;
 use Larapress\Profiles\CRUD\ActivateCodeHistoryCRUDProvider;
 
@@ -19,7 +16,6 @@ class ActivateCodeHistoryController extends BaseCRUDController
             ActivateCodeHistoryCRUDProvider::class
         );
 
-
         parent::registerCRUDVerbs(
             $name,
             [
@@ -27,20 +23,19 @@ class ActivateCodeHistoryController extends BaseCRUDController
                     'methods' => ['POST'],
                     'uses' => '\\'.self::class.'@query',
                     'url' => $name.'/query/{activate_code_id}',
-                ]
+                ],
             ],
             ActivateCodeHistoryCRUDProvider::class
         );
     }
 
     /**
-     * @return null|integer
+     * @return null|int
      */
     public static function getActivateCodeIDFromRequest()
     {
         if ((isset(\request()->route()->parameters['activate_code_id']))) {
             return \request()->route()->parameters['activate_code_id'];
         }
-        return null;
     }
 }

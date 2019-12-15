@@ -2,7 +2,6 @@
 
 namespace Larapress\Profiles\CRUD;
 
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Larapress\Core\Exceptions\AppException;
@@ -29,7 +28,7 @@ class SettingsDuplicateDomainProvider extends SettingsCRUDProvider
         /** @var \Larapress\CRUD\ICRUDUser|\Larapress\Profiles\IProfileUser $user */
         $user = Auth::user();
         if ($user->hasRole(config('larapress.profiles.security.roles.master'))) {
-            if (!in_array($args['domain_id'], $user->getAffiliateDomainIds())) {
+            if (! in_array($args['domain_id'], $user->getAffiliateDomainIds())) {
                 throw new AppException(AppException::ERR_OBJ_ACCESS_DENIED);
             }
         }

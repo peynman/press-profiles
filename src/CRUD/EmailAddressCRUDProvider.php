@@ -1,13 +1,12 @@
 <?php
 
-
 namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Support\Facades\Auth;
 use Larapress\CRUD\Base\BaseCRUDProvider;
 use Larapress\CRUD\Base\ICRUDProvider;
-use Larapress\Profiles\IProfileUser;
 use Larapress\CRUD\ICRUDUser;
+use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\EmailAddress;
 
 class EmailAddressCRUDProvider implements ICRUDProvider

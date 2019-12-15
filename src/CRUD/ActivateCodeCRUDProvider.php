@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\CRUD;
 
 use Larapress\CRUD\Base\BaseCRUDProvider;

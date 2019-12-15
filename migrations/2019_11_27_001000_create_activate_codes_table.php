@@ -15,14 +15,14 @@ class CreateActivateCodesTable extends Migration
     {
         Schema::create('activate_codes', function (Blueprint $table) {
             $table->bigIncrements('id');
-	        $table->bigInteger('user_id', false, true);
-	        $table->string('code');
-	        $table->string('mode');
-	        $table->integer('status', false, true)->default(0);
-	        $table->timestamps();
-	        $table->softDeletes();
+            $table->bigInteger('user_id', false, true);
+            $table->string('code');
+            $table->string('mode');
+            $table->integer('status', false, true)->default(0);
+            $table->timestamps();
+            $table->softDeletes();
 
-	        $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 

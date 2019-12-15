@@ -1,4 +1,5 @@
 <?php
+
 namespace Larapress\Profiles\MetaData;
 
 use Illuminate\Support\Facades\Auth;
@@ -56,10 +57,12 @@ class UserMetaData extends SingleSourceBaseMetaData implements
     {
         return trans('sidebar.title.users');
     }
+
     public function singular()
     {
         return trans('models.user.name.singular');
     }
+
     public function plural()
     {
         return trans('models.user.name.plural');
@@ -69,18 +72,22 @@ class UserMetaData extends SingleSourceBaseMetaData implements
     {
         return '';
     }
+
     public function url()
     {
         return $this->viewUrl();
     }
+
     public function key()
     {
         return config('larapress.profiles.routes.users.name');
     }
+
     public function viewPermissions()
     {
         return [$this->getViewPermission()];
     }
+
     public function viewRoles()
     {
         return [];
@@ -90,13 +97,14 @@ class UserMetaData extends SingleSourceBaseMetaData implements
     {
         return config('larapress.profiles.routes.users.name');
     }
+
     public function getTableColumns()
     {
         return [
             TableViewColumn::id(),
             TableViewColumn::column(trans('tables.column.username'), 'name'),
             TableViewColumn::filter(trans('tables.column.roles'), 'roles', 'JSBridge.getBadge(data)'),
-            TableViewColumn::options()
+            TableViewColumn::options(),
         ];
     }
 
@@ -106,7 +114,7 @@ class UserMetaData extends SingleSourceBaseMetaData implements
      */
     public function getFilterFields()
     {
-       /** @var ICRUDFilterStorage $filter */
+        /** @var ICRUDFilterStorage $filter */
         $filter = app()->make(ICRUDFilterStorage::class);
         $values = $filter->getFilterValues(session()->getId(), new UserCRUDProvider());
 
@@ -121,7 +129,7 @@ class UserMetaData extends SingleSourceBaseMetaData implements
                     'objects' => Role::all(['id', 'title']),
                     'value' => $values['role'],
                     'max-options' => 1,
-                    'multiple' => true
+                    'multiple' => true,
                 ]
             ),
             FormField::common(
@@ -131,7 +139,7 @@ class UserMetaData extends SingleSourceBaseMetaData implements
                 [
                     'objects' => Domain::all(['id', 'title']),
                     'value' => $values['domain'],
-                    'max-options' => 1, 'multiple' => true
+                    'max-options' => 1, 'multiple' => true,
                 ]
             ),
             FormField::applyFilter(),
@@ -144,8 +152,8 @@ class UserMetaData extends SingleSourceBaseMetaData implements
         return [
             'with' => [
                 'roles' => [],
-                'domains' => []
-            ]
+                'domains' => [],
+            ],
         ];
     }
 
@@ -153,6 +161,7 @@ class UserMetaData extends SingleSourceBaseMetaData implements
     {
         return config('larapress.profiles.routes.users.name');
     }
+
     public function getCreateFields()
     {
         $roles = Role::query()->select(['id', 'title']);
@@ -182,7 +191,7 @@ class UserMetaData extends SingleSourceBaseMetaData implements
                 []
             ),
             FormField::common('select', 'sub_domain_id', trans('forms.label.domain'), [
-                'objects' => Domain::all(['id', 'title'])
+                'objects' => Domain::all(['id', 'title']),
             ]),
             FormField::common('switches', 'flags', trans('forms.label.options'), [
                 'objects' => UserFlags::toArray(),
@@ -289,12 +298,12 @@ class UserMetaData extends SingleSourceBaseMetaData implements
                                     [
                                         'operator' => 'LIKE',
                                         'phrase' => 'app.domain.any.user.registered',
-                                    ]
+                                    ],
                                 ],
-                            ]
+                            ],
                         ],
                         'legend_labels' => [
-                            null => 'Registered Users'
+                            null => 'Registered Users',
                         ],
                     ],
                 ]
@@ -321,12 +330,12 @@ class UserMetaData extends SingleSourceBaseMetaData implements
                                     [
                                         'operator' => 'LIKE',
                                         'phrase' => 'app.domain.any.user.login',
-                                    ]
+                                    ],
                                 ],
-                            ]
+                            ],
                         ],
                         'legend_labels' => [
-                            null => 'Logged In Users'
+                            null => 'Logged In Users',
                         ],
                     ],
                 ]
@@ -356,7 +365,7 @@ class UserMetaData extends SingleSourceBaseMetaData implements
                                     [
                                         'operator' => 'NOT LIKE',
                                         'phrase' => 'app.domain.any.user.registered',
-                                    ]
+                                    ],
                                 ],
                             ],
                         ],
@@ -366,7 +375,7 @@ class UserMetaData extends SingleSourceBaseMetaData implements
                                 return str_replace('.', '_', $d);
                             }
                         ),
-                    ]
+                    ],
                 ]
             ),
         ];

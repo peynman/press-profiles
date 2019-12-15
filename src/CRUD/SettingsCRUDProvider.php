@@ -1,14 +1,13 @@
 <?php
 
-
 namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Support\Facades\Auth;
-use Larapress\Profiles\IProfileUser;
-use Larapress\Profiles\Models\Settings;
 use Larapress\CRUD\Base\BaseCRUDProvider;
 use Larapress\CRUD\Base\ICRUDProvider;
 use Larapress\CRUD\ICRUDUser;
+use Larapress\Profiles\IProfileUser;
+use Larapress\Profiles\Models\Settings;
 
 class SettingsCRUDProvider implements ICRUDProvider
 {
@@ -83,6 +82,7 @@ class SettingsCRUDProvider implements ICRUDProvider
     {
         return $args;
     }
+
     public function onBeforeUpdate($args)
     {
         return $this->onBeforeCreate($args);

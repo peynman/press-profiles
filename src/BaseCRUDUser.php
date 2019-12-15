@@ -11,15 +11,17 @@ trait BaseCRUDUser
 {
     /** @var array */
     public $permissions = null;
+
     /**
-     * Removes all cached permissions for this user
+     * Removes all cached permissions for this user.
      */
     public function forgetPermissionsCache()
     {
         Cache::forget("larapress.cached..user.$this->id.permissions");
     }
+
     /**
-     * Check if user has permission or not
+     * Check if user has permission or not.
      * @param string|int|Permission|string[]|int[]|Permission[] $permissions
      *
      * @return bool
@@ -98,8 +100,10 @@ trait BaseCRUDUser
                 }
             }
         }
+
         return false;
     }
+
     /**
      * @param string|int|Role $role
      *
@@ -112,6 +116,7 @@ trait BaseCRUDUser
                 return true;
             }
         }
+
         return false;
     }
 

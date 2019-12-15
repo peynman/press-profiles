@@ -1,16 +1,15 @@
 <?php
 
-
 namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
-use Larapress\Profiles\IProfileUser;
-use Larapress\Profiles\Flags\DomainFlags;
-use Larapress\Profiles\Models\Domain;
 use Larapress\CRUD\Base\BaseCRUDProvider;
 use Larapress\CRUD\Base\ICRUDProvider;
 use Larapress\CRUD\ICRUDUser;
+use Larapress\Profiles\Flags\DomainFlags;
+use Larapress\Profiles\IProfileUser;
+use Larapress\Profiles\Models\Domain;
 
 class DomainCRUDProvider implements ICRUDProvider
 {
@@ -42,7 +41,7 @@ class DomainCRUDProvider implements ICRUDProvider
         'created_at',
         'domain',
         'ips',
-        'nameservers'
+        'nameservers',
     ];
     public $validRelations = ['author'];
     public $validFilters = [];
@@ -74,7 +73,7 @@ class DomainCRUDProvider implements ICRUDProvider
      */
     public function onBeforeCreate($args)
     {
-        if (!isset($args['flags'])) {
+        if (! isset($args['flags'])) {
             $args['flags'] = 0;
         }
 
@@ -93,7 +92,7 @@ class DomainCRUDProvider implements ICRUDProvider
      */
     public function onBeforeUpdate($args)
     {
-        if (!isset($args['flags'])) {
+        if (! isset($args['flags'])) {
             $args['flags'] = 0;
         }
 
@@ -129,7 +128,7 @@ class DomainCRUDProvider implements ICRUDProvider
 
         if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
             $user->domains()->attach($object->id, [
-                'flags' => DomainFlags::AFFILIATE_DOMAIN
+                'flags' => DomainFlags::AFFILIATE_DOMAIN,
             ]);
             $user->forgetAffiliateDomainsCache();
         }

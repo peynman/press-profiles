@@ -15,13 +15,13 @@ class CreateMetricsCountersTable extends Migration
     {
         Schema::create('metrics_counters', function (Blueprint $table) {
             $table->bigIncrements('id');
-	        $table->bigInteger('domain_id', false, true)->nullable();
-	        $table->string('key');
-	        $table->decimal('value', 12, 2);
-	        $table->timestamp('created_at');
+            $table->bigInteger('domain_id', false, true)->nullable();
+            $table->string('key');
+            $table->decimal('value', 12, 2);
+            $table->timestamp('created_at');
 
-	        $table->index(['created_at', 'key']);
-	        $table->foreign('domain_id')->references('id')->on('domains');
+            $table->index(['created_at', 'key']);
+            $table->foreign('domain_id')->references('id')->on('domains');
         });
     }
 

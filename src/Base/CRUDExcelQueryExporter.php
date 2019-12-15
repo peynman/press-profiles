@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\Base;
 
 use Illuminate\Contracts\Support\Responsable;
@@ -14,8 +13,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
 /**
- * Class BaseCRUDQueryExporter
- * @package Larapress\CRUD\Base
+ * Class BaseCRUDQueryExporter.
  */
 class CRUDExcelQueryExporter implements
     FromQuery,
@@ -26,7 +24,7 @@ class CRUDExcelQueryExporter implements
     WithHeadings
 {
     use Exportable;
-    /** @var \Illuminate\Database\Eloquent\Builder  */
+    /** @var \Illuminate\Database\Eloquent\Builder */
     private $query;
     /**
      * @var ICRUDProvider
@@ -53,7 +51,6 @@ class CRUDExcelQueryExporter implements
         return $this->query->newQuery();
     }
 
-
     /**
      * @param mixed $row
      *
@@ -61,9 +58,10 @@ class CRUDExcelQueryExporter implements
      */
     public function map($row): array
     {
-        if (!is_null($this->provider)) {
+        if (! is_null($this->provider)) {
             return $this->provider->getExportMap($row);
         }
+
         return $row;
     }
 
@@ -72,7 +70,7 @@ class CRUDExcelQueryExporter implements
      */
     public function columnFormats(): array
     {
-        if (!is_null($this->provider)) {
+        if (! is_null($this->provider)) {
             return $this->provider->getExportColumnTypes();
         }
 
@@ -84,7 +82,7 @@ class CRUDExcelQueryExporter implements
      */
     public function headings(): array
     {
-        if (!is_null($this->provider)) {
+        if (! is_null($this->provider)) {
             return $this->provider->getExportHeaders();
         }
 

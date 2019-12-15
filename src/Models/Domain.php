@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -45,7 +44,7 @@ class Domain extends Model
     ];
 
     protected $casts = [
-        'data' => 'array'
+        'data' => 'array',
     ];
 
     /**
@@ -77,7 +76,8 @@ class Domain extends Model
     public static function getRequestDomain(Request $request)
     {
         $domain_str = $request->getHost();
-        return Domain::where('domain', $domain_str)->first();
+
+        return self::where('domain', $domain_str)->first();
     }
 
     /**
@@ -87,7 +87,7 @@ class Domain extends Model
     public static function isRequestDefaultDomain(Request $request)
     {
         $domain_str = $request->getHost();
-        $sub_domain = Domain::where('domain', $domain_str)->first();
+        $sub_domain = self::where('domain', $domain_str)->first();
         $is_default_domain = false;
         if (is_null($sub_domain)) {
             $default_domain = config('app.url');

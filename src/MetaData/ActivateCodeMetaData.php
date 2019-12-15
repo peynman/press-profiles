@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace Larapress\Profiles\MetaData;
 
 use Larapress\CRUD\Base\BasePermissionMetaData;
@@ -18,7 +16,6 @@ use Larapress\CRUDRender\Rendering\Table\ITableViewMetaData;
 use Larapress\CRUDRender\Rendering\Table\TableViewColumn;
 use Larapress\CRUDRender\Rendering\Table\TableViewMetaData;
 use Larapress\Profiles\CRUD\ActivateCodeCRUDProvider;
-use Larapress\Profiles\CRUD\BaseCRUDFilterStorage;
 use Larapress\Profiles\Flags\ActivateCodeMode;
 use Larapress\Profiles\Flags\ActivateCodeStatus;
 
@@ -61,10 +58,12 @@ class ActivateCodeMetaData extends SingleSourceBaseMetaData implements
     {
         return trans('models.activate-codes.sidebar');
     }
+
     public function singular()
     {
         return trans('models.activate-codes.name.singular');
     }
+
     public function plural()
     {
         return trans('models.activate-codes.name.plural');
@@ -97,6 +96,7 @@ class ActivateCodeMetaData extends SingleSourceBaseMetaData implements
     {
         return [$this->getViewPermission()];
     }
+
     public function viewRoles()
     {
         return [];
@@ -113,7 +113,7 @@ class ActivateCodeMetaData extends SingleSourceBaseMetaData implements
             TableViewColumn::filter(trans('tables.column.status'), 'status', 'JSBridge.getActivateCodeStatus(data)'),
             TableViewColumn::filter(trans('tables.column.use_count'), 'history', 'JSBridge.getObjectCount(data)'),
             TableViewColumn::datetime(trans('tables.column.created_at'), 'created_at'),
-            TableViewColumn::options()
+            TableViewColumn::options(),
         ];
     }
 
@@ -125,10 +125,11 @@ class ActivateCodeMetaData extends SingleSourceBaseMetaData implements
                 'title' => ActivateCodeHistoryMetaData::instance()->plural(),
                 'link' => function (...$params) {
                     ActivateCodeHistoryMetaData::instance()->ActivateCodeID = $params;
+
                     return ActivateCodeHistoryMetaData::instance()->viewUrl();
                 },
                 'metadata' => ActivateCodeHistoryMetaData::instance(),
-            ]
+            ],
         ];
     }
 
@@ -164,11 +165,11 @@ class ActivateCodeMetaData extends SingleSourceBaseMetaData implements
         return ['with' => ['user' => [], 'history' => []]];
     }
 
-
     public function getViewControllerRouteName()
     {
         return config('larapress.profiles.routes.activate-codes.name');
     }
+
     public function getCreateFields()
     {
         return [

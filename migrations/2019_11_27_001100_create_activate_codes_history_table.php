@@ -15,16 +15,16 @@ class CreateActivateCodesHistoryTable extends Migration
     {
         Schema::create('activate_codes_history', function (Blueprint $table) {
             $table->bigIncrements('id');
-	        $table->bigInteger('activate_code_id', false, true);
-	        $table->string('session_id');
-	        $table->string('user_agent')->nullable();
-	        $table->string('ip')->nullable();
-	        $table->timestamps();
-	        $table->softDeletes();
+            $table->bigInteger('activate_code_id', false, true);
+            $table->string('session_id');
+            $table->string('user_agent')->nullable();
+            $table->string('ip')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
 
-	        $table->foreign('activate_code_id')->references('id')->on('activate_codes');
-	        $table->index(['ip', 'user_agent']);
-	        $table->index('session_id');
+            $table->foreign('activate_code_id')->references('id')->on('activate_codes');
+            $table->index(['ip', 'user_agent']);
+            $table->index('session_id');
         });
     }
 

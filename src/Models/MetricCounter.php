@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -20,7 +19,7 @@ class MetricCounter extends Model
     protected $table = 'metrics_counters';
 
     public $timestamps = [
-        'created_at'
+        'created_at',
     ];
 
     protected $fillable = [

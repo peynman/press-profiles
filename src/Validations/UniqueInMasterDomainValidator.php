@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\Validations;
 
 use Illuminate\Http\Request;
@@ -19,7 +18,7 @@ class UniqueInMasterDomainValidator
             /** @var Domain $domain */
             $domain = Domain::select(['id'])->where('domain', $request->getHost())->first();
             $domain_ids = null;
-            if (!is_null($domain)) {
+            if (! is_null($domain)) {
                 $domain_ids = [];
 
                 /** @var IProfileUser[] $master_aff */
@@ -34,7 +33,7 @@ class UniqueInMasterDomainValidator
                 }
             }
 
-            if (!is_null($domain_ids)) {
+            if (! is_null($domain_ids)) {
                 return DB::table($parameters[0])
                         ->where($parameters[1], $value)
                         ->whereIn($parameters[2], $domain_ids)

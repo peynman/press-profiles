@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace Larapress\Profiles\MetaData;
 
 use Larapress\CRUD\Base\BasePermissionMetaData;
@@ -45,7 +43,6 @@ class FilterMetaData extends SingleSourceBaseMetaData implements
         ];
     }
 
-
     /***
      * @return string
      */
@@ -58,10 +55,12 @@ class FilterMetaData extends SingleSourceBaseMetaData implements
     {
         return trans('sidebar.title.filters');
     }
+
     public function singular()
     {
         return trans('models.filter.name.singular');
     }
+
     public function plural()
     {
         return trans('models.filter.name.plural');
@@ -89,11 +88,11 @@ class FilterMetaData extends SingleSourceBaseMetaData implements
     {
         return [$this->getViewPermission()];
     }
+
     public function viewRoles()
     {
         return [];
     }
-
 
     public function getTableColumns()
     {
@@ -109,7 +108,7 @@ class FilterMetaData extends SingleSourceBaseMetaData implements
             TableViewColumn::column(trans('tables.column.title'), 'title'),
             TableViewColumn::column(trans('tables.column.name'), 'name'),
             TableViewColumn::column(trans('tables.column.type'), 'type'),
-            TableViewColumn::options()
+            TableViewColumn::options(),
         ];
     }
 
@@ -123,7 +122,7 @@ class FilterMetaData extends SingleSourceBaseMetaData implements
         return [
             'with' => [
                 'domain' => [],
-            ]
+            ],
         ];
     }
 
@@ -131,6 +130,7 @@ class FilterMetaData extends SingleSourceBaseMetaData implements
     {
         return config('larapress.profiles.routes.filters.name');
     }
+
     public function getCreateFields()
     {
         return [

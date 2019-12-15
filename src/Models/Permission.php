@@ -5,7 +5,7 @@ namespace Larapress\Profiles\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Permission
+ * Class Permission.
  *
  * @property $id
  * @property $name
@@ -15,8 +15,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property Role[] $roles
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- *
- * @package Larapress\CRUD\Models
  */
 class Permission extends Model
 {

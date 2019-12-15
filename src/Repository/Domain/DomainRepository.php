@@ -22,6 +22,7 @@ class DomainRepository implements IDomainRepository
 
         /** @var Domain[] $domains */
         $domains = $query->select($columns)->get();
+
         return $domains;
     }
 }

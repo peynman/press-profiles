@@ -1,15 +1,14 @@
 <?php
 
-
 namespace Larapress\Profiles\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Larapress\CRUD\ICRUDUser;
-use Larapress\Profiles\Models\Settings;
-use Larapress\Profiles\Models\Domain;
 use Larapress\Core\SessionService\ISessionService;
+use Larapress\CRUD\ICRUDUser;
+use Larapress\Profiles\Models\Domain;
+use Larapress\Profiles\Models\Settings;
 
 class AppSettingOverride
 {
@@ -18,7 +17,7 @@ class AppSettingOverride
         $domain = Domain::select(['id'])
                            ->where('domain', $request->getHost())->first();
         $domain_ids = null;
-        if (!is_null($domain)) {
+        if (! is_null($domain)) {
             /** @var ICRUDUser[] $master_aff */
             $master_aff = $domain->affiliates()->whereHas('roles', function ($q) {
                 $q->where('name', config('crud.roles.master.role_name'));

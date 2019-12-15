@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace Larapress\Profiles\MetaData;
 
 use Illuminate\Support\Facades\Auth;
@@ -52,10 +50,12 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
     {
         return trans('models.settings.sidebar');
     }
+
     public function singular()
     {
         return trans('models.settings.name.singular');
     }
+
     public function plural()
     {
         return trans('models.settings.name.plural');
@@ -83,6 +83,7 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
     {
         return [$this->getViewPermission()];
     }
+
     public function viewRoles()
     {
         return [];
@@ -109,7 +110,7 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
             ),
             TableViewColumn::column(trans('tables.column.key'), 'key'),
             TableViewColumn::column(trans('tables.column.content'), 'val', false, 15),
-            TableViewColumn::options()
+            TableViewColumn::options(),
         ];
     }
 
@@ -124,10 +125,9 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
             'with' => [
                 'user' => [],
                 'sub_domain' => [],
-            ]
+            ],
         ];
     }
-
 
     public function hasCreate()
     {
@@ -138,6 +138,7 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
     {
         return config('larapress.profiles.routes.settings.name');
     }
+
     public function getCreateFields()
     {
         return [
@@ -193,7 +194,6 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
         ];
     }
 
-
     public function actions()
     {
         /** @var Domain[] $domains */
@@ -209,7 +209,7 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
         $dropdowns = [];
         foreach ($domains as $domain) {
             $dropdowns[] = [
-                'title' => $domain->title. ' ('.$domain->domain.')',
+                'title' => $domain->title.' ('.$domain->domain.')',
                 'icon' => '',
                 'method' => 'POST',
                 'link' => function (...$params) use ($domain) {
@@ -217,7 +217,7 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
                         'settings.create.duplicate.domain.view.post',
                         [
                             'settings_id' => $params[0],
-                            'domain_id' => $domain->id
+                            'domain_id' => $domain->id,
                         ]
                     );
                 },
@@ -231,7 +231,7 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
                 ]),
                 'icon' => 'content-paste',
                 'dropdown' => $dropdowns,
-                'metadata' => SettingsMetaData::instance(),
+                'metadata' => self::instance(),
             ],
         ];
     }

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -35,7 +34,7 @@ class ActivityLog extends Model
     ];
 
     protected $casts = [
-        'data' => 'array'
+        'data' => 'array',
     ];
 
     /**

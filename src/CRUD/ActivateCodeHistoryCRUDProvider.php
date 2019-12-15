@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\CRUD;
 
 use Larapress\CRUD\Base\BaseCRUDProvider;
@@ -32,9 +31,10 @@ class ActivateCodeHistoryCRUDProvider implements ICRUDProvider
     public function onBeforeQuery($query)
     {
         $specific = ActivateCodeHistoryController::getActivateCodeIDFromRequest();
-        if (!is_null($specific)) {
+        if (! is_null($specific)) {
             $query->where('activate_code_id', $specific);
         }
+
         return $query;
     }
 }

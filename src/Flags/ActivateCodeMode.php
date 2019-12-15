@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\Flags;
 
 use Larapress\Core\BaseType;

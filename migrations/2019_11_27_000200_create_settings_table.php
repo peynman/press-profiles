@@ -15,19 +15,19 @@ class CreateSettingsTable extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->bigIncrements('id');
-	        $table->bigInteger('user_id', false, true)->nullable();
-	        $table->bigInteger('domain_id', false, true)->nullable();
-	        $table->string('type')->nullable();
-	        $table->string('key');
-	        $table->string('val');
-	        $table->timestamps();
-	        $table->softDeletes();
+            $table->bigInteger('user_id', false, true)->nullable();
+            $table->bigInteger('domain_id', false, true)->nullable();
+            $table->string('type')->nullable();
+            $table->string('key');
+            $table->string('val');
+            $table->timestamps();
+            $table->softDeletes();
 
-	        $table->index(['domain_id', 'type']);
-	        $table->unique(['deleted_at', 'domain_id', 'type', 'key']);
+            $table->index(['domain_id', 'type']);
+            $table->unique(['deleted_at', 'domain_id', 'type', 'key']);
 
-	        $table->foreign('user_id')->references('id')->on('users');
-	        $table->foreign('domain_id')->references('id')->on('domains');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('domain_id')->references('id')->on('domains');
         });
     }
 

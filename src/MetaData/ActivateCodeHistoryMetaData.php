@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\MetaData;
 
 use Larapress\CRUD\Base\BasePermissionMetaData;
@@ -41,7 +40,7 @@ class ActivateCodeHistoryMetaData extends SingleSourceBaseMetaData implements
     protected function __construct()
     {
         $this->ActivateCodeID = ActivateCodeHistoryController::getActivateCodeIDFromRequest();
-        if (!is_null($this->ActivateCodeID)) {
+        if (! is_null($this->ActivateCodeID)) {
             $this->ActivateCode = ActivateCode::find($this->ActivateCodeID);
         }
     }
@@ -136,7 +135,7 @@ class ActivateCodeHistoryMetaData extends SingleSourceBaseMetaData implements
      */
     public function queryUrl()
     {
-        if (!is_null($this->ActivateCodeID)) {
+        if (! is_null($this->ActivateCodeID)) {
             return route(
                 config('larapress.profiles.routes.activate-codes-history.name').'.query.specific',
                 $this->ActivateCodeID
@@ -151,7 +150,7 @@ class ActivateCodeHistoryMetaData extends SingleSourceBaseMetaData implements
      */
     public function viewUrl()
     {
-        if (!is_null($this->ActivateCodeID)) {
+        if (! is_null($this->ActivateCodeID)) {
             return route(
                 config('larapress.profiles.routes.activate-codes-history.name').'.view.specific',
                 $this->ActivateCodeID
@@ -168,6 +167,7 @@ class ActivateCodeHistoryMetaData extends SingleSourceBaseMetaData implements
     {
         return [$this->getViewPermission()];
     }
+
     /**
      * @return array
      */
@@ -183,7 +183,7 @@ class ActivateCodeHistoryMetaData extends SingleSourceBaseMetaData implements
             TableViewColumn::column(trans('tables.column.ip'), 'ip'),
             TableViewColumn::column(trans('tables.column.username'), 'user_agent'),
             TableViewColumn::datetime(trans('tables.column.created_at'), 'created_at'),
-            TableViewColumn::options()
+            TableViewColumn::options(),
         ];
     }
 
@@ -202,11 +202,11 @@ class ActivateCodeHistoryMetaData extends SingleSourceBaseMetaData implements
         return ['with' => []];
     }
 
-
     public function getViewControllerRouteName()
     {
         return config('larapress.profiles.routes.activate-codes-history.name');
     }
+
     public function getCreateFields()
     {
         return [];

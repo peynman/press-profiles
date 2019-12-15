@@ -6,11 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Larapress\Core\Extend\Helpers;
-use Larapress\Profiles\Models\Domain;
 use Larapress\CRUD\ICRUDUser;
 
 /**
- * Class PhoneNumber
+ * Class PhoneNumber.
  *
  * @property int            $id
  * @property int            $user_id
@@ -24,8 +23,6 @@ use Larapress\CRUD\ICRUDUser;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $deleted_at
- *
- * @package Larapress\CRUD\Models
  */
 class PhoneNumber extends Model
 {
@@ -95,7 +92,7 @@ class PhoneNumber extends Model
                 }
                 $numbers_array = $numeric_array;
                 /** @var PhoneNumber[] $numbers */
-                $numbers = PhoneNumber::whereIn('number', $numbers_array)->get();
+                $numbers = self::whereIn('number', $numbers_array)->get();
                 if (count($numbers) < count($numbers_array)) {
                     foreach ($numbers_array as $new_number) {
                         $new = true;
@@ -107,7 +104,7 @@ class PhoneNumber extends Model
                         }
 
                         if ($new) {
-                            $created = PhoneNumber::create([
+                            $created = self::create([
                                 'number' => $new_number,
                                 'flags' => 0,
                             ]);

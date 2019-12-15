@@ -3,7 +3,9 @@
 namespace Larapress\Profiles\Commands;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Larapress\Core\Commands\ActionCommandBase;
 use Larapress\CRUD\Base\IPermissionsMetaData;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\CRUDRender\CRUD\ICRUDPermissionView;
@@ -11,8 +13,6 @@ use Larapress\Profiles\Flags\PhoneNumberFlags;
 use Larapress\Profiles\Models\Permission;
 use Larapress\Profiles\Models\PhoneNumber;
 use Larapress\Profiles\Models\Role;
-use Illuminate\Support\Facades\Hash;
-use Larapress\Core\Commands\ActionCommandBase;
 
 class AccountManager extends ActionCommandBase
 {
@@ -29,9 +29,7 @@ class AccountManager extends ActionCommandBase
      *
      * @var string
      */
-
     protected $description = 'Create super users and assign roles';
-
 
     /**
      * Create a new command instance.
@@ -46,6 +44,7 @@ class AccountManager extends ActionCommandBase
             'update:super-role' => $this->updateSuperRole(),
         ]);
     }
+
     private function updateSuperUser()
     {
         return function () {
@@ -56,9 +55,10 @@ class AccountManager extends ActionCommandBase
             ];
             $form = $this->fillForm($form);
             $this->updateSuperUserWithData($form);
-            $this->info("Account updated with super-role.");
+            $this->info('Account updated with super-role.');
         };
     }
+
     private function updatePermissions()
     {
         return function () {
@@ -82,13 +82,13 @@ class AccountManager extends ActionCommandBase
                                     'name' => $name,
                                     'title' => $title,
                                     'group_name' => $instance->getPermissionObjectName(),
-                                    'group_title' => $instance->plural()
+                                    'group_title' => $instance->plural(),
                                 ]);
                             } else {
                                 $model->update([
                                     'title' => $title,
                                     'group_name' => $instance->getPermissionObjectName(),
-                                    'group_title' => $instance->plural()
+                                    'group_title' => $instance->plural(),
                                 ]);
                             }
                         }
@@ -98,6 +98,7 @@ class AccountManager extends ActionCommandBase
             $process_class_names($meta_data_classes, $process_class_names);
         };
     }
+
     private function updateSuperRole()
     {
         return function () {
@@ -119,17 +120,17 @@ class AccountManager extends ActionCommandBase
             /** @var ICRUDUser[] $super_users */
             $super_users = $user_query->whereHas(
                 'roles',
-                function (/** @var Builder $q */$q) {
+                function (/* @var Builder $q */$q) {
                     $q->where('name', 'super-role');
                 }
             )->get();
 
             foreach ($super_users as $super_user) {
-                $this->info("Permissions cache cleared for user: ".$super_user->name);
+                $this->info('Permissions cache cleared for user: '.$super_user->name);
                 $super_user->forgetPermissionsCache();
             }
 
-            $this->info("Super-Role updated with latest permissions, all users with super-role are updated too.");
+            $this->info('Super-Role updated with latest permissions, all users with super-role are updated too.');
         };
     }
 
@@ -142,8 +143,8 @@ class AccountManager extends ActionCommandBase
         /** @var \Larapress\CRUD\ICRUDUser $user */
         $user = $user_quer->where('name', $form['name'])->first();
 
-        if (!is_null($user) && !is_null($phone) && $phone->user_id != $user->id) {
-            $this->error("number is already connected to another user");
+        if (! is_null($user) && ! is_null($phone) && $phone->user_id != $user->id) {
+            $this->error('number is already connected to another user');
         }
 
         if (is_null($user)) {
@@ -171,10 +172,10 @@ class AccountManager extends ActionCommandBase
         if (is_null($super_role)) {
             $super_role = Role::create([
                 'name' => 'super-role',
-                'title' => 'Super Role'
+                'title' => 'Super Role',
             ]);
         }
-        if (!is_null($super_role)) {
+        if (! is_null($super_role)) {
             $user->roles()->sync($super_role);
         }
 
@@ -183,12 +184,14 @@ class AccountManager extends ActionCommandBase
         $super_role->permissions()->sync($permission_ids);
         $user->forgetPermissionsCache();
     }
+
     private function fillForm($form)
     {
         $data = [];
         foreach ($form as $key => $val) {
             $data[$key] = $this->ask($key, $val);
         }
+
         return $data;
     }
 }

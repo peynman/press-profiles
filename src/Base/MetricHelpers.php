@@ -108,7 +108,7 @@ class MetricHelpers
                 'from' => null,
                 'to' => null,
                 'resolution' => null,
-            ]
+            ],
         ];
     }
 
@@ -164,6 +164,7 @@ class MetricHelpers
         foreach ($arr as $a) {
             $labels[$a['title']] = [$method, $maker($a['id'])];
         }
+
         return $labels;
     }
 
@@ -176,6 +177,7 @@ class MetricHelpers
             $labels[$domain->domain] = [$method, $maker($domain->domain)];
         }
         $labels['Main Site'] = [$method, $maker('default')];
+
         return $labels;
     }
 }

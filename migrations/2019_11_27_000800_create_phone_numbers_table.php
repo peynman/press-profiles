@@ -13,21 +13,20 @@ class CreatePhoneNumbersTable extends Migration
      */
     public function up()
     {
-        Schema::create('phone_numbers', function (Blueprint $table)
-        {
-	        $table->bigIncrements( 'id' );
-	        $table->bigInteger( 'user_id', false, true )->nullable();
-	        $table->bigInteger( 'domain_id', false, true )->nullable();
-	        $table->string( 'number' );
-	        $table->integer( 'flags', false, true )->default( 0 );
+        Schema::create('phone_numbers', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->bigInteger('user_id', false, true)->nullable();
+            $table->bigInteger('domain_id', false, true)->nullable();
+            $table->string('number');
+            $table->integer('flags', false, true)->default(0);
             $table->json('data')->nullable();
-	        $table->timestamps();
-	        $table->softDeletes();
+            $table->timestamps();
+            $table->softDeletes();
 
-	        $table->unique(['deleted_at', 'domain_id', 'number']);
+            $table->unique(['deleted_at', 'domain_id', 'number']);
 
-	        $table->foreign( 'user_id' )->references( 'id' )->on( 'users' );
-	        $table->foreign( 'domain_id' )->references( 'id' )->on( 'domains' );
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('domain_id')->references('id')->on('domains');
         });
     }
 

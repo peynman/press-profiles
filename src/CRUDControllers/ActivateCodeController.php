@@ -2,7 +2,6 @@
 
 namespace Larapress\Profiles\CRUDControllers;
 
-use Larapress\CRUD\Base\ICRUDService;
 use Larapress\CRUD\Controllers\BaseCRUDController;
 use Larapress\Profiles\CRUD\ActivateCodeCRUDProvider;
 

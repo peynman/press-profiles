@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\Validations;
 
 use Illuminate\Http\Request;
@@ -16,7 +15,7 @@ class UniqueInDomainValidator
             $request = Request::createFromGlobals();
             $domain = Domain::select(['id'])->where('domain', $request->getHost())->first();
             $domain_id = null;
-            if (!is_null($domain)) {
+            if (! is_null($domain)) {
                 $domain_id = $domain->id;
             }
 

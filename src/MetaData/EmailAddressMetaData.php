@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace Larapress\Profiles\MetaData;
 
 use Larapress\CRUD\Base\BasePermissionMetaData;
@@ -56,10 +54,12 @@ class EmailAddressMetaData extends SingleSourceBaseMetaData implements
     {
         return trans('sidebar.title.email-addresses');
     }
+
     public function singular()
     {
         return trans('models.email-addresses.name.singular');
     }
+
     public function plural()
     {
         return trans('models.email-addresses.name.plural');
@@ -87,6 +87,7 @@ class EmailAddressMetaData extends SingleSourceBaseMetaData implements
     {
         return [$this->getViewPermission()];
     }
+
     public function viewRoles()
     {
         return [];
@@ -113,7 +114,7 @@ class EmailAddressMetaData extends SingleSourceBaseMetaData implements
             TableViewColumn::column(trans('tables.column.email'), 'email'),
             TableViewColumn::column(trans('tables.column.type'), 'type'),
             TableViewColumn::column(trans('tables.column.description'), 'desc'),
-            TableViewColumn::options()
+            TableViewColumn::options(),
         ];
     }
 
@@ -131,7 +132,6 @@ class EmailAddressMetaData extends SingleSourceBaseMetaData implements
             ],
         ];
     }
-
 
     public function getViewControllerRouteName()
     {

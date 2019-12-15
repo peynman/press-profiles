@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -12,6 +11,7 @@ class UserAffiliateCRUDProvider extends UserCRUDProvider
     public $data_keys = [
         'share_percent',
     ];
+
     public function getCreateRules()
     {
         $rules = parent::getCreateRules();
@@ -25,6 +25,7 @@ class UserAffiliateCRUDProvider extends UserCRUDProvider
             'share_percent' => 'nullable|numeric|max:100',
         ]);
     }
+
     public function getUpdateRules()
     {
         $rules = parent::getUpdateRules();
@@ -38,16 +39,19 @@ class UserAffiliateCRUDProvider extends UserCRUDProvider
             'share_percent' => 'required|numeric|max:100',
         ]);
     }
+
     public function getAutoSyncRelations()
     {
         return array_merge(parent::getAutoSyncRelations(), [
-            'affiliate_domains'
+            'affiliate_domains',
         ]);
     }
+
     public function getValidRelations()
     {
         return ['affiliate_domains', 'roles'];
     }
+
     public function getEagerRelations()
     {
         return ['affiliate_domains'];
@@ -60,7 +64,7 @@ class UserAffiliateCRUDProvider extends UserCRUDProvider
             $args['affiliate_domains'] = Helpers::getNormalizedObjectIds($args['affiliate_domains']);
         }
 
-        if (!isset($args['share_percent']) || is_null($args['share_percent'])) {
+        if (! isset($args['share_percent']) || is_null($args['share_percent'])) {
             $args['share_percent'] = 0;
         }
 

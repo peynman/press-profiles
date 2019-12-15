@@ -2,17 +2,14 @@
 
 namespace Larapress\Profiles;
 
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Larapress\Core\BaseFlags;
 use Larapress\Profiles\Flags\DomainFlags;
-use Larapress\Profiles\Flags\UserFlags;
 use Larapress\Profiles\Models\Domain;
-use Larapress\Profiles\Models\Permission;
 use Larapress\Profiles\Models\Role;
 
 /**
- * Trait BaseProfileUser
+ * Trait BaseProfileUser.
  *
  * @property int $id
  * @property string $name
@@ -22,8 +19,6 @@ use Larapress\Profiles\Models\Role;
  * @property \Carbon\Carbon $deleted_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $created_at
- *
- * @package Larapress\Profiles
  */
 trait BaseProfileUser
 {
@@ -40,16 +35,16 @@ trait BaseProfileUser
                 return $domain;
             }
         }
-
-        return null;
     }
+
     /**
      * @return int
      */
     public function getRegistrationDomainId()
     {
         $domain = $this->getRegistrationDomain();
-        return is_null($domain) ? null: $domain->id;
+
+        return is_null($domain) ? null : $domain->id;
     }
 
     /**
@@ -63,8 +58,6 @@ trait BaseProfileUser
                 return $domain;
             }
         }
-
-        return null;
     }
 
     /**
@@ -73,7 +66,8 @@ trait BaseProfileUser
     public function getMembershipDomainId()
     {
         $domain = $this->getRegistrationDomain();
-        return is_null($domain) ? null: $domain->id;
+
+        return is_null($domain) ? null : $domain->id;
     }
 
     /**
