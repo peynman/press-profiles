@@ -1,0 +1,46 @@
+{
+  "name": "peynman/larapress-profiles",
+  "description": "This is the description of the package.",
+  "type": "library",
+  "license": "MIT",
+  "minimum-stability": "dev",
+  "authors": [
+    {
+      "name": "Peyman Abdi",
+      "email": "peyman.abdi.work@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Larapress\\Profiles\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Larapress\\Profiles\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Larapress\\Profiles\\Providers\\PackageServiceProvider"
+      ]
+    }
+  },
+  "require": {
+    "peynman/larapress-crud-render": "master",
+    "php": "^7.2",
+    "laravel/framework": "^6.2"
+  },
+  "require-dev": {
+    "facade/ignition": "^1.4",
+    "fzaninotto/faker": "^1.4",
+    "mockery/mockery": "^1.0",
+    "nunomaduro/collision": "^3.0",
+    "orchestra/testbench": "^4.4",
+    "phpunit/phpunit": "^8.0",
+    "phpmd/phpmd" : "@stable",
+    "squizlabs/php_codesniffer": "3.*",
+    "matthewbdaly/artisan-standalone": "dev-master"
+  }
+}
