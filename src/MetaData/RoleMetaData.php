@@ -10,10 +10,10 @@ use Larapress\CRUDRender\CRUD\ICRUDPermissionView;
 use Larapress\CRUDRender\Form\BaseCRUDFormMetaData;
 use Larapress\CRUDRender\Form\FormField;
 use Larapress\CRUDRender\Form\ICRUDFormMetaData;
-use Larapress\CRUDRender\Rendering\Menu\IMenuItemMetaData;
-use Larapress\CRUDRender\Rendering\Table\ITableViewMetaData;
-use Larapress\CRUDRender\Rendering\Table\TableViewColumn;
-use Larapress\CRUDRender\Rendering\Table\TableViewMetaData;
+use Larapress\CRUDRender\Menu\IMenuItemMetaData;
+use Larapress\CRUDRender\Table\ITableViewMetaData;
+use Larapress\CRUDRender\Table\TableViewColumn;
+use Larapress\CRUDRender\Table\TableViewMetaData;
 use Larapress\Profiles\Models\Permission;
 
 class RoleMetaData extends SingleSourceBaseMetaData implements
