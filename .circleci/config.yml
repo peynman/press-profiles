@@ -11,9 +11,11 @@ jobs:
           name: Setup Environment
           command: |
             cp .env.testing .env
-      - run: sudo apt update && sudo apt install zlib1g-dev libsqlite3-dev
-      - run: sudo docker-php-ext-install zip
+      - run: sudo apt update && sudo apt install zlib1g-dev libsqlite3-dev libpng-dev
+      - run: sudo docker-php-ext-install zip && sudo docker-php-ext-enable zip
       - run: sudo -E docker-php-ext-install bcmath && sudo docker-php-ext-enable bcmath
+      - run: sudo -E docker-php-ext-install intl && sudo docker-php-ext-enable intl
+      - run: sudo -E docker-php-ext-install gd && sudo docker-php-ext-enable gd
       - run: sudo docker-php-ext-enable xdebug
 
       # composer cache
