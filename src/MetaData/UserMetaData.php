@@ -8,7 +8,7 @@ use Larapress\CRUD\Base\ICRUDFilterStorage;
 use Larapress\CRUD\Base\IPermissionsMetaData;
 use Larapress\CRUD\Base\SingleSourceBaseMetaData;
 use Larapress\CRUD\ICRUDUser;
-use Larapress\CRUDRender\CRUD\BaseCRUDPermissionView;
+use Larapress\CRUDRender\Base\BaseCRUDPermissionView;
 use Larapress\CRUDRender\Form\BaseCRUDFormMetaData;
 use Larapress\CRUDRender\Form\FormField;
 use Larapress\CRUDRender\Form\ICRUDFormMetaData;
@@ -23,7 +23,7 @@ use Larapress\Profiles\CRUD\UserCRUDProvider;
 use Larapress\Profiles\Flags\UserFlags;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\Domain;
-use Larapress\Profiles\Models\Role;
+use Larapress\CRUD\Models\Role;
 
 class UserMetaData extends SingleSourceBaseMetaData implements
     IPermissionsMetaData,
@@ -53,7 +53,7 @@ class UserMetaData extends SingleSourceBaseMetaData implements
         return config('larapress.profiles.routes.users.name');
     }
 
-    public function title()
+    public function getMenuTitle()
     {
         return trans('sidebar.title.users');
     }
@@ -68,27 +68,27 @@ class UserMetaData extends SingleSourceBaseMetaData implements
         return trans('models.user.name.plural');
     }
 
-    public function icon()
+    public function getMenuIcon()
     {
         return '';
     }
 
-    public function url()
+    public function getMenuURL()
     {
         return $this->viewUrl();
     }
 
-    public function key()
+    public function getMenuKey()
     {
         return config('larapress.profiles.routes.users.name');
     }
 
-    public function viewPermissions()
+    public function getMenuViewPermissions()
     {
         return [$this->getViewPermission()];
     }
 
-    public function viewRoles()
+    public function getMenuViewRoles()
     {
         return [];
     }
@@ -190,7 +190,7 @@ class UserMetaData extends SingleSourceBaseMetaData implements
                 FormField::decorator('id', 'title', null, null, 'names'),
                 []
             ),
-            FormField::common('select', 'sub_domain_id', trans('forms.label.domain'), [
+            FormField::common('select', 'domain_id', trans('forms.label.domain'), [
                 'objects' => Domain::all(['id', 'title']),
             ]),
             FormField::common('switches', 'flags', trans('forms.label.options'), [

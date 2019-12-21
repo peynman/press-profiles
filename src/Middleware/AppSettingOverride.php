@@ -29,9 +29,9 @@ class AppSettingOverride
         }
         $query = Settings::query()->where('type', 'config')->whereNull('user_id');
         if (is_null($domain_ids)) {
-            $query->where('sub_domain_id', $domain_ids);
+            $query->where('domain_id', $domain_ids);
         } else {
-            $query->whereIn('sub_domain_id', $domain_ids);
+            $query->whereIn('domain_id', $domain_ids);
         }
 
         $configs = $query->get();

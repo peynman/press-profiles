@@ -2,7 +2,7 @@
 
 namespace Larapress\Profiles\CRUDControllers;
 
-use Larapress\CRUD\Controllers\BaseCRUDController;
+use Larapress\CRUD\CRUDControllers\BaseCRUDController;
 use Larapress\Profiles\CRUD\EmailAddressCRUDProvider;
 
 class EmailAddressController extends BaseCRUDController

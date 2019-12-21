@@ -2,7 +2,7 @@
 
 namespace Larapress\Profiles\CRUDControllers;
 
-use Larapress\CRUD\Controllers\BaseCRUDController;
+use Larapress\CRUD\CRUDControllers\BaseCRUDController;
 use Larapress\Profiles\CRUD\ActivateCodeHistoryCRUDProvider;
 
 class ActivateCodeHistoryController extends BaseCRUDController
@@ -16,7 +16,7 @@ class ActivateCodeHistoryController extends BaseCRUDController
             ActivateCodeHistoryCRUDProvider::class
         );
 
-        parent::registerCRUDVerbs(
+        parent::registerVerbs(
             $name,
             [
                 'query.specific' => [

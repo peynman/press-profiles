@@ -5,8 +5,8 @@ namespace Larapress\Profiles\MetaData;
 use Larapress\CRUD\Base\BasePermissionMetaData;
 use Larapress\CRUD\Base\IPermissionsMetaData;
 use Larapress\CRUD\Base\SingleSourceBaseMetaData;
-use Larapress\CRUDRender\CRUD\BaseCRUDPermissionView;
-use Larapress\CRUDRender\CRUD\ICRUDPermissionView;
+use Larapress\CRUDRender\Base\BaseCRUDPermissionView;
+use Larapress\CRUDRender\Base\ICRUDPermissionView;
 use Larapress\CRUDRender\Form\BaseCRUDFormMetaData;
 use Larapress\CRUDRender\Form\ICRUDFormMetaData;
 use Larapress\CRUDRender\Menu\IMenuItemMetaData;
@@ -69,7 +69,7 @@ class ActivateCodeHistoryMetaData extends SingleSourceBaseMetaData implements
     /**
      * @return string
      */
-    public function title()
+    public function getMenuTitle()
     {
         return trans('models.activate-codes-history.sidebar');
     }
@@ -109,7 +109,7 @@ class ActivateCodeHistoryMetaData extends SingleSourceBaseMetaData implements
     /**
      * @return string
      */
-    public function key()
+    public function getMenuKey()
     {
         return config('larapress.profiles.routes.activate-codes-history.name');
     }
@@ -117,7 +117,7 @@ class ActivateCodeHistoryMetaData extends SingleSourceBaseMetaData implements
     /**
      * @return string
      */
-    public function icon()
+    public function getMenuIcon()
     {
         return 'devices';
     }
@@ -125,7 +125,7 @@ class ActivateCodeHistoryMetaData extends SingleSourceBaseMetaData implements
     /**
      * @return string
      */
-    public function url()
+    public function getMenuURL()
     {
         return $this->viewUrl();
     }
@@ -163,7 +163,7 @@ class ActivateCodeHistoryMetaData extends SingleSourceBaseMetaData implements
     /**
      * @return array
      */
-    public function viewPermissions()
+    public function getMenuViewPermissions()
     {
         return [$this->getViewPermission()];
     }
@@ -171,7 +171,7 @@ class ActivateCodeHistoryMetaData extends SingleSourceBaseMetaData implements
     /**
      * @return array
      */
-    public function viewRoles()
+    public function getMenuViewRoles()
     {
         return [];
     }

@@ -1,18 +1,19 @@
 <?php
 
+
 namespace Larapress\Profiles\CRUDControllers;
 
 use Larapress\CRUD\CRUDControllers\BaseCRUDController;
-use Larapress\Profiles\CRUD\UserCRUDProvider;
+use Larapress\Profiles\CRUD\FilterCRUDProvider;
 
-class UserController extends BaseCRUDController
+class FilterController extends BaseCRUDController
 {
     public static function registerRoutes()
     {
         parent::registerCrudRoutes(
-            config('larapress.profiles.routes.users.name'),
+            config('larapress.profiles.routes.filters.name'),
             self::class,
-            UserCRUDProvider::class
+            FilterCRUDProvider::class
         );
     }
 }

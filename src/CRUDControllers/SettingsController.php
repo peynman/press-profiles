@@ -2,7 +2,7 @@
 
 namespace Larapress\Profiles\CRUDControllers;
 
-use Larapress\CRUD\Controllers\BaseCRUDController;
+use Larapress\CRUD\CRUDControllers\BaseCRUDController;
 use Larapress\Profiles\CRUD\SettingsCRUDProvider;
 use Larapress\Profiles\CRUD\SettingsDuplicateDomainProvider;
 
@@ -17,7 +17,7 @@ class SettingsController extends BaseCRUDController
             SettingsCRUDProvider::class
         );
 
-        parent::registerCRUDVerbs(
+        parent::registerVerbs(
             $name,
             [
                 'store.duplicate' => [

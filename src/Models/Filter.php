@@ -1,6 +1,6 @@
 <?php
 
-namespace Larpress\CRUD\Models;
+namespace Larapress\CRUD\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

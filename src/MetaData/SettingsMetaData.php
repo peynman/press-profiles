@@ -7,8 +7,8 @@ use Larapress\CRUD\Base\BasePermissionMetaData;
 use Larapress\CRUD\Base\ICRUDFilterStorage;
 use Larapress\CRUD\Base\IPermissionsMetaData;
 use Larapress\CRUD\Base\SingleSourceBaseMetaData;
-use Larapress\CRUDRender\CRUD\BaseCRUDPermissionView;
-use Larapress\CRUDRender\CRUD\ICRUDPermissionView;
+use Larapress\CRUDRender\Base\BaseCRUDPermissionView;
+use Larapress\CRUDRender\Base\ICRUDPermissionView;
 use Larapress\CRUDRender\Form\BaseCRUDFormMetaData;
 use Larapress\CRUDRender\Form\FormField;
 use Larapress\CRUDRender\Form\ICRUDFormMetaData;
@@ -46,7 +46,7 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
         ];
     }
 
-    public function title()
+    public function getMenuTitle()
     {
         return trans('models.settings.sidebar');
     }
@@ -61,17 +61,17 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
         return trans('models.settings.name.plural');
     }
 
-    public function key()
+    public function getMenuKey()
     {
         return config('larapress.profiles.routes.settings.name');
     }
 
-    public function icon()
+    public function getMenuIcon()
     {
         return '';
     }
 
-    public function url()
+    public function getMenuURL()
     {
         return $this->viewUrl();
     }
@@ -79,12 +79,12 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
     /**
      * @return array
      */
-    public function viewPermissions()
+    public function getMenuViewPermissions()
     {
         return [$this->getViewPermission()];
     }
 
-    public function viewRoles()
+    public function getMenuViewRoles()
     {
         return [];
     }
@@ -98,7 +98,7 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
                 'domain.domain',
                 false,
                 30,
-                DomainMetaData::instance()->editUrl('::sub_domain_id:')
+                DomainMetaData::instance()->editUrl('::domain_id:')
             ),
             TableViewColumn::column(trans('tables.column.type'), 'type'),
             TableViewColumn::column(
@@ -146,7 +146,7 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
             FormField::text('key', trans('forms.label.key')),
             FormField::text('val', trans('forms.label.value')),
             FormField::text('type', trans('forms.label.type')),
-            FormField::common('select', 'sub_domain_id', trans('forms.label.domain'), [
+            FormField::common('select', 'domain_id', trans('forms.label.domain'), [
                 'objects' => Domain::all(['id', 'title']),
             ]),
         ];
@@ -188,7 +188,7 @@ class SettingsMetaData extends SingleSourceBaseMetaData implements
             FormField::text('key', trans('forms.label.key')),
             FormField::text('val', trans('forms.label.value')),
             FormField::text('type', trans('forms.label.type')),
-            FormField::common('select', 'sub_domain_id', trans('forms.label.domain'), [
+            FormField::common('select', 'domain_id', trans('forms.label.domain'), [
                 'objects' => Domain::all(['id', 'title']),
             ]),
         ];

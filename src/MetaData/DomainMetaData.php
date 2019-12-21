@@ -5,8 +5,8 @@ namespace Larapress\Profiles\MetaData;
 use Larapress\CRUD\Base\BasePermissionMetaData;
 use Larapress\CRUD\Base\IPermissionsMetaData;
 use Larapress\CRUD\Base\SingleSourceBaseMetaData;
-use Larapress\CRUDRender\CRUD\BaseCRUDPermissionView;
-use Larapress\CRUDRender\CRUD\ICRUDPermissionView;
+use Larapress\CRUDRender\Base\BaseCRUDPermissionView;
+use Larapress\CRUDRender\Base\ICRUDPermissionView;
 use Larapress\CRUDRender\Form\BaseCRUDFormMetaData;
 use Larapress\CRUDRender\Form\FormField;
 use Larapress\CRUDRender\Form\ICRUDFormMetaData;
@@ -51,7 +51,7 @@ class DomainMetaData extends SingleSourceBaseMetaData implements
         return config('larapress.profiles.routes.domains.name');
     }
 
-    public function title()
+    public function getMenuTitle()
     {
         return trans('models.sub-domains.sidebar');
     }
@@ -66,17 +66,17 @@ class DomainMetaData extends SingleSourceBaseMetaData implements
         return trans('models.sub-domains.name.plural');
     }
 
-    public function key()
+    public function getMenuKey()
     {
         return config('larapress.profiles.routes.domains.name');
     }
 
-    public function icon()
+    public function getMenuIcon()
     {
         return '';
     }
 
-    public function url()
+    public function getMenuURL()
     {
         return $this->viewUrl();
     }
@@ -84,12 +84,12 @@ class DomainMetaData extends SingleSourceBaseMetaData implements
     /**
      * @return array
      */
-    public function viewPermissions()
+    public function getMenuViewPermissions()
     {
         return [$this->getViewPermission()];
     }
 
-    public function viewRoles()
+    public function getMenuViewRoles()
     {
         return [];
     }

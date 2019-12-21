@@ -7,7 +7,8 @@ use Larapress\CRUD\Base\ICRUDExporter;
 use Larapress\CRUD\Base\ICRUDFilterStorage;
 use Larapress\Profiles\Base\BaseCRUDFilterStorage;
 use Larapress\Profiles\Base\BaseCRUDQueryExport;
-use Larapress\Profiles\Commands\AccountManager;
+use Larapress\Profiles\CRUD\ActivityLogCRUDProvider;
+use Larapress\Profiles\CRUD\UserCRUDProvider;
 use Larapress\Profiles\Repository\Domain\DomainRepository;
 use Larapress\Profiles\Repository\Domain\IDomainRepository;
 use Larapress\Profiles\Validations\UniqueInDomainValidator;
@@ -37,17 +38,10 @@ class PackageServiceProvider extends ServiceProvider
         UniqueInMasterDomainValidator::register();
         UniqueInDomainValidator::register();
 
-        $this->loadRoutesFrom(__DIR__.'/../../routes/api.php');
         $this->loadMigrationsFrom(__DIR__.'/../../migrations');
 
         $this->publishes([
             __DIR__.'/../../config/profiles.php' => config_path('larapress/profiles.php'),
         ], ['config', 'larapress', 'larapress-profiles']);
-
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                AccountManager::class,
-            ]);
-        }
     }
 }

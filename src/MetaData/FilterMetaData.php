@@ -5,8 +5,8 @@ namespace Larapress\Profiles\MetaData;
 use Larapress\CRUD\Base\BasePermissionMetaData;
 use Larapress\CRUD\Base\IPermissionsMetaData;
 use Larapress\CRUD\Base\SingleSourceBaseMetaData;
-use Larapress\CRUDRender\CRUD\BaseCRUDPermissionView;
-use Larapress\CRUDRender\CRUD\ICRUDPermissionView;
+use Larapress\CRUDRender\Base\BaseCRUDPermissionView;
+use Larapress\CRUDRender\Base\ICRUDPermissionView;
 use Larapress\CRUDRender\Form\BaseCRUDFormMetaData;
 use Larapress\CRUDRender\Form\FormField;
 use Larapress\CRUDRender\Form\ICRUDFormMetaData;
@@ -51,7 +51,7 @@ class FilterMetaData extends SingleSourceBaseMetaData implements
         return config('larapress.profiles.routes.filters.name');
     }
 
-    public function title()
+    public function getMenuTitle()
     {
         return trans('sidebar.title.filters');
     }
@@ -66,17 +66,17 @@ class FilterMetaData extends SingleSourceBaseMetaData implements
         return trans('models.filter.name.plural');
     }
 
-    public function key()
+    public function getMenuKey()
     {
         return config('larapress.profiles.routes.filters.name');
     }
 
-    public function icon()
+    public function getMenuIcon()
     {
         return '';
     }
 
-    public function url()
+    public function getMenuURL()
     {
         return $this->viewUrl();
     }
@@ -84,12 +84,12 @@ class FilterMetaData extends SingleSourceBaseMetaData implements
     /**
      * @return array
      */
-    public function viewPermissions()
+    public function getMenuViewPermissions()
     {
         return [$this->getViewPermission()];
     }
 
-    public function viewRoles()
+    public function getMenuViewRoles()
     {
         return [];
     }
@@ -137,7 +137,7 @@ class FilterMetaData extends SingleSourceBaseMetaData implements
             FormField::text('title', trans('forms.label.title')),
             FormField::text('name', trans('forms.label.name')),
             FormField::text('type', trans('forms.label.type')),
-            FormField::common('select', 'sub_domain_id', trans('forms.label.domain'), [
+            FormField::common('select', 'domain_id', trans('forms.label.domain'), [
                 'objects' => Domain::select(['id', 'domain'])->get(),
                 'decorator' => FormField::decorator('id', 'domain'),
                 'multiple' => true,
@@ -153,7 +153,7 @@ class FilterMetaData extends SingleSourceBaseMetaData implements
             FormField::text('title', trans('forms.label.title')),
             FormField::text('name', trans('forms.label.name')),
             FormField::text('type', trans('forms.label.type')),
-            FormField::common('select', 'sub_domain_id', trans('forms.label.domain'), [
+            FormField::common('select', 'domain_id', trans('forms.label.domain'), [
                 'objects' => Domain::select(['id', 'domain'])->get(),
                 'decorator' => FormField::decorator('id', 'domain'),
                 'multiple' => true,

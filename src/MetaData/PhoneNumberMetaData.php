@@ -5,7 +5,7 @@ namespace Larapress\Profiles\MetaData;
 use Larapress\CRUD\Base\BasePermissionMetaData;
 use Larapress\CRUD\Base\IPermissionsMetaData;
 use Larapress\CRUD\Base\SingleSourceBaseMetaData;
-use Larapress\CRUDRender\CRUD\BaseCRUDPermissionView;
+use Larapress\CRUDRender\Base\BaseCRUDPermissionView;
 use Larapress\CRUDRender\Form\BaseCRUDFormMetaData;
 use Larapress\CRUDRender\Form\FormField;
 use Larapress\CRUDRender\Form\ICRUDFormMetaData;
@@ -50,7 +50,7 @@ class PhoneNumberMetaData extends SingleSourceBaseMetaData implements
         return config('larapress.profiles.routes.phone-numbers.name');
     }
 
-    public function title()
+    public function getMenuTitle()
     {
         return trans('sidebar.title.numbers');
     }
@@ -65,17 +65,17 @@ class PhoneNumberMetaData extends SingleSourceBaseMetaData implements
         return trans('models.phone-number.name.plural');
     }
 
-    public function key()
+    public function getMenuKey()
     {
         return config('larapress.profiles.routes.phone-numbers.name');
     }
 
-    public function icon()
+    public function getMenuIcon()
     {
         return '';
     }
 
-    public function url()
+    public function getMenuURL()
     {
         return $this->viewUrl();
     }
@@ -83,12 +83,12 @@ class PhoneNumberMetaData extends SingleSourceBaseMetaData implements
     /**
      * @return array
      */
-    public function viewPermissions()
+    public function getMenuViewPermissions()
     {
         return [$this->getViewPermission()];
     }
 
-    public function viewRoles()
+    public function getMenuViewRoles()
     {
         return [];
     }
@@ -109,7 +109,7 @@ class PhoneNumberMetaData extends SingleSourceBaseMetaData implements
                 'sub_domain.domain',
                 false,
                 30,
-                DomainMetaData::instance()->editUrl('::sub_domain_id:')
+                DomainMetaData::instance()->editUrl('::domain_id:')
             ),
             TableViewColumn::column(trans('tables.column.number'), 'number'),
             TableViewColumn::column(trans('tables.column.type'), 'type'),

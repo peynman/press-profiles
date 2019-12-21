@@ -52,6 +52,6 @@ class EmailAddress extends Model
      */
     public function domain()
     {
-        return $this->belongsTo(Domain::class, 'sub_domain_id');
+        return $this->belongsTo(Domain::class, 'domain_id');
     }
 }

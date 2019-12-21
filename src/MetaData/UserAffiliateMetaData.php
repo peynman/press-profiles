@@ -22,7 +22,7 @@ class UserAffiliateMetaData extends UserMetaData
         ];
     }
 
-    public function title()
+    public function getMenuTitle()
     {
         return trans('models.affiliate.sidebar');
     }
@@ -37,7 +37,7 @@ class UserAffiliateMetaData extends UserMetaData
         return trans('models.affiliate.name.plural');
     }
 
-    public function key()
+    public function getMenuKey()
     {
         return config('larapress.profiles.routes.user-affiliates.name');
     }

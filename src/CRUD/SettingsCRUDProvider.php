@@ -42,7 +42,7 @@ class SettingsCRUDProvider implements ICRUDProvider
     ];
     public $filterFields = [
         'type' => 'equals:type',
-        'domain' => 'equals:sub_domain_id',
+        'domain' => 'equals:domain_id',
         'user_id' => 'equals:user_id',
     ];
 
