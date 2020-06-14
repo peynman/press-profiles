@@ -6,17 +6,26 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Larapress\Core\Extend\Helpers;
+use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\Base\BaseCRUDProvider;
 use Larapress\CRUD\Base\ICRUDProvider;
+use Larapress\CRUD\Base\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
+use Larapress\CRUD\Models\Role;
+use Larapress\CRUD\Repository\IRoleRepository;
 use Larapress\Profiles\IProfileUser;
-use Larapress\Profiles\Models\Role;
 
-class UserCRUDProvider implements ICRUDProvider
+class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 {
     use BaseCRUDProvider;
 
+    public $name_in_config = 'larapress.profiles.routes.emails.name';
+    public $verbs = [
+        self::VIEW,
+        self::CREATE,
+        self::EDIT,
+        self::DELETE,
+    ];
     public function getModelClass()
     {
         return config('larapress.crud.user.class');
@@ -27,18 +36,26 @@ class UserCRUDProvider implements ICRUDProvider
         'password' => 'required|string|min:4|confirmed|regex:/(^[A-Za-z0-9-_.]+$)+/',
         'password_confirmation' => 'required',
         'roles' => 'required|objectIds:roles,id,id',
-        'segments' => 'nullable|objectIds:user_segments,id,id',
+        'register_domain_id' => 'required|exists:domains,id',
+        'member_domain_id' => 'required|exists:domains,id',
         'flags' => 'nullable|numeric',
     ];
     public $updateValidations = [
         'password' => 'nullable|string|min:4|confirmed|regex:/(^[A-Za-z0-9-_.]+$)+/',
         'password_confirmation' => 'required_with:password',
         'roles' => 'required|objectIds:roles,id,id',
-        'segments' => 'nullable|objectIds:user_segments,id,id',
+        'register_domain_id' => 'required|exists:domains,id',
+        'member_domain_id' => 'required|exists:domains,id',
         'flags' => 'nullable|numeric',
     ];
 
-    public $validRelations = ['roles', 'roles.permissions', 'domains', 'phone_numbers', 'emails', 'segments'];
+    public $validRelations = [
+        'roles',
+        'roles.permissions',
+        'domains',
+        'phone_numbers',
+        'emails',
+    ];
     public $validSortColumns = ['id', 'name', 'created_at', 'updated_at'];
     public $validFilters = [];
     public $defaultShowRelations = ['roles', 'phone_numbers', 'domains', 'emails'];
@@ -125,8 +142,10 @@ class UserCRUDProvider implements ICRUDProvider
 
         /** @var IProfileUser|ICRUDUser $user */
         $user = Auth::user();
+        /** @var IRoleRepository $roleRepo */
+        $roleRepo = app(IRoleRepository::class);
         /** @var Role $userHighRole */
-        $userHighRole = $user->roles()->orderBy('priority', 'DESC')->first();
+        $userHighRole = $roleRepo->getUserHighestRole($user);
         $reqRolesIds = Helpers::getNormalizedObjectIds($args['roles']);
         /** @var Role[] $reqRoles */
         $reqRoles = Role::query()->whereIn('id', $reqRolesIds)->get();
@@ -160,7 +179,7 @@ class UserCRUDProvider implements ICRUDProvider
             $object->forgetPermissionsCache();
         }
 
-        $object->forgetAffiliateDomainsCache();
+        $object->forgetDomainsCache();
     }
 
     /**

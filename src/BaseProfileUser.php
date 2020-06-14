@@ -3,10 +3,10 @@
 namespace Larapress\Profiles;
 
 use Illuminate\Support\Facades\Cache;
-use Larapress\Core\BaseFlags;
-use Larapress\Profiles\Flags\DomainFlags;
+use Larapress\CRUD\BaseFlags;
+use Larapress\CRUD\Models\Role;
+use Larapress\Profiles\Flags\UserDomainFlags;
 use Larapress\Profiles\Models\Domain;
-use Larapress\Profiles\Models\Role;
 
 /**
  * Trait BaseProfileUser.
@@ -31,7 +31,7 @@ trait BaseProfileUser
     {
         $domains = $this->getDomains();
         foreach ($domains as $domain) {
-            if (BaseFlags::isActive($domain->flags, DomainFlags::REGISTRATION_DOMAIN)) {
+            if (BaseFlags::isActive($domain->flags, UserDomainFlags::REGISTRATION_DOMAIN)) {
                 return $domain;
             }
         }
@@ -54,7 +54,7 @@ trait BaseProfileUser
     {
         $domains = $this->getDomains();
         foreach ($domains as $domain) {
-            if (BaseFlags::isActive($domain->flags, DomainFlags::MEMBERSHIP_DOMAIN)) {
+            if (BaseFlags::isActive($domain->flags, UserDomainFlags::MEMBERSHIP_DOMAIN)) {
                 return $domain;
             }
         }
@@ -79,7 +79,7 @@ trait BaseProfileUser
         $affDomains = [];
 
         foreach ($domains as $domain) {
-            if (BaseFlags::isActive($domain->flags, DomainFlags::AFFILIATE_DOMAIN)) {
+            if (BaseFlags::isActive($domain->flags, UserDomainFlags::AFFILIATE_DOMAIN)) {
                 $affDomains[] = $domain;
             }
         }
@@ -92,21 +92,15 @@ trait BaseProfileUser
      */
     public function getAffiliateDomainIds()
     {
-        $domains = $this->getAffiliateDomains();
+        $domains = $this->getDomains();
         $ids = [];
         foreach ($domains as $domain) {
-            $ids[] = $domain->id;
+            if (BaseFlags::isActive($domain->flags, UserDomainFlags::AFFILIATE_DOMAIN)) {
+                $ids[] = $domain->id;
+            }
         }
 
         return $ids;
-    }
-
-    /**
-     * @return void
-     */
-    public function forgetDomainsCache()
-    {
-        Cache::forget('larapress.cached.user.'.$this->id.'.domains');
     }
 
     /**
@@ -147,11 +141,19 @@ trait BaseProfileUser
                 Cache::put(
                     'larapress.cached.user.'.$this->id.'.domains',
                     $this->cachedDomains,
-                    \DateInterval::createFromDateString(config('larapress.profiles.defaults.cache-ttl'))
+                    0
                 );
             }
         }
 
         return $this->cachedDomains;
+    }
+
+    /**
+     * @return void
+     */
+    public function forgetDomainsCache()
+    {
+        Cache::forget('larapress.cached.user.'.$this->id.'.domains');
     }
 }

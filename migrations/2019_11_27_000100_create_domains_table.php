@@ -16,7 +16,7 @@ class CreateDomainsTable extends Migration
         Schema::create('domains', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->bigInteger('author_id', false, true)->nullable();
-            $table->string('domain')->unique();
+            $table->string('domain');
             $table->string('ips')->nullable();
             $table->string('nameservers')->nullable();
             $table->integer('flags')->default(0);
@@ -24,7 +24,20 @@ class CreateDomainsTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
+            $table->unique(['deleted_at', 'domain']);
+
             $table->foreign('author_id')->references('id')->on('users');
+        });
+        Schema::create('domains_subs', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->bigInteger('domain_id', false, true);
+            $table->string('sub_domain');
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->unique('deleted_at', 'sub_domain');
+
+            $table->foreign('domain_id')->references('id')->on('domains');
         });
     }
 
@@ -35,6 +48,7 @@ class CreateDomainsTable extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('domains_subs');
         Schema::dropIfExists('domains');
     }
 }

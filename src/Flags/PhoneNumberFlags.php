@@ -2,7 +2,7 @@
 
 namespace Larapress\Profiles\Flags;
 
-use Larapress\Core\BaseFlags;
+use Larapress\CRUD\BaseFlags;
 
 class PhoneNumberFlags
 {
@@ -17,6 +17,6 @@ class PhoneNumberFlags
 
     public static function getTitle($flag)
     {
-        return self::__getTitle($flag, 'models.phone-number.flags');
+        return self::__getFlagProperty($flag, 'models.phone-number.flags');
     }
 }

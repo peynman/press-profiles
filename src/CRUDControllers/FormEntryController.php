@@ -3,16 +3,16 @@
 namespace Larapress\Profiles\CRUDControllers;
 
 use Larapress\CRUD\CRUDControllers\BaseCRUDController;
-use Larapress\Profiles\CRUD\ActivateCodeCRUDProvider;
+use Larapress\Profiles\CRUD\FormEntryCRUDProvider;
 
-class ActivateCodeController extends BaseCRUDController
+class FormEntryController extends BaseCRUDController
 {
     public static function registerRoutes()
     {
         parent::registerCrudRoutes(
-            config('larapress.profiles.routes.activate-codes.name'),
+            config('larapress.profiles.routes.form-entries.name'),
             self::class,
-            ActivateCodeCRUDProvider::class
+            FormEntryCRUDProvider::class
         );
     }
 }

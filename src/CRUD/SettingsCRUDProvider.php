@@ -5,14 +5,22 @@ namespace Larapress\Profiles\CRUD;
 use Illuminate\Support\Facades\Auth;
 use Larapress\CRUD\Base\BaseCRUDProvider;
 use Larapress\CRUD\Base\ICRUDProvider;
+use Larapress\CRUD\Base\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\Settings;
 
-class SettingsCRUDProvider implements ICRUDProvider
+class SettingsCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 {
     use BaseCRUDProvider;
 
+    public $name_in_config = 'larapress.profiles.routes.settings.name';
+    public $verbs = [
+        self::VIEW,
+        self::CREATE,
+        self::EDIT,
+        self::DELETE,
+    ];
     public $model = Settings::class;
     public $createValidations = [
         'key' => 'required|string',

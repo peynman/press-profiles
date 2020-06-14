@@ -6,50 +6,84 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use Larapress\CRUD\Base\BaseCRUDProvider;
 use Larapress\CRUD\Base\ICRUDProvider;
+use Larapress\CRUD\Base\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
-use Larapress\Profiles\Flags\DomainFlags;
+use Larapress\Profiles\Flags\UserDomainFlags;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\Domain;
+use Larapress\Profiles\Models\DomainSub;
 
-class DomainCRUDProvider implements ICRUDProvider
+class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 {
     use BaseCRUDProvider;
 
+    public $name_in_config = 'larapress.profiles.routes.domains.name';
+    public $verbs = [
+        self::VIEW,
+        self::CREATE,
+        self::EDIT,
+        self::DELETE,
+    ];
     public $model = Domain::class;
     public $createValidations = [
-        'name' => 'required|string|unique:domains,name',
-        'title' => 'required|string',
-        'domain' => 'required|string',
+        'domain' => 'required|string|domain|' .
+            // unique in domains table
+            'unique:domains,domain,NULL,id,deleted_at,NULL|' .
+            // unique in sub domains table
+            'unique:domains_subs,sub_domain,NULL,id,deleted_at,NULL',
+        'sub_domains.*.sub_domain' => 'required|string|domain|' .
+            // unique in domains table
+            'unique:domains,domain,NULL,id,deleted_at,NULL|' .
+            // unique in sub domains table
+            'unique:domains_subs,sub_domain,NULL,id,deleted_at,NULL',
+        'ips' => 'required|string|ip_list',
+        'nameservers' => 'nullable|string',
+        'flags' => 'nullable|numeric',
+        'data' => 'nullable|json',
+        // used by super-role account to create domains in place of other users
+        'target_user_id' => 'nullable|exists:users,id',
+    ];
+    public $updateValidations = [
+        'domain' => 'required|string|domain|' .
+            // unique in domains table
+            'unique:domains,domain,NULL,id,deleted_at,NULL|' .
+            // unique in sub domains table
+            'unique:domains_subs,sub_domain,NULL,id,deleted_at,NULL',
+        'sub_domains.*.sub_domain' => 'required|string|domain|' .
+            // unique in domains table
+            'unique:domains,domain,NULL,id,deleted_at,NULL|' .
+            // unique in sub domains table
+            'unique:domains_subs,sub_domain,NULL,id,deleted_at,NULL',
         'ips' => 'required|string|ip_list',
         'nameservers' => 'required|string',
         'flags' => 'nullable|numeric',
-        'data' => 'nullable|string|json',
+        'data' => 'nullable|json',
+        // used by super-role account to create domains in place of other users
+        'target_user_id' => 'nullable|exists:users,id',
     ];
-    public $updateValidations = [
-        'title' => 'required|string',
-        'domain' => 'required|string',
-        'ips' => 'required|string|',
-        'nameservers' => 'required|string',
-        'flags' => 'nullable|numeric',
-        'data' => 'nullable|string|json',
-    ];
-    public $autoSyncRelations = [];
-    public $validSortColumns = [
-        'id',
-        'name',
-        'title',
-        'created_at',
+    public $searchColumns = [
         'domain',
+        'id',
         'ips',
         'nameservers',
     ];
-    public $validRelations = ['author'];
-    public $validFilters = [];
-    public $defaultShowRelations = ['author'];
-    public $excludeFromUpdate = ['name'];
-    public $searchColumns = ['name', 'title'];
-    public $filterDefaults = [];
-    public $filterFields = [];
+    public $validSortColumns = [
+        'id',
+        'domain',
+        'ips',
+        'author_id',
+        'nameservers',
+        'created_at',
+        'updated_at',
+    ];
+    public $validRelations = [
+        'author',
+        'sub_domains',
+    ];
+    public $defaultShowRelations = [
+        'author',
+        'sub_domains',
+    ];
 
     /**
      * @param Builder $query
@@ -60,43 +94,11 @@ class DomainCRUDProvider implements ICRUDProvider
     {
         /** @var ICRUDUser $user */
         $user = Auth::user();
-        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
             $query->where('author_id', $user->id);
         }
 
         return $query;
-    }
-
-    /**
-     * @param array $args
-     * @return array
-     */
-    public function onBeforeCreate($args)
-    {
-        if (! isset($args['flags'])) {
-            $args['flags'] = 0;
-        }
-
-        /** @var ICRUDUser $user */
-        $user = Auth::user();
-        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
-            $args['author_id'] = $user->id;
-        }
-
-        return $args;
-    }
-
-    /**
-     * @param array $args
-     * @return array
-     */
-    public function onBeforeUpdate($args)
-    {
-        if (! isset($args['flags'])) {
-            $args['flags'] = 0;
-        }
-
-        return $args;
     }
 
     /**
@@ -108,11 +110,26 @@ class DomainCRUDProvider implements ICRUDProvider
     {
         /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
-        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
             return in_array($object->id, $user->getAffiliateDomainIds());
         }
 
         return true;
+    }
+
+    /**
+     * @param array $args
+     *
+     * @return array
+     */
+    public function onBeforeCreate($args)
+    {
+        /** @var ICRUDUser|IProfileUser $user */
+        $user = Auth::user();
+
+        $args['author_id'] = $user->id;
+
+        return $args;
     }
 
     /**
@@ -126,17 +143,34 @@ class DomainCRUDProvider implements ICRUDProvider
         /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
 
-        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
             $user->domains()->attach($object->id, [
-                'flags' => DomainFlags::AFFILIATE_DOMAIN,
+                'flags' => UserDomainFlags::AFFILIATE_DOMAIN,
             ]);
-            $user->forgetAffiliateDomainsCache();
+        } else
+            // allow super user to create domains in place of other users
+        if (isset($input_data['target_user_id']) && !is_null($input_data['target_user_id'])) {
+            $targetUser = call_user_func([config('larapress.crud.user.class'), 'find'], $input_data['target_user_id']);
+            if (!is_null($targetUser)) {
+                $targetUser->domains()->attach(
+                    $object->id,
+                    [
+                        'flags' => UserDomainFlags::AFFILIATE_DOMAIN,
+                    ]
+                );
+            }
         }
+
+        if (!empty($input_data['sub_domains'])) {
+            $this->saveHasManyRelation('sub_domains', $object, $input_data, DomainSub::class);
+        }
+
+        $user->forgetDomainsCache();
     }
 
     /**
      * @param Domain $object
-     * @param array  $input_data
+     * @param array $input_data
      *
      * @return array|void
      */
@@ -144,6 +178,27 @@ class DomainCRUDProvider implements ICRUDProvider
     {
         /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
-        $user->forgetAffiliateDomainsCache();
+
+        // allow super user to create domains in place of other users
+        if ($user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+            if (isset($input_data['target_user_id']) && !is_null($input_data['target_user_id'])) {
+                $targetUser = call_user_func([config('larapress.crud.user.class'), 'find'], $input_data['target_user_id']);
+                if (!is_null($targetUser)) {
+                    $targetUser->domains()->attach(
+                        $object->id,
+                        [
+                            'flags' => UserDomainFlags::AFFILIATE_DOMAIN,
+                        ]
+                    );
+                }
+            }
+        }
+
+        if (!empty($input_data['sub_domains'])) {
+            $object->sub_domains()->forceDelete();
+            $this->saveHasManyRelation('sub_domains', $object, $input_data, DomainSub::class);
+        }
+
+        $user->forgetDomainsCache();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Larapress\Profiles\Flags;
 
-use Larapress\Core\BaseFlags;
+use Larapress\CRUD\BaseFlags;
 
 class UserFlags
 {
@@ -16,6 +16,6 @@ class UserFlags
 
     public static function getTitle($flag)
     {
-        return self::__getTitle($flag, 'larapress::models.user.flags');
+        return self::__getFlagProperty($flag, 'larapress::models.users.flags');
     }
 }

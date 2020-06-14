@@ -3,6 +3,7 @@
 namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Larapress\Core\Extend\Helpers;
 
@@ -12,9 +13,9 @@ class UserAffiliateCRUDProvider extends UserCRUDProvider
         'share_percent',
     ];
 
-    public function getCreateRules()
+    public function getCreateRules(Request $request)
     {
-        $rules = parent::getCreateRules();
+        $rules = parent::getCreateRules($request);
 
         unset($rules['roles']);
         unset($rules['segments']);
@@ -26,9 +27,9 @@ class UserAffiliateCRUDProvider extends UserCRUDProvider
         ]);
     }
 
-    public function getUpdateRules()
+    public function getUpdateRules(Request $request)
     {
-        $rules = parent::getUpdateRules();
+        $rules = parent::getUpdateRules($request);
 
         unset($rules['roles']);
         unset($rules['segments']);
@@ -114,7 +115,7 @@ class UserAffiliateCRUDProvider extends UserCRUDProvider
      */
     public function onAfterUpdate($object, $args)
     {
-        $object->forgetAffiliateDomainsCache();
+        $object->forgetDomainsCache();
     }
 
     /**

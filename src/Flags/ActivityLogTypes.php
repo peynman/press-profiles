@@ -2,7 +2,7 @@
 
 namespace App\Models\Flags;
 
-use Larapress\Core\BaseType;
+use Larapress\CRUD\BaseType;
 
 class ActivityLogTypes
 {
@@ -20,6 +20,6 @@ class ActivityLogTypes
 
     public static function getTitle($flag)
     {
-        return self::__getTitle($flag, 'models.activity-logs.types');
+        return self::__getFlagProperty($flag, 'models.activity-logs.types');
     }
 }

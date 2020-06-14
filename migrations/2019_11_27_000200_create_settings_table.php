@@ -15,18 +15,26 @@ class CreateSettingsTable extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->bigInteger('author_id', false, true);
             $table->bigInteger('user_id', false, true)->nullable();
-            $table->bigInteger('domain_id', false, true)->nullable();
             $table->string('type')->nullable();
             $table->string('key');
             $table->string('val');
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['domain_id', 'type']);
-            $table->unique(['deleted_at', 'domain_id', 'type', 'key']);
+            $table->index(['user_id', 'type']);
+            $table->unique(['deleted_at', 'type', 'key']);
 
             $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('author_id')->references('id')->on('users');
+        });
+
+        Schema::create('setting_domain', function(Blueprint $table) {
+            $table->bigInteger('setting_id', false, true);
+            $table->bigInteger('domain_id', false, true);
+
+            $table->foreign('setting_id')->references('id')->on('settings');
             $table->foreign('domain_id')->references('id')->on('domains');
         });
     }
@@ -38,6 +46,7 @@ class CreateSettingsTable extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('setting_domain');
         Schema::dropIfExists('settings');
     }
 }

@@ -1,11 +1,10 @@
 <?php
 
-namespace Larapress\CRUD\Models;
+namespace Larapress\Profiles\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Larapress\Core\Extend\SelectorObjects;
-use Larapress\Profiles\Models\Domain;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Larapress\Profiles\IProfileUser;
 
 /**
  * @property int       $id
@@ -16,21 +15,22 @@ use Larapress\Profiles\Models\Domain;
  * @property string    $type
  * @property string    $name
  * @property string    $title
- * @property Domain    $domain
+ * @property Domain[]    $domains
+ * @property \Carbon\Carbon $deleted_at
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property IProfileUser $author
  */
 class Filter extends Model
 {
-    use SelectorObjects;
+    use SoftDeletes;
 
     protected $table = 'filters';
 
-    public $timestamps = false;
-
     public $fillable = [
+        'author_id',
         'type',
         'name',
-        'title',
-        'domain_id',
         'data',
         'flags',
         'translations',
@@ -42,81 +42,25 @@ class Filter extends Model
     ];
 
     /**
-     * @return BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function domain()
+    public function domains()
     {
-        return $this->belongsTo(Domain::class, 'domain_id');
+        return $this->belongsToMany(
+            Domain::class,
+            'filter_domain',
+            'filter_id',
+            'domain_id'
+        );
     }
+
 
     /**
-     * @param        $tagsCandid
-     * @param string $type
-     *
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public static function processTags($tagsCandid, $type = '')
+    public function author()
     {
-        $tags_array = [];
-        if (is_string($tagsCandid)) {
-            $tags_array = json_decode($tagsCandid);
-            if (is_null($tags_array) || ! is_object($tags_array)) {
-                $tags_array = [$tagsCandid];
-            }
-        } elseif (is_array($tagsCandid)) {
-            $tags_array = $tagsCandid;
-        }
-        /** @var Filter[] $tags */
-        $tags = self::whereIn('id', $tags_array)->get();
-        if (count($tags) < count($tags_array)) {
-            foreach ($tags_array as $new_tag) {
-                $new = true;
-                foreach ($tags as $tag) {
-                    if ($new_tag == $tag->name) {
-                        $new = false;
-                        break;
-                    }
-                }
-
-                if ($new) {
-                    $created = self::create([
-                        'name' => $new_tag,
-                        'type' => $type,
-                        'flags' => 0,
-                    ]);
-                    $tags[] = $created;
-                }
-            }
-        }
-
-        return $tags;
+        return $this->belongsTo(config('larapress.crud.user.class'), 'author_id');
     }
 
-    /**
-     * @param string $type
-     *
-     * @return Filter[]
-     */
-    public static function getByType($type)
-    {
-        $objects = self::getSelectorObjects(['id', 'type', 'name', 'title', 'data'], false);
-        $tags = [];
-        foreach ($objects as $object) {
-            if ($object->type == $type) {
-                $tags[] = $object;
-            }
-        }
-
-        return $tags;
-    }
-
-    public static function randomByType($type)
-    {
-        $objects = self::getByType($type);
-        if (count($objects) > 1) {
-            return $objects[rand(0, count($objects) - 1)];
-        }
-
-        return $objects[0];
-    }
 }

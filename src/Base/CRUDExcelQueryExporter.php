@@ -5,25 +5,25 @@ namespace Larapress\Profiles\Base;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\Query\Builder;
 use Larapress\CRUD\Base\ICRUDProvider;
-use Maatwebsite\Excel\Concerns\Exportable;
-use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
+// use Maatwebsite\Excel\Concerns\Exportable;
+// use Maatwebsite\Excel\Concerns\FromQuery;
+// use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+// use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+// use Maatwebsite\Excel\Concerns\WithHeadings;
+// use Maatwebsite\Excel\Concerns\WithMapping;
 
 /**
  * Class BaseCRUDQueryExporter.
  */
 class CRUDExcelQueryExporter implements
-    FromQuery,
-    Responsable,
-    WithMapping,
-    WithColumnFormatting,
-    ShouldAutoSize,
-    WithHeadings
+    // FromQuery,
+    Responsable
+    // WithMapping,
+    // WithColumnFormatting,
+    // ShouldAutoSize,
+    // WithHeadings
 {
-    use Exportable;
+    // use Exportable;
     /** @var \Illuminate\Database\Eloquent\Builder */
     private $query;
     /**

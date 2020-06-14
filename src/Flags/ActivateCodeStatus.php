@@ -2,7 +2,7 @@
 
 namespace Larapress\Profiles\Flags;
 
-use Larapress\Core\BaseType;
+use Larapress\CRUD\BaseType;
 
 class ActivateCodeStatus
 {
@@ -16,6 +16,6 @@ class ActivateCodeStatus
 
     public static function getTitle($flag)
     {
-        return self::__getTitle('models.activate-codes.status', $flag);
+        return self::__getFlagProperty('models.activate-codes.status', $flag);
     }
 }

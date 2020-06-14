@@ -6,9 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use Larapress\CRUD\ICRUDUser;
+use Larapress\Profiles\CRUD\DomainCRUDProvider;
 use Larapress\Profiles\IProfileUser;
 
 /**
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon $deleted_at
  * @property int            $id
  * @property string         $name
  * @property string         $title
@@ -22,9 +26,7 @@ use Larapress\Profiles\IProfileUser;
  * @property IProfileUser   $author
  * @property IProfileUser[] $users
  * @property ICRUDUser[]    $affiliates
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- * @property \Carbon\Carbon $deleted_at
+ * @property DomainSub[]    $sub_domains
  */
 class Domain extends Model
 {
@@ -33,8 +35,6 @@ class Domain extends Model
     protected $table = 'domains';
 
     protected $fillable = [
-        'name',
-        'title',
         'domain',
         'ips',
         'nameservers',
@@ -69,31 +69,12 @@ class Domain extends Model
     }
 
     /**
-     * @param Request|null $request
-     *
-     * @return Domain|null
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public static function getRequestDomain(Request $request)
-    {
-        $domain_str = $request->getHost();
-
-        return self::where('domain', $domain_str)->first();
-    }
-
-    /**
-     * @param Request $request
-     * @return bool
-     */
-    public static function isRequestDefaultDomain(Request $request)
-    {
-        $domain_str = $request->getHost();
-        $sub_domain = self::where('domain', $domain_str)->first();
-        $is_default_domain = false;
-        if (is_null($sub_domain)) {
-            $default_domain = config('app.url');
-            $is_default_domain = stringContains($default_domain, $domain_str);
-        }
-
-        return $is_default_domain;
+    public function sub_domains() {
+        return $this->hasMany(
+            DomainSub::class,
+            'domain_id'
+        );
     }
 }

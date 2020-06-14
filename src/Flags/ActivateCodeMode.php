@@ -2,7 +2,7 @@
 
 namespace Larapress\Profiles\Flags;
 
-use Larapress\Core\BaseType;
+use Larapress\CRUD\BaseType;
 
 class ActivateCodeMode
 {

@@ -3,16 +3,24 @@
 namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Support\Facades\Auth;
-use Larapress\Core\Extend\Helpers;
+use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\Base\BaseCRUDProvider;
 use Larapress\CRUD\Base\ICRUDProvider;
+use Larapress\CRUD\Base\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\Models\PhoneNumber;
 
-class PhoneNumberCRUDProvider implements ICRUDProvider
+class PhoneNumberCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 {
     use BaseCRUDProvider;
 
+    public $name_in_config = 'larapress.profiles.routes.phone-numbers.name';
+    public $verbs = [
+        self::VIEW,
+        self::CREATE,
+        self::EDIT,
+        self::DELETE,
+    ];
     public $model = PhoneNumber::class;
     public $createValidations = [
         'user_id' => 'required|numeric|exists:users,id',

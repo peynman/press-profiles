@@ -6,14 +6,22 @@ use Illuminate\Support\Facades\Auth;
 use Larapress\Core\Exceptions\AppException;
 use Larapress\CRUD\Base\BaseCRUDProvider;
 use Larapress\CRUD\Base\ICRUDProvider;
+use Larapress\CRUD\Base\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\ActivityLog;
 
-class ActivityLogCRUDProvider implements ICRUDProvider
+class ActivityLogCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 {
     use BaseCRUDProvider;
 
+    public $name_in_config = 'larapress.profiles.routes.activity-logs.name';
+    public $verbs = [
+        self::VIEW,
+        self::CREATE,
+        self::EDIT,
+        self::DELETE,
+    ];
     public $model = ActivityLog::class;
     public $data_keys = [
     ];
