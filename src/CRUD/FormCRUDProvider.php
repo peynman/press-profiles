@@ -3,6 +3,7 @@
 namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Larapress\CRUD\Base\BaseCRUDProvider;
 use Larapress\CRUD\Base\ICRUDProvider;
@@ -24,14 +25,14 @@ class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     ];
     public $model = Form::class;
     public $createValidations = [
-        'name' => 'required|string',
-        'data' => 'required|json',
-        'flags' => 'nullable|int',
+        'name' => 'required|unique:forms,name',
+        'data.title' => 'required',
+        'flags' => 'nullable|numeric',
     ];
     public $updateValidations = [
-        'name' => 'required|string',
-        'data' => 'required|json',
-        'flags' => 'nullable|int',
+        'name' => 'required|unique:forms,name',
+        'data.title' => 'required|string',
+        'flags' => 'nullable|numeric',
     ];
     public $autoSyncRelations = [
         'author' => 'auth::user',
@@ -62,6 +63,17 @@ class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     ];
     public $filterFields = [
     ];
+
+    /**
+     * Exclude current id in name unique request
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function getUpdateRules(Request $request) {
+        $this->updateValidations['name'] .= ',' . $request->route('id');
+        return $this->updateValidations;
+    }
 
     /**
      * @param Form $object

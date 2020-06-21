@@ -53,7 +53,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'roles',
         'roles.permissions',
         'domains',
-        'phone_numbers',
+        'phones',
         'emails',
     ];
     public $validSortColumns = ['id', 'name', 'created_at', 'updated_at'];

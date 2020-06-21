@@ -7,6 +7,8 @@ use Larapress\CRUD\BaseFlags;
 use Larapress\CRUD\Models\Role;
 use Larapress\Profiles\Flags\UserDomainFlags;
 use Larapress\Profiles\Models\Domain;
+use Larapress\Profiles\Models\EmailAddress;
+use Larapress\Profiles\Models\PhoneNumber;
 
 /**
  * Trait BaseProfileUser.
@@ -147,6 +149,31 @@ trait BaseProfileUser
         }
 
         return $this->cachedDomains;
+    }
+
+
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function phones()
+    {
+        return $this->hasMany(
+            PhoneNumber::class,
+            'user_id',
+        );
+    }
+
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function emails()
+    {
+        return $this->hasMany(
+            EmailAddress::class,
+            'user_id',
+        );
     }
 
     /**
