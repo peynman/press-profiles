@@ -9,6 +9,7 @@ use Larapress\CRUD\Base\ICRUDProvider;
 use Larapress\CRUD\Base\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\Models\PhoneNumber;
+use Larapress\Profiles\IProfileUser;
 
 class PhoneNumberCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 {
@@ -34,45 +35,43 @@ class PhoneNumberCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'flags' => 'numeric',
         'data' => 'nullable|json',
     ];
-    public $autoSyncRelations = ['user'];
-    public $validSortColumns = ['id', 'number', 'created_at'];
-    public $validRelations = ['user', 'domain'];
+    public $autoSyncRelations = [
+    ];
+    public $validSortColumns = [
+        'id',
+        'number',
+        'created_at',
+        'updated_at',
+        'flags',
+        'domain_id',
+        'user_id',
+    ];
+    public $validRelations = [
+        'user',
+        'domain'
+    ];
     public $validFilters = [];
-    public $defaultShowRelations = ['user', 'domain'];
+    public $defaultShowRelations = [
+        'user',
+        'domain'
+    ];
     public $excludeFromUpdate = [];
-    public $searchColumns = ['number'];
+    public $searchColumns = [
+        'number'
+    ];
     public $filterDefaults = [];
     public $filterFields = [];
 
     /**
-     * @param array $args
-     * @return array|mixed
-     */
-    public function onBeforeCreate($args)
-    {
-        $args = Helpers::getNormalizedNumbers($args, ['number']);
-
-        return $args;
-    }
-
-    /**
-     * @param array $args
-     * @return array|mixed
-     */
-    public function onBeforeUpdate($args)
-    {
-        return $this->onBeforeCreate($args);
-    }
-
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param Builder $query
+     *
+     * @return \Illuminate\Database\Query\Builder
      */
     public function onBeforeQuery($query)
     {
-        /** @var ICRUDUser|\Larapress\Profiles\IProfileUser $user */
+        /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
-        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
             $query->whereIn('domain_id', $user->getAffiliateDomainIds());
         }
 
@@ -81,16 +80,18 @@ class PhoneNumberCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 
     /**
      * @param PhoneNumber $object
+     *
      * @return bool
      */
     public function onBeforeAccess($object)
     {
-        /** @var ICRUDUser|\Larapress\Profiles\IProfileUser $user */
+        /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
-        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
             return in_array($object->domain_id, $user->getAffiliateDomainIds());
         }
 
         return true;
     }
+
 }

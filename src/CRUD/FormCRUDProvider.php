@@ -84,17 +84,8 @@ class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
 
-        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
-            $domain_ids = $object->domains->pluck('id');
-            $aff_domains = $user->getAffiliateDomainIds();
-
-            foreach ($domain_ids as $domainId) {
-                if (in_array($domainId, $aff_domains)) {
-                    return true;
-                }
-            }
-
-            return false;
+        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+            return $user->id === $object->author_id;
         }
 
         return true;
@@ -109,10 +100,8 @@ class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
 
-        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
-            $query->whereHas('domains', function(Builder $q) use($user) {
-                $q->whereIn('id', $user->getAffiliateDomainIds());
-            });
+        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+            $query->where('author_id', $user->id);
         }
 
         return $query;

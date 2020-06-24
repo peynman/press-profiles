@@ -10,11 +10,11 @@
 
 ## CRUD for resources:
 * Domains
+* Form
+* FormEntries
 * Settings
-* Roles
-* Permissions
 * ActivityLog
-* ActivateCodes
+* ActivityCodes
 * Filters
 * EmailAddress
 * PhoneNumber
