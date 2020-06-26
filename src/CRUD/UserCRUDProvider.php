@@ -19,7 +19,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 {
     use BaseCRUDProvider;
 
-    public $name_in_config = 'larapress.profiles.routes.emails.name';
+    public $name_in_config = 'larapress.profiles.routes.users.name';
     public $verbs = [
         self::VIEW,
         self::CREATE,
@@ -192,7 +192,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         /** @var IProfileUser|ICRUDUser $user */
         $user = Auth::user();
 
-        if ($user->hasRole(config('larapress.profile.security.roles.affiliate'))) {
+        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
             $query->whereHas('domains', function (Builder $q) use ($user) {
                 $q->whereIn('id', $user->getAffiliateDomainIds());
             });
@@ -211,7 +211,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
 
-        if ($user->hasRole(config('larapress.profile.security.roles.affiliate'))) {
+        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
             if (! in_array($object->getMembershipDomainId(), $user->getAffiliateDomainIds())) {
                 return false;
             }
