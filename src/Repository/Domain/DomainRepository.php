@@ -29,6 +29,17 @@ class DomainRepository implements IDomainRepository
         return $domains;
     }
 
+
+    /**
+     * Undocumented function
+     *
+     * @param IProfileUser $user
+     * @return array
+     */
+    public function getDomainFlags(IProfileUser $user) {
+        return UserDomainFlags::toArray();
+    }
+
     /**
      * @param Request|null $request
      *
@@ -55,7 +66,7 @@ class DomainRepository implements IDomainRepository
     public function isRequestDefaultDomain(Request $request)
     {
         $domain = $this->getRequestDomain($request);
-        return is_null($domain) || BaseFlags::isActive($domain->flags, UserDomainFlags::DEFAULT_DOMAIN);
+        return is_null($domain) || BaseFlags::isActive($domain->flags, Domain::FLAG_DEFAULT_DOMAIN);
     }
 
     /**

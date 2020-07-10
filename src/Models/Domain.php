@@ -30,6 +30,8 @@ use Larapress\Profiles\IProfileUser;
  */
 class Domain extends Model
 {
+    const FLAG_DEFAULT_DOMAIN = 1;
+
     use SoftDeletes;
 
     protected $table = 'domains';

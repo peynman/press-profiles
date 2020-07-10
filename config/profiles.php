@@ -4,6 +4,7 @@ return [
     'defaults' => [
         'date-filter-interval' => '-1y',
         'cache-ttl' => '1d',
+        'profile-form-id' => 1
     ],
 
     'translations' => [

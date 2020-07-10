@@ -21,20 +21,12 @@ class CreateFiltersTable extends Migration
             $table->integer('zorder', false, true)->default(0);
             $table->integer('flags', false, true)->default(0);
             $table->json('data')->nullable();
-            $table->json('translations')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
             $table->unique(['deleted_at', 'type', 'name']);
             $table->index(['type', 'name']);
             $table->foreign('author_id')->references('id')->on('users');
-        });
-        Schema::create('filter_domain', function(Blueprint $table) {
-            $table->bigInteger('filter_id', false, true);
-            $table->bigInteger('domain_id', false, true);
-
-            $table->foreign('domain_id')->references('id')->on('domains');
-            $table->foreign('filter_id')->references('id')->on('filters');
         });
     }
 
@@ -45,7 +37,6 @@ class CreateFiltersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('filter_domain');
         Schema::dropIfExists('filters');
     }
 }

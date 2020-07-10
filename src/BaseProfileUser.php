@@ -4,10 +4,12 @@ namespace Larapress\Profiles;
 
 use Illuminate\Support\Facades\Cache;
 use Larapress\CRUD\BaseFlags;
+use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\Models\Role;
 use Larapress\Profiles\Flags\UserDomainFlags;
 use Larapress\Profiles\Models\Domain;
 use Larapress\Profiles\Models\EmailAddress;
+use Larapress\Profiles\Models\FormEntry;
 use Larapress\Profiles\Models\PhoneNumber;
 
 /**
@@ -106,6 +108,48 @@ trait BaseProfileUser
     }
 
     /**
+     * @return Domain[]
+     */
+    public function getDomains()
+    {
+        if (is_null($this->cachedDomains)) {
+            $this->cachedDomains = Helpers::getCachedValue(
+                'larapress.cached.user.'.$this->id.'.domains',
+                function () {
+                    return $this->domains()->get();
+                },
+                ['user:'.$this->id, 'domains'],
+                null
+            );
+        }
+
+        return $this->cachedDomains;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function getProfileAttribute() {
+        return Helpers::getCachedValue(
+            'larapress.users.'.$this->id.'.profile',
+            function () {
+                return $this->form_entries()->where('form_id', config('larapress.profiles.defaults.profile-form-id'))->first();
+            },
+            ['user:'.$this->id, 'forms'],
+            null
+        );
+    }
+
+    public function profile() {
+        return $this->hasOne(
+            FormEntry::class,
+            'user_id'
+        )->where('form_id', config('larapress.profiles.defaults.profile-form-id'));
+    }
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function roles()
@@ -128,30 +172,8 @@ trait BaseProfileUser
             'user_domain',
             'user_id',
             'domain_id'
-        );
+        )->withPivot('flags');
     }
-
-    /**
-     * @return Domain[]
-     */
-    public function getDomains()
-    {
-        if (is_null($this->cachedDomains)) {
-            $this->cachedDomains = Cache::get('larapress.cached.user.'.$this->id.'.domains', null);
-            if (is_null($this->cachedDomains)) {
-                $this->cachedDomains = $this->domains()->get();
-                Cache::put(
-                    'larapress.cached.user.'.$this->id.'.domains',
-                    $this->cachedDomains,
-                    0
-                );
-            }
-        }
-
-        return $this->cachedDomains;
-    }
-
-
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -182,5 +204,15 @@ trait BaseProfileUser
     public function forgetDomainsCache()
     {
         Cache::forget('larapress.cached.user.'.$this->id.'.domains');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function form_entries() {
+        return $this->hasMany(
+            FormEntry::class,
+            'user_id'
+        );
     }
 }

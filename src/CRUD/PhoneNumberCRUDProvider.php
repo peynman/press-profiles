@@ -21,6 +21,7 @@ class PhoneNumberCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         self::CREATE,
         self::EDIT,
         self::DELETE,
+        self::REPORTS,
     ];
     public $model = PhoneNumber::class;
     public $createValidations = [
@@ -55,7 +56,7 @@ class PhoneNumberCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'user',
         'domain'
     ];
-    public $excludeFromUpdate = [];
+    public $excludeIfNull = [];
     public $searchColumns = [
         'number'
     ];

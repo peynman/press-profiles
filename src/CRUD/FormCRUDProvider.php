@@ -22,6 +22,7 @@ class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         self::CREATE,
         self::EDIT,
         self::DELETE,
+        self::REPORTS,
     ];
     public $model = Form::class;
     public $createValidations = [
@@ -53,7 +54,7 @@ class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     public $defaultShowRelations = [
 
     ];
-    public $excludeFromUpdate = [
+    public $excludeIfNull = [
     ];
     public $searchColumns = [
         'name',
@@ -73,6 +74,19 @@ class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     public function getUpdateRules(Request $request) {
         $this->updateValidations['name'] .= ',' . $request->route('id');
         return $this->updateValidations;
+    }
+
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $args
+     * @return void
+     */
+    public function onBeforeCreate( $args )
+    {
+        $args['author_id'] = Auth::user()->id;
+        return $args;
     }
 
     /**

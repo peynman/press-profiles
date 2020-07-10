@@ -9,6 +9,8 @@ use Larapress\CRUD\Base\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\FormEntry;
+use Larapress\Profiles\Services\FormEntryUpdateReport;
+use Larapress\Reports\Services\IReportsService;
 
 class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 {
@@ -20,6 +22,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         self::CREATE,
         self::EDIT,
         self::DELETE,
+        self::REPORTS,
     ];
     public $model = FormEntry::class;
     public $createValidations = [
@@ -29,6 +32,10 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     public $autoSyncRelations = [
     ];
     public $validSortColumns = [
+        'id',
+        'user_id',
+        'domain_id',
+        'form_id',
     ];
     public $validFilters = [
     ];
@@ -42,7 +49,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'form',
         'domain'
     ];
-    public $excludeFromUpdate = [
+    public $excludeIfNull = [
     ];
     public $searchColumns = [
     ];
@@ -53,6 +60,18 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'domain' => 'equals:domain_id',
         'user_id' => 'equals:user_id',
     ];
+
+    /**
+     *
+     */
+    public function getReportSources()
+    {
+        /** @var IReportsService */
+        $service = app(IReportsService::class);
+        return [
+            new FormEntryUpdateReport($service),
+        ];
+    }
 
     /**
      * @param FormEntry $object

@@ -12,7 +12,7 @@ class UserController extends BaseCRUDController
         parent::registerCrudRoutes(
             config('larapress.profiles.routes.users.name'),
             self::class,
-            UserCRUDProvider::class
+            config('larapress.crud.user.crud-provider')
         );
     }
 }

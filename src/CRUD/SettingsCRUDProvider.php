@@ -41,7 +41,7 @@ class SettingsCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     public $validRelations = ['user', 'domain'];
     public $validFilters = [];
     public $defaultShowRelations = ['user', 'domain'];
-    public $excludeFromUpdate = [];
+    public $excludeIfNull = [];
     public $searchColumns = ['val', 'key'];
     public $filterDefaults = [
         'sub_domain' => null,

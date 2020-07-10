@@ -33,7 +33,7 @@ class ActivityLogCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     public $validRelations = ['user', 'domain'];
     public $validFilters = [];
     public $defaultShowRelations = ['user', 'domain'];
-    public $excludeFromUpdate = [];
+    public $excludeIfNull = [];
     public $autoSyncRelations = [];
     public $searchColumns = [
         'equals:id',

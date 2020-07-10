@@ -25,46 +25,35 @@ class FilterCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     ];
     public $model = Filter::class;
     public $createValidations = [
-        'title.default' => 'required|string|max:190',
-        'title.translations.*' => 'nullable|string|max:190',
+        'data.title' => 'required|string|max:190',
         'name' => 'required|string|max:190',
         'type' => 'required|string|max:190',
-        'data' => 'nullable|json',
-        'domains' => 'nullable|db_object_ids:domains,id,id',
+        'zorder' => 'required|numeric',
     ];
     public $updateValidations = [
-        'title.default' => 'required|string|max:190',
-        'title.translations.*' => 'nullable|string|max:190',
+        'data.title' => 'required|string|max:190',
         'name' => 'required|string|max:190',
         'type' => 'required|string|max:190',
-        'data' => 'nullable|json',
-        'domains' => 'nullable|db_object_ids:domains,id,id',
-    ];
-    public $translations = [
-        'title'
+        'zorder' => 'required|numeric',
     ];
     public $validSortColumns = [
         'id',
         'name',
         'type',
-        'title',
         'author_id',
         'created_at',
         'updated_at',
     ];
     public $validRelations = [
         'author',
-        'domains',
     ];
     public $defaultShowRelations = [
         'author',
-        'domains',
     ];
     public $searchColumns = [
         'id' => 'equals:id',
         'name',
         'type',
-        'translations',
     ];
 
     public function onBeforeCreate($args)
@@ -84,12 +73,10 @@ class FilterCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onBeforeQuery($query)
     {
-        /** @var ICRUDUser|IProfileUser $user */
+        /** @var ICRUDUser $user */
         $user = Auth::user();
-        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
-            $query->has('domains', function(Builder $q) use($user) {
-                $q->whereIn('id', $user->getAffiliateDomainIds());
-            });
+        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+            $query->where('author_id', $user->id);
         }
 
         return $query;
@@ -104,47 +91,10 @@ class FilterCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     {
         /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
-        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
-            $domainFilters = $object->domains;
-            foreach ($domainFilters as $domain) {
-                if (in_array($domain->id, $user->getAffiliateDomainIds())) {
-                    return true;
-                }
-            }
-
-            return false;
+        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+            return $user->id === $object->author_id;
         }
 
         return true;
-    }
-
-
-    /**
-     * @param Filter $object
-     * @param array  $input_data
-     *
-     * @return array|void
-     */
-    public function onAfterCreate($object, $input_data)
-    {
-        /** @var ICRUDUser|IProfileUser $user */
-        $user = Auth::user();
-
-        $object->domains()->detach($user->getAffiliateDomainIds());
-        self::syncWithoutDetachingBelongsToManyRelation('domains', $object, $input_data);
-    }
-
-    /**
-     * @param Filter $object
-     * @param array $input_data
-     * @return array|void
-     */
-    public function onAfterUpdate($object, $input_data)
-    {
-        /** @var ICRUDUser|IProfileUser $user */
-        $user = Auth::user();
-
-        $object->domains()->detach($user->getAffiliateDomainIds());
-        self::syncWithoutDetachingBelongsToManyRelation('domains', $object, $input_data);
     }
 }

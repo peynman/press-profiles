@@ -1,6 +1,8 @@
 <?php
 
-use Larapress\Profiles\Repository\Filter;
+namespace Larapress\Profiles\Repository\Filter;
+
+use Larapress\Profiles\Models\Filter;
 
 interface IFilterRepository
 {
@@ -23,12 +25,12 @@ interface IFilterRepository
      *
      * @return Filter[]
      */
-    public function getVisibleByType($type);
+    public function getVisibleByType($user, $type);
 
     /**
      * @param string $type
      *
      * @return Filter
      */
-    public function randomVisibleByType($type);
+    public function randomVisibleByType($user, $type);
 }

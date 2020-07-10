@@ -17,6 +17,14 @@ interface IDomainRepository
     public function getVisibleDomains(IProfileUser $user, $columns = ['id', 'domain', 'data']);
 
     /**
+     * Undocumented function
+     *
+     * @param IProfileUser $user
+     * @return array
+     */
+    public function getDomainFlags(IProfileUser $user);
+
+    /**
      * @param Request|null $request
      *
      * @return Domain|null
