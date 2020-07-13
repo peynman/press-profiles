@@ -35,7 +35,7 @@ trait BaseProfileUser
     {
         $domains = $this->getDomains();
         foreach ($domains as $domain) {
-            if (BaseFlags::isActive($domain->flags, UserDomainFlags::REGISTRATION_DOMAIN)) {
+            if (BaseFlags::isActive($domain->pivot->flags, UserDomainFlags::REGISTRATION_DOMAIN)) {
                 return $domain;
             }
         }
@@ -58,7 +58,7 @@ trait BaseProfileUser
     {
         $domains = $this->getDomains();
         foreach ($domains as $domain) {
-            if (BaseFlags::isActive($domain->flags, UserDomainFlags::MEMBERSHIP_DOMAIN)) {
+            if (BaseFlags::isActive($domain->pivot->flags, UserDomainFlags::REGISTRATION_DOMAIN)) {
                 return $domain;
             }
         }
