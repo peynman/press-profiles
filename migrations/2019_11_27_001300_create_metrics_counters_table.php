@@ -20,7 +20,7 @@ class CreateMetricsCountersTable extends Migration
             $table->decimal('value', 12, 2);
             $table->timestamp('created_at');
 
-            $table->index(['created_at', 'key']);
+            $table->index(['created_at', 'domain_id', 'key']);
             $table->foreign('domain_id')->references('id')->on('domains');
         });
     }
