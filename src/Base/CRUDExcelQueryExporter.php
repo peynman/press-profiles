@@ -4,7 +4,7 @@ namespace Larapress\Profiles\Base;
 
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\Query\Builder;
-use Larapress\CRUD\Base\ICRUDProvider;
+use Larapress\CRUD\Services\ICRUDProvider;
 // use Maatwebsite\Excel\Concerns\Exportable;
 // use Maatwebsite\Excel\Concerns\FromQuery;
 // use Maatwebsite\Excel\Concerns\ShouldAutoSize;

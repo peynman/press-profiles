@@ -3,8 +3,8 @@
 namespace Larapress\Profiles\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Larapress\CRUD\Base\ICRUDExporter;
-use Larapress\CRUD\Base\ICRUDFilterStorage;
+use Larapress\CRUD\Services\ICRUDExporter;
+use Larapress\CRUD\Services\ICRUDFilterStorage;
 use Larapress\Profiles\Base\BaseCRUDFilterStorage;
 use Larapress\Profiles\Base\BaseCRUDQueryExport;
 use Larapress\Profiles\CRUD\ActivityLogCRUDProvider;

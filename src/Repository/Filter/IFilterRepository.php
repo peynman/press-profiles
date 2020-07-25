@@ -3,13 +3,14 @@
 namespace Larapress\Profiles\Repository\Filter;
 
 use Larapress\Profiles\Models\Filter;
+use Illuminate\Support\Collection;
 
 interface IFilterRepository
 {
     /**
      * @param string $type
      *
-     * @return Filter[]
+     * @return Collection
      */
     public function getByType($type);
 

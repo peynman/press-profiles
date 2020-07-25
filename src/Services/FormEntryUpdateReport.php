@@ -3,7 +3,7 @@
 namespace Larapress\Profiles\Services;
 
 use Illuminate\Support\Facades\Log;
-use Larapress\CRUD\Base\IReportSource;
+use Larapress\CRUD\Services\IReportSource;
 use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\Repository\IRoleRepository;
 use Larapress\Profiles\Services\FormEntryUpdateEvent;

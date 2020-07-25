@@ -13,14 +13,16 @@ use Larapress\Profiles\Repository\Domain\IDomainRepository;
 
 class FormEntryService implements IFormEntryService
 {
+
     /**
-     * Undocumented function
      *
      * @param Request $request
      * @param int $formId
+     * @param string|null $tags
+     * @param callable $onUpdate
      * @return FormEntry
      */
-    public function updateFormEntry(Request $request, $formId)
+    public function updateFormEntry(Request $request, $formId, $tags = null, $onUpdate = null)
     {
         /** @var Form */
         $form = Form::find($formId);
@@ -106,13 +108,20 @@ class FormEntryService implements IFormEntryService
             $entry = FormEntry::query()
                 ->where('user_id', $user->id)
                 ->where('form_id', $form->id)
-                ->where('domain_id', $domain->id)
-                ->first();
+                ->where('domain_id', $domain->id);
+            if (is_null($tags)) {
+                $entry->whereNull('tags');
+            } else {
+                $entry->where('tags', $tags);
+            }
+            $entry = $entry->first();
+
             if (is_null($entry)) {
                 $entry = FormEntry::create([
                     'user_id' => $user->id,
                     'form_id' => $form->id,
                     'domain_id' => $domain->id,
+                    'tags' => $tags,
                     'data' => [
                         'ip' => $request->ip(),
                         'agent' => $request->userAgent(),
@@ -121,12 +130,13 @@ class FormEntryService implements IFormEntryService
                     'flags' => 0,
                 ]);
             } else {
+                $values = is_null($onUpdate) ? $request->all($inputNames) : $onUpdate($request, $inputNames, $form, $entry);
                 $created = false;
                 $entry->update([
                     'data' => [
                         'ip' => $request->ip(),
                         'agent' => $request->userAgent(),
-                        'values' => $request->all($inputNames),
+                        'values' => $values,
                     ],
                 ]);
             }

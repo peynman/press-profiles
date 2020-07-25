@@ -4,9 +4,9 @@ namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
-use Larapress\CRUD\Base\BaseCRUDProvider;
-use Larapress\CRUD\Base\ICRUDProvider;
-use Larapress\CRUD\Base\IPermissionsMetadata;
+use Larapress\CRUD\Services\BaseCRUDProvider;
+use Larapress\CRUD\Services\ICRUDProvider;
+use Larapress\CRUD\Services\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\Flags\UserDomainFlags;
 use Larapress\Profiles\IProfileUser;

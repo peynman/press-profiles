@@ -3,9 +3,9 @@
 namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Support\Facades\Auth;
-use Larapress\CRUD\Base\BaseCRUDProvider;
-use Larapress\CRUD\Base\ICRUDProvider;
-use Larapress\CRUD\Base\IPermissionsMetadata;
+use Larapress\CRUD\Services\BaseCRUDProvider;
+use Larapress\CRUD\Services\ICRUDProvider;
+use Larapress\CRUD\Services\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\FormEntry;
@@ -19,25 +19,15 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     public $name_in_config = 'larapress.profiles.routes.form-entries.name';
     public $verbs = [
         self::VIEW,
-        self::CREATE,
-        self::EDIT,
         self::DELETE,
         self::REPORTS,
     ];
     public $model = FormEntry::class;
-    public $createValidations = [
-    ];
-    public $updateValidations = [
-    ];
-    public $autoSyncRelations = [
-    ];
     public $validSortColumns = [
         'id',
         'user_id',
         'domain_id',
         'form_id',
-    ];
-    public $validFilters = [
     ];
     public $validRelations = [
         'user',
@@ -49,16 +39,15 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'form',
         'domain'
     ];
-    public $excludeIfNull = [
-    ];
     public $searchColumns = [
-    ];
-    public $filterDefaults = [
+        'id',
+        'tags',
     ];
     public $filterFields = [
         'type' => 'equals:type',
-        'domain' => 'equals:domain_id',
+        'domain' => 'in:domain_id',
         'user_id' => 'equals:user_id',
+        'tags' => 'like:tags',
     ];
 
     /**

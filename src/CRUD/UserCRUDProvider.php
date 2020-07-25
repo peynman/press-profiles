@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Larapress\CRUD\Extend\Helpers;
-use Larapress\CRUD\Base\BaseCRUDProvider;
-use Larapress\CRUD\Base\ICRUDProvider;
-use Larapress\CRUD\Base\IPermissionsMetadata;
+use Larapress\CRUD\Services\BaseCRUDProvider;
+use Larapress\CRUD\Services\ICRUDProvider;
+use Larapress\CRUD\Services\IPermissionsMetadata;
 use Larapress\CRUD\Exceptions\AppException;
 use Larapress\CRUD\Exceptions\ValidationException;
 use Larapress\CRUD\ICRUDUser;
@@ -84,8 +84,6 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'has:phones,number',
     ];
     public $filterFields = [
-        'from' => 'after:created_at',
-        'to' => 'before:created_at',
         'roles' => 'has:roles',
         'phones' => 'has:phones:number',
         'domains' => 'has:domains',

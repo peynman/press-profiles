@@ -3,13 +3,14 @@
 namespace Larapress\Profiles\Repository\Filter;
 
 use Larapress\Profiles\Models\Filter;
+use Illuminate\Support\Collection;
 
 class FilterRepository implements IFilterRepository
 {
     /**
      * @param string $type
      *
-     * @return Filter[]
+     * @return Collection
      */
     public function getByType($type)
     {
@@ -30,7 +31,7 @@ class FilterRepository implements IFilterRepository
     /**
      * @param string $type
      *
-     * @return Filter[]
+     * @return Collection
      */
     public function getVisibleByType($user, $type)
     {

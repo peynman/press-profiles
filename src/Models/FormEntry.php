@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $user_id
  * @property int $domain_id
  * @property int $flags
+ * @property string $tags
  * @property array $data
  */
 class FormEntry extends Model
@@ -29,6 +30,7 @@ class FormEntry extends Model
         'form_id',
         'user_id',
         'domain_id',
+        'tags',
         'data',
         'flags',
     ];

@@ -5,7 +5,7 @@ namespace Larapress\Profiles\Validations;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Larapress\Core\Exceptions\AppException;
+use Larapress\CRUD\Exceptions\AppException;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\Domain;
 

@@ -19,9 +19,12 @@ class CreateFormEntriesTable extends Migration
             $table->bigInteger('user_id', false, true)->nullable();
             $table->bigInteger('domain_id', false, true)->nullable();
             $table->json('data');
+            $table->string('tags')->nullable();
             $table->integer('flags', false, true)->default(0);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->index(['deleted_at', 'form_id', 'domain_id', 'user_id', 'tags']);
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('form_id')->references('id')->on('forms');

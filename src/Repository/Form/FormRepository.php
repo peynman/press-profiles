@@ -5,7 +5,7 @@ namespace Larapress\Profiles\Repository\Form;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
-use Larapress\CRUD\Base\ICRUDService;
+use Larapress\CRUD\Services\ICRUDService;
 use Larapress\CRUD\Exceptions\AppException;
 use Larapress\Profiles\Models\Form;
 use Larapress\Profiles\Models\FormEntry;

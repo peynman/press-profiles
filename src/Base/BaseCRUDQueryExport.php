@@ -2,27 +2,30 @@
 
 namespace Larapress\Profiles\Base;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Larapress\CRUD\Base\ICRUDExporter;
-use Larapress\CRUD\Base\ICRUDProvider;
-// use Maatwebsite\Excel\Excel;
+use Larapress\CRUD\Services\ICRUDExporter;
+use Larapress\CRUD\Services\ICRUDProvider;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BaseCRUDQueryExport implements ICRUDExporter
 {
     public function getResponseForQueryExport(Request $request, Builder $query, ICRUDProvider $provider)
     {
-        // $download = (new CRUDExcelQueryExporter($query, $provider));
-        // if (! is_null($request->get('format'))) {
-        //     switch ($request->get('format')) {
-        //         case 'html':
-        //             return $download->download('export-'.Carbon::now()->timestamp.'.html', Excel::HTML);
-        //         case 'pdf':
-        //             return $download->download('export-'.Carbon::now()->timestamp.'.pdf', Excel::MPDF);
-        //     }
-        // }
-
-        // return $download->download('export-'.Carbon::now()->timestamp.'.xlsx');
+        return new StreamedResponse(function () use ($query, $provider) {
+            $FH = fopen('php://output', 'w');
+            $query->chunk(500, function ($items) use ($FH, $provider) {
+                foreach ($items as $row) {
+                    fputcsv($FH, $provider->getExportArray($row));
+                }
+            });
+            fclose($FH);
+        }, 200, [
+            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
+            'Content-type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename=galleries.csv',
+            'Expires'             => '0',
+            'Pragma'              => 'public'
+        ]);
     }
 }
