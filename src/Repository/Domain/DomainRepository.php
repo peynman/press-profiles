@@ -4,7 +4,7 @@ namespace Larapress\Profiles\Repository\Domain;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Larapress\CRUD\ServicesFlags;
+use Larapress\CRUD\BaseFlags;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\CRUD\DomainCRUDProvider;
 use Larapress\Profiles\Flags\UserDomainFlags;
