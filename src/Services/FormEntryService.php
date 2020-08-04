@@ -19,10 +19,10 @@ class FormEntryService implements IFormEntryService
      * @param Request $request
      * @param int $formId
      * @param string|null $tags
-     * @param callable $onUpdate
+     * @param callable $onProvide
      * @return FormEntry
      */
-    public function updateFormEntry(Request $request, $formId, $tags = null, $onUpdate = null)
+    public function updateFormEntry(Request $request, $formId, $tags = null, $onProvide = null)
     {
         /** @var Form */
         $form = Form::find($formId);
@@ -100,7 +100,7 @@ class FormEntryService implements IFormEntryService
                 'data' => [
                     'ip' => $request->ip(),
                     'agent' => $request->userAgent(),
-                    'values' => $request->all($inputNames),
+                    'values' => is_null($onProvide) ? $request->all($inputNames) : $onProvide($request, $inputNames, $form, $entry)
                 ],
                 'flags' => 0,
             ]);
@@ -125,12 +125,12 @@ class FormEntryService implements IFormEntryService
                     'data' => [
                         'ip' => $request->ip(),
                         'agent' => $request->userAgent(),
-                        'values' => $request->all($inputNames),
+                        'values' => is_null($onProvide) ? $request->all($inputNames) : $onProvide($request, $inputNames, $form, $entry)
                     ],
                     'flags' => 0,
                 ]);
             } else {
-                $values = is_null($onUpdate) ? $request->all($inputNames) : $onUpdate($request, $inputNames, $form, $entry);
+                $values = is_null($onProvide) ? $request->all($inputNames) : $onProvide($request, $inputNames, $form, $entry);
                 $created = false;
                 $entry->update([
                     'data' => [
