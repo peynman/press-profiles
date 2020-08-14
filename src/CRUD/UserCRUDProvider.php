@@ -65,7 +65,8 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'domains',
         'phones',
         'emails',
-        'profile'
+        'profile',
+        'supportUserProfile',
     ];
     public $validSortColumns = [
         'id',
@@ -321,8 +322,11 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         $user = Auth::user();
 
         if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
-            $query->whereHas('domains', function (Builder $q) use ($user) {
+            $query->orWhereHas('domains', function (Builder $q) use ($user) {
                 $q->whereIn('id', $user->getAffiliateDomainIds());
+            });
+            $query->orWhereHas('form_entries', function($q) use($user) {
+                $q->where('tags', 'support-group-'.$user->id);
             });
         }
 

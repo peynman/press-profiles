@@ -13,7 +13,6 @@ use Larapress\Profiles\Repository\Domain\IDomainRepository;
 
 class FormEntryService implements IFormEntryService
 {
-
     /**
      *
      * @param Request $request
@@ -30,6 +29,124 @@ class FormEntryService implements IFormEntryService
         if (is_null($form)) {
             throw new AppException(AppException::ERR_OBJECT_NOT_FOUND);
         }
+
+        $inputNames = $this->validateFormEntryRequestAndGetInputs($request, $form);
+
+        /** @var IDomainRepository */
+        $domainRepo = app(IDomainRepository::class);
+        $domain = $domainRepo->getRequestDomain($request);
+
+        $user = Auth::user();
+        $entry = null;
+        $created = true;
+
+        $entry = $this->resolveFormEntryRequest(
+            $request,
+            $user,
+            $form,
+            $tags,
+            true,
+            $domain,
+            function () use ($user, $form, $domain, $request, $onProvide, $inputNames, $tags) {
+                return FormEntry::create([
+                    'user_id' => is_null($user) ? null : $user->id,
+                    'form_id' => $form->id,
+                    'domain_id' => $domain->id,
+                    'tags' => $tags,
+                    'data' => [
+                        'ip' => $request->ip(),
+                        'agent' => $request->userAgent(),
+                        'values' => is_null($onProvide) ? $request->all($inputNames) : $onProvide($request, $inputNames, $form, null)
+                    ],
+                    'flags' => 0,
+                ]);
+            },
+            function ($entry) use($form, $request, $onProvide, $inputNames, $tags, &$created) {
+                $values = is_null($onProvide) ? $request->all($inputNames) : $onProvide($request, $inputNames, $form, $entry);
+                $created = false;
+                $entry->update([
+                    'tags' => $tags,
+                    'data' => [
+                        'ip' => $request->ip(),
+                        'agent' => $request->userAgent(),
+                        'values' => $values,
+                    ],
+                ]);
+            }
+        );
+        FormEntryUpdateEvent::dispatch($user, $domain, $entry, $form, $created, $request->ip(), time());
+
+        return $entry;
+    }
+
+
+
+    public function updateUserFormEntryTag(Request $request, $user, $formId, $tags, $onProvide = null)
+    {
+        /** @var Form */
+        $form = Form::find($formId);
+
+        if (is_null($form)) {
+            throw new AppException(AppException::ERR_OBJECT_NOT_FOUND);
+        }
+
+        $inputNames = $this->validateFormEntryRequestAndGetInputs($request, $form);
+
+        /** @var IDomainRepository */
+        $domainRepo = app(IDomainRepository::class);
+        $domain = $domainRepo->getRequestDomain($request);
+
+        $entry = null;
+        $created = true;
+
+        $entry = $this->resolveFormEntryRequest(
+            $request,
+            $user,
+            $form,
+            $tags,
+            false,
+            $domain,
+            function () use ($user, $form, $domain, $request, $onProvide, $inputNames, $tags) {
+                return FormEntry::create([
+                    'user_id' => is_null($user) ? null : $user->id,
+                    'form_id' => $form->id,
+                    'domain_id' => $domain->id,
+                    'tags' => $tags,
+                    'data' => [
+                        'ip' => $request->ip(),
+                        'agent' => $request->userAgent(),
+                        'values' => is_null($onProvide) ? $request->all($inputNames) : $onProvide($request, $inputNames, $form, null)
+                    ],
+                    'flags' => 0,
+                ]);
+            },
+            function ($entry) use($form, $request, $onProvide, $inputNames, $tags, &$created) {
+                $values = is_null($onProvide) ? $request->all($inputNames) : $onProvide($request, $inputNames, $form, $entry);
+                $created = false;
+                $entry->update([
+                    'tags' => $tags,
+                    'data' => [
+                        'ip' => $request->ip(),
+                        'agent' => $request->userAgent(),
+                        'values' => $values,
+                    ],
+                ]);
+            }
+        );
+        FormEntryUpdateEvent::dispatch($user, $domain, $entry, $form, $created, $request->ip(), time());
+
+        return $entry;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param Request $request
+     * @param Form $form
+     * @return void
+     */
+    protected function validateFormEntryRequestAndGetInputs(Request $request, Form $form)
+    {
 
         $rules = [];
         $inputNames = [];
@@ -84,66 +201,46 @@ class FormEntryService implements IFormEntryService
             throw new ValidationException($validate);
         }
 
-        /** @var IDomainRepository */
-        $domainRepo = app(IDomainRepository::class);
-        $domain = $domainRepo->getRequestDomain($request);
+        return $inputNames;
+    }
 
-        $user = Auth::user();
-        $entry = null;
-        $created = true;
-
+    /**
+     * Undocumented function
+     *
+     * @param [type] $request
+     * @param [type] $user
+     * @param [type] $form
+     * @param [type] $tags
+     * @param [type] $checkTags
+     * @param [type] $domain
+     * @param [type] $onCreateEntry
+     * @param [type] $onUpdateEntry
+     * @return void
+     */
+    protected function resolveFormEntryRequest($request, $user, $form, $tags, $checkTags, $domain, $onCreateEntry, $onUpdateEntry)
+    {
         if (is_null($user)) {
             // handler open (no user) forms
-            $entry = FormEntry::create([
-                'form_id' => $form->id,
-                'domain_id' => $domain->id,
-                'data' => [
-                    'ip' => $request->ip(),
-                    'agent' => $request->userAgent(),
-                    'values' => is_null($onProvide) ? $request->all($inputNames) : $onProvide($request, $inputNames, $form, $entry)
-                ],
-                'flags' => 0,
-            ]);
+            return $onCreateEntry();
         } else {
             $entry = FormEntry::query()
                 ->where('user_id', $user->id)
                 ->where('form_id', $form->id)
                 ->where('domain_id', $domain->id);
-            if (is_null($tags)) {
-                $entry->whereNull('tags');
-            } else {
-                $entry->where('tags', $tags);
+            if ($checkTags) {
+                if (is_null($tags)) {
+                    $entry->whereNull('tags');
+                } else {
+                    $entry->where('tags', $tags);
+                }
             }
             $entry = $entry->first();
 
             if (is_null($entry)) {
-                $entry = FormEntry::create([
-                    'user_id' => $user->id,
-                    'form_id' => $form->id,
-                    'domain_id' => $domain->id,
-                    'tags' => $tags,
-                    'data' => [
-                        'ip' => $request->ip(),
-                        'agent' => $request->userAgent(),
-                        'values' => is_null($onProvide) ? $request->all($inputNames) : $onProvide($request, $inputNames, $form, $entry)
-                    ],
-                    'flags' => 0,
-                ]);
+                return $onCreateEntry();
             } else {
-                $values = is_null($onProvide) ? $request->all($inputNames) : $onProvide($request, $inputNames, $form, $entry);
-                $created = false;
-                $entry->update([
-                    'data' => [
-                        'ip' => $request->ip(),
-                        'agent' => $request->userAgent(),
-                        'values' => $values,
-                    ],
-                ]);
+                return $onUpdateEntry($entry);
             }
         }
-
-        FormEntryUpdateEvent::dispatch($user, $domain, $entry, $form, $created, $request->ip(), time());
-
-        return $entry;
     }
 }

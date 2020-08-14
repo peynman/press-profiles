@@ -56,9 +56,10 @@ class FormEntryUpdateReport implements IReportSource
     {
         /** @var IRoleRepository */
         $roleRepo = app(IRoleRepository::class);
+        $highRole = is_null($event->user) ? null : $roleRepo->getUserHighestRole($event->user);
         $tags = [
             'domain' => $event->domain->id,
-            'role' => is_null($event->user) ? 'guest' : $roleRepo->getUserHighestRole($event->user)->name,
+            'role' => is_null($highRole) ? 'guest' : $highRole->name,
             'form' => $event->form->id,
             'created' => $event->created,
         ];

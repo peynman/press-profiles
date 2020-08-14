@@ -19,4 +19,18 @@ interface IFormEntryService {
      * @return FormEntry
      */
     public function updateFormEntry(Request $request, $formId, $tags = null, $onProvide = null);
+
+
+    /**
+     * add new form entry
+     *  check on form_id and user_id only and update entries tag
+     *
+     * @param Request $request
+     * @param mixed $user
+     * @param int $formId
+     * @param string|null $tags
+     * @param callable $onProvide
+     * @return FormEntry
+     */
+    public function updateUserFormEntryTag(Request $request, $user, $formId, $tags, $onProvide = null);
 }

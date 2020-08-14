@@ -15,8 +15,6 @@ use Larapress\CRUD\ICRUDUser;
  * @property int            $user_id
  * @property int            $domain_id
  * @property string         $number
- * @property string         $type
- * @property string         $desc
  * @property int            $flags
  * @property ICRUDUser      $user
  * @property Domain         $domain
@@ -37,9 +35,7 @@ class PhoneNumber extends Model
         'user_id',
         'domain_id',
         'number',
-        'type',
         'flags',
-        'desc',
     ];
 
     /**

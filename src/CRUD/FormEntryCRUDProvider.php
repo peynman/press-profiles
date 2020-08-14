@@ -88,7 +88,10 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         $user = Auth::user();
 
         if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
-            $query->whereIn('domain_id', $user->getAffiliateDomainIds());
+            $query->orWhereIn('domain_id', $user->getAffiliateDomainIds());
+            $query->orWhereHas('user.form_entries', function($q) use($user) {
+                $q->where('tags', 'support-group-'.$user->id);
+            });
         }
 
         return $query;

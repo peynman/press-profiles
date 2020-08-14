@@ -135,6 +135,13 @@ trait BaseProfileUser
         return Helpers::getCachedValue(
             'larapress.users.'.$this->id.'.profile',
             function () {
+                $profileRoles = self::getProfilesRoleMap();
+                foreach ($profileRoles as $role => $formId) {
+                    if ($this->hasRole($role)) {
+                        return $this->form_entries()->where('form_id', $formId)->first();
+                    }
+                }
+
                 return $this->form_entries()->where('form_id', config('larapress.profiles.defaults.profile-form-id'))->first();
             },
             ['user:'.$this->id, 'forms'],
@@ -142,11 +149,35 @@ trait BaseProfileUser
         );
     }
 
-    public function profile() {
-        return $this->hasOne(
-            FormEntry::class,
-            'user_id'
-        )->where('form_id', config('larapress.profiles.defaults.profile-form-id'));
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function getSupportUserProfileAttribute() {
+        return Helpers::getCachedValue(
+            'larapress.users.'.$this->id.'.support',
+            function () {
+                $entry = $this->form_entries()
+                                ->where('form_id', config('larapress.profiles.defaults.support-registration-form-id'))
+                                ->first();
+                if (!is_null($entry)) {
+                    $tag = explode('-', $entry->tags)[2];
+                    $profile = FormEntry::where('user_id', $tag)
+                                ->where('form_id', config('larapress.profiles.defaults.profile-support-form-id'))
+                                ->first();
+                    if (isset($profile->data['values']['firstname']) && isset($profile->data['values']['lastname'])) {
+                        $data = $profile->data;
+                        $data['values']['fullname'] = $profile->data['values']['firstname'].' '.$profile->data['values']['lastname'];
+                        $profile->data = $data;
+                    }
+                    return $profile;
+                }
+                return null;
+            },
+            ['user:'.$this->id, 'forms', 'support'],
+            null
+        );
     }
 
     /**
@@ -214,5 +245,16 @@ trait BaseProfileUser
             FormEntry::class,
             'user_id'
         );
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public static function getProfilesRoleMap() {
+        return [
+            'support' => config('larapress.profiles.defaults.profile-support-form-id')
+        ];
     }
 }
