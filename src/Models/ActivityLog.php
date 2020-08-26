@@ -29,7 +29,6 @@ class ActivityLog extends Model
         'type',
         'subject',
         'data',
-        'captured_at',
         'description',
     ];
 

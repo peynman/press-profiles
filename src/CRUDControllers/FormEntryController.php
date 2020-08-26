@@ -3,6 +3,7 @@
 namespace Larapress\Profiles\CRUDControllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Larapress\CRUD\CRUDControllers\BaseCRUDController;
 use Larapress\Profiles\CRUD\FormEntryCRUDProvider;
@@ -33,6 +34,6 @@ class FormEntryController extends BaseCRUDController
      * @return Illuminate\Http\Response
      */
     public function updateEntry(IFormEntryService $serivce, Request $request, $formId) {
-        return $serivce->updateFormEntry($request, $formId);
+        return $serivce->updateFormEntry($request, Auth::user(), $formId);
     }
 }

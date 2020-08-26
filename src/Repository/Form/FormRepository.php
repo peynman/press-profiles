@@ -18,6 +18,16 @@ class FormRepository implements IFormRepository
      * Undocumented function
      *
      * @param [type] $user
+     * @return Form[]
+     */
+    public function getFillableForms($user) {
+        return Form::select('id', 'name', 'data')->get();
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $user
      * @param [type] $formId
      * @return Form
      */

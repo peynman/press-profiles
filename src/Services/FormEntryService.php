@@ -4,24 +4,27 @@ namespace Larapress\Profiles\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 use Larapress\CRUD\Exceptions\AppException;
 use Larapress\CRUD\Exceptions\ValidationException;
 use Larapress\Profiles\Models\Form;
 use Larapress\Profiles\Models\FormEntry;
 use Larapress\Profiles\Repository\Domain\IDomainRepository;
+use Larapress\Profiles\IProfileUser;
+use Larapress\CRUD\ICRUDUser;
 
 class FormEntryService implements IFormEntryService
 {
     /**
-     *
-     * @param Request $request
+     * @param Request|null $request
      * @param int $formId
+     * @param IProfileUser $user
      * @param string|null $tags
      * @param callable $onProvide
      * @return FormEntry
      */
-    public function updateFormEntry(Request $request, $formId, $tags = null, $onProvide = null)
+    public function updateFormEntry($request, $user, $formId, $tags = null, $onProvide = null)
     {
         /** @var Form */
         $form = Form::find($formId);
@@ -30,58 +33,109 @@ class FormEntryService implements IFormEntryService
             throw new AppException(AppException::ERR_OBJECT_NOT_FOUND);
         }
 
-        $inputNames = $this->validateFormEntryRequestAndGetInputs($request, $form);
+        $inputNames = !is_null($request) ? $this->validateFormEntryRequestAndGetInputs($request, $form) : [];
 
-        /** @var IDomainRepository */
-        $domainRepo = app(IDomainRepository::class);
-        $domain = $domainRepo->getRequestDomain($request);
-
-        $user = Auth::user();
+        if (is_null($request)) {
+            $domain = $user->getRegistrationDomain();
+        } else {
+            /** @var IDomainRepository */
+            $domainRepo = app(IDomainRepository::class);
+            $domain = $domainRepo->getRequestDomain($request);
+        }
         $entry = null;
         $created = true;
 
         $entry = $this->resolveFormEntryRequest(
-            $request,
             $user,
             $form,
             $tags,
             true,
             $domain,
             function () use ($user, $form, $domain, $request, $onProvide, $inputNames, $tags) {
+                if (is_null($onProvide)) {
+                    if (is_null($request)) {
+                        $values = [];
+                    } else {
+                        $values = $request->all($inputNames);
+                    }
+                } else {
+                    $values = $onProvide($request, $inputNames, $form, null);
+                }
                 return FormEntry::create([
-                    'user_id' => is_null($user) ? null : $user->id,
+                    'user_id' => $user->id,
                     'form_id' => $form->id,
                     'domain_id' => $domain->id,
                     'tags' => $tags,
                     'data' => [
-                        'ip' => $request->ip(),
-                        'agent' => $request->userAgent(),
-                        'values' => is_null($onProvide) ? $request->all($inputNames) : $onProvide($request, $inputNames, $form, null)
+                        'ip' => !is_null($request) ? $request->ip() : null,
+                        'agent' => !is_null($request) ? $request->userAgent() : null,
+                        'values' => $values,
                     ],
                     'flags' => 0,
                 ]);
             },
-            function ($entry) use($form, $request, $onProvide, $inputNames, $tags, &$created) {
-                $values = is_null($onProvide) ? $request->all($inputNames) : $onProvide($request, $inputNames, $form, $entry);
+            function ($entry) use ($form, $request, $onProvide, $inputNames, $tags, &$created) {
+                if (is_null($onProvide)) {
+                    if (is_null($request)) {
+                        $values = [];
+                    } else {
+                        $values = $request->all($inputNames);
+                    }
+                } else {
+                    $values = $onProvide($request, $inputNames, $form, null);
+                }
                 $created = false;
                 $entry->update([
                     'tags' => $tags,
                     'data' => [
-                        'ip' => $request->ip(),
-                        'agent' => $request->userAgent(),
+                        'ip' => !is_null($request) ? $request->ip() : null,
+                        'agent' => !is_null($request) ? $request->userAgent() : null,
                         'values' => $values,
                     ],
                 ]);
+                return $entry;
             }
         );
-        FormEntryUpdateEvent::dispatch($user, $domain, $entry, $form, $created, $request->ip(), time());
+        FormEntryUpdateEvent::dispatch(
+            $user,
+            $domain,
+            $entry,
+            $form,
+            $created,
+            !is_null($request) ? $request->ip() : 'local',
+            time()
+        );
+        Cache::tags(['user.form.' . $form->id . '.entry:' . $user->id])->flush();
+
+        // if user is support and this is a support form,
+        // clear cached support form for all users
+        if (
+            $user->hasRole(config('larapress.ecommerce.lms.support_role_id')) &&
+            $form->id == config('larapress.profiles.defaults.profile-support-form-id')
+        ) {
+            FormEntry::select('user_id')
+                ->where('tags', 'support-group-' . $user->id)
+                ->chunk(100, function ($ids) {
+                    Cache::tags(array_map(function ($i) {
+                        return 'user.support:' . $i;
+                    }, $ids))->flush();
+                });
+        }
 
         return $entry;
     }
 
-
-
-    public function updateUserFormEntryTag(Request $request, $user, $formId, $tags, $onProvide = null)
+    /**
+     * Undocumented function
+     *
+     * @param Request $request
+     * @param IProfileUser $user
+     * @param int $formId
+     * @param string $tags
+     * @param callable $onProvide
+     * @return void
+     */
+    public function updateUserFormEntryTag($request, $user, $formId, $tags, $onProvide = null)
     {
         /** @var Form */
         $form = Form::find($formId);
@@ -90,50 +144,95 @@ class FormEntryService implements IFormEntryService
             throw new AppException(AppException::ERR_OBJECT_NOT_FOUND);
         }
 
-        $inputNames = $this->validateFormEntryRequestAndGetInputs($request, $form);
+        $inputNames = !is_null($request) ? $this->validateFormEntryRequestAndGetInputs($request, $form) : [];
 
-        /** @var IDomainRepository */
-        $domainRepo = app(IDomainRepository::class);
-        $domain = $domainRepo->getRequestDomain($request);
+        if (is_null($request)) {
+            $domain = $user->getRegistrationDomain();
+        } else {
+            /** @var IDomainRepository */
+            $domainRepo = app(IDomainRepository::class);
+            $domain = $domainRepo->getRequestDomain($request);
+        }
 
         $entry = null;
         $created = true;
 
         $entry = $this->resolveFormEntryRequest(
-            $request,
             $user,
             $form,
             $tags,
             false,
             $domain,
             function () use ($user, $form, $domain, $request, $onProvide, $inputNames, $tags) {
+                if (is_null($onProvide)) {
+                    if (is_null($request)) {
+                        $values = [];
+                    } else {
+                        $values = $request->all($inputNames);
+                    }
+                } else {
+                    $values = $onProvide($request, $inputNames, $form, null);
+                }
                 return FormEntry::create([
-                    'user_id' => is_null($user) ? null : $user->id,
+                    'user_id' => $user->id,
                     'form_id' => $form->id,
                     'domain_id' => $domain->id,
                     'tags' => $tags,
                     'data' => [
-                        'ip' => $request->ip(),
-                        'agent' => $request->userAgent(),
-                        'values' => is_null($onProvide) ? $request->all($inputNames) : $onProvide($request, $inputNames, $form, null)
+                        'ip' => !is_null($request) ? $request->ip() : null,
+                        'agent' => !is_null($request) ? $request->userAgent() : null,
+                        'values' => $values
                     ],
                     'flags' => 0,
                 ]);
             },
-            function ($entry) use($form, $request, $onProvide, $inputNames, $tags, &$created) {
-                $values = is_null($onProvide) ? $request->all($inputNames) : $onProvide($request, $inputNames, $form, $entry);
+            function ($entry) use ($form, $request, $onProvide, $inputNames, $tags, &$created) {
+                if (is_null($onProvide)) {
+                    if (is_null($request)) {
+                        $values = [];
+                    } else {
+                        $values = $request->all($inputNames);
+                    }
+                } else {
+                    $values = $onProvide($request, $inputNames, $form, null);
+                }
                 $created = false;
                 $entry->update([
                     'tags' => $tags,
                     'data' => [
-                        'ip' => $request->ip(),
-                        'agent' => $request->userAgent(),
-                        'values' => $values,
+                        'ip' => !is_null($request) ? $request->ip() : null,
+                        'agent' => !is_null($request) ? $request->userAgent() : null,
+                        'values' => $values
                     ],
                 ]);
+                return $entry;
             }
         );
-        FormEntryUpdateEvent::dispatch($user, $domain, $entry, $form, $created, $request->ip(), time());
+        FormEntryUpdateEvent::dispatch(
+            $user,
+            $domain,
+            $entry,
+            $form,
+            $created,
+            !is_null($request) ? $request->ip() : 'local',
+            time()
+        );
+        Cache::tags(['user.form.' . $form->id . '.entry:' . $user->id])->flush();
+
+        // if user is support and this is a support form,
+        // clear cached support form for all users
+        if (
+            $user->hasRole(config('larapress.ecommerce.lms.support_role_id')) &&
+            $form->id == config('larapress.profiles.defaults.profile-support-form-id')
+        ) {
+            FormEntry::select('user_id')
+                ->where('tags', 'support-group-' . $user->id)
+                ->chunk(1000, function ($ids) {
+                    Cache::tags(array_map(function ($i) {
+                        return 'user.support:' . $i;
+                    }, $ids))->flush();
+                });
+        }
 
         return $entry;
     }
@@ -147,7 +246,6 @@ class FormEntryService implements IFormEntryService
      */
     protected function validateFormEntryRequestAndGetInputs(Request $request, Form $form)
     {
-
         $rules = [];
         $inputNames = [];
         $feilds = isset($form->data['form']['schema']['fields']) ? $form->data['form']['schema']['fields'] : [];
@@ -217,7 +315,7 @@ class FormEntryService implements IFormEntryService
      * @param [type] $onUpdateEntry
      * @return void
      */
-    protected function resolveFormEntryRequest($request, $user, $form, $tags, $checkTags, $domain, $onCreateEntry, $onUpdateEntry)
+    protected function resolveFormEntryRequest($user, $form, $tags, $checkTags, $domain, $onCreateEntry, $onUpdateEntry)
     {
         if (is_null($user)) {
             // handler open (no user) forms

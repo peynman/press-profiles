@@ -7,6 +7,15 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 
 interface IFormRepository {
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $user
+     * @return Form[]
+     */
+    public function getFillableForms($user);
+
     /**
      * Undocumented function
      *

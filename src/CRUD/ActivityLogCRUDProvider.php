@@ -2,6 +2,7 @@
 
 namespace Larapress\Profiles\CRUD;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Larapress\Core\Exceptions\AppException;
 use Larapress\CRUD\Services\BaseCRUDProvider;
@@ -18,23 +19,16 @@ class ActivityLogCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     public $name_in_config = 'larapress.profiles.routes.activity-logs.name';
     public $verbs = [
         self::VIEW,
-        self::CREATE,
-        self::EDIT,
-        self::DELETE,
     ];
     public $model = ActivityLog::class;
-    public $data_keys = [
+    public $validSortColumns = [
+        'id',
+        'type',
+        'subject',
+        'created_at'
     ];
-    public $createValidations = [
-    ];
-    public $updateValidations = [
-    ];
-    public $validSortColumns = ['id',  'type', 'subject', 'captured_at'];
     public $validRelations = ['user', 'domain'];
-    public $validFilters = [];
     public $defaultShowRelations = ['user', 'domain'];
-    public $excludeIfNull = [];
-    public $autoSyncRelations = [];
     public $searchColumns = [
         'equals:id',
         'equals:type',
@@ -45,48 +39,36 @@ class ActivityLogCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'subject' => 'subject',
         'domain_id' => 'equals:domain_id',
     ];
-    public $filterDefaults = [
-        'type' => null,
-        'subject' => null,
-        'domain_id' => null,
-    ];
 
     /**
-     * @param $query
+     * @param Builder $query
      *
      * @return \Illuminate\Database\Query\Builder
      */
     public function onBeforeQuery($query)
     {
-        /** @var IProfileUser|ICRUDUser $user */
+        /** @var ICRUDUser $user */
         $user = Auth::user();
-
-        if ($user->hasRole(config('bet.master.role_name'))) {
-            $query->whereIn('domain_id', $user->getAffiliateDomainIds());
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+            $query->where('user_id', $user->id);
         }
 
         return $query;
     }
 
     /**
-     * @param $args
+     * @param Domain $object
      *
-     * @return array|void
-     * @throws AppException
+     * @return bool
      */
-    public function onBeforeCreate($args)
+    public function onBeforeAccess($object)
     {
-        throw new AppException(AppException::ERR_OBJ_ACCESS_DENIED);
-    }
+        /** @var ICRUDUser|IProfileUser $user */
+        $user = Auth::user();
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+            return in_array($object->domain_id, $user->getAffiliateDomainIds());
+        }
 
-    /**
-     * @param array $args
-     *
-     * @return array|void
-     * @throws AppException
-     */
-    public function onBeforeUpdate($args)
-    {
-        throw new AppException(AppException::ERR_OBJ_ACCESS_DENIED);
+        return true;
     }
 }

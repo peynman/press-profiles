@@ -190,12 +190,19 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
                 if (is_null($dbPhone)) {
                     // check for same number in this domain;
                     //   dont create a new phone if someone in the same domain has this phone
-                    $sameNumbers = PhoneNumber::query()
+                    $sameNumber = PhoneNumber::query()
                         ->where('number', $phone['number'])
                         ->where('domain_id', $domain->id)
-                        ->count();
-                    if ($sameNumbers > 0) {
-                        throw new AppException(AppException::ERR_NUMBER_ALREADY_EXISTS);
+                        ->first();
+                    if (!is_null($sameNumber)) {
+                        if (is_null($sameNumber->user_id)) {
+                            $sameNumber->update([
+                                'user_id' => $object->id,
+                                'flags' => isset($phone['flags']) && !is_null($phone['flags']) ? $phone['flags'] : 0,
+                            ]);
+                        } else {
+                            throw new AppException(AppException::ERR_NUMBER_ALREADY_EXISTS);
+                        }
                     } else {
                         $dbPhone = PhoneNumber::create([
                             'number' => $phone['number'],
@@ -206,7 +213,6 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
                     }
                 } else {
                     $dbPhone->update([
-                        'number' => $phone['number'],
                         'flags' => isset($phone['flags']) && !is_null($phone['flags']) ? $phone['flags'] : 0,
                     ]);
                 }

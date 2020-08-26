@@ -118,7 +118,7 @@ trait BaseProfileUser
                 function () {
                     return $this->domains()->get();
                 },
-                ['user:'.$this->id, 'domains'],
+                ['user.domains:'.$this->id],
                 null
             );
         }
@@ -135,47 +135,17 @@ trait BaseProfileUser
         return Helpers::getCachedValue(
             'larapress.users.'.$this->id.'.profile',
             function () {
+                // if this role has custom form-id for its profiles, use it.
                 $profileRoles = self::getProfilesRoleMap();
                 foreach ($profileRoles as $role => $formId) {
                     if ($this->hasRole($role)) {
                         return $this->form_entries()->where('form_id', $formId)->first();
                     }
                 }
-
+                // else use default form-id from config
                 return $this->form_entries()->where('form_id', config('larapress.profiles.defaults.profile-form-id'))->first();
             },
-            ['user:'.$this->id, 'forms'],
-            null
-        );
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return void
-     */
-    public function getSupportUserProfileAttribute() {
-        return Helpers::getCachedValue(
-            'larapress.users.'.$this->id.'.support',
-            function () {
-                $entry = $this->form_entries()
-                                ->where('form_id', config('larapress.profiles.defaults.support-registration-form-id'))
-                                ->first();
-                if (!is_null($entry)) {
-                    $tag = explode('-', $entry->tags)[2];
-                    $profile = FormEntry::where('user_id', $tag)
-                                ->where('form_id', config('larapress.profiles.defaults.profile-support-form-id'))
-                                ->first();
-                    if (isset($profile->data['values']['firstname']) && isset($profile->data['values']['lastname'])) {
-                        $data = $profile->data;
-                        $data['values']['fullname'] = $profile->data['values']['firstname'].' '.$profile->data['values']['lastname'];
-                        $profile->data = $data;
-                    }
-                    return $profile;
-                }
-                return null;
-            },
-            ['user:'.$this->id, 'forms', 'support'],
+            ['user.form.'.config('larapress.profiles.defaults.profile-form-id').'.entry:'.$this->id],
             null
         );
     }
@@ -234,7 +204,7 @@ trait BaseProfileUser
      */
     public function forgetDomainsCache()
     {
-        Cache::forget('larapress.cached.user.'.$this->id.'.domains');
+        Cache::tags(['user.domains:'.$this->id])->flush();
     }
 
     /**

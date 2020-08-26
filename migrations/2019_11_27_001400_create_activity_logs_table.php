@@ -21,12 +21,11 @@ class CreateActivityLogsTable extends Migration
             $table->string('subject');
             $table->text('description')->nullable();
             $table->json('data')->nullable();
-            $table->timestamp('captured_at');
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('domain_id')->references('id')->on('domains');
-            $table->index(['type', 'subject']);
+            $table->index(['created_at', 'domain_id', 'type', 'subject', 'user_id']);
         });
     }
 
