@@ -13,6 +13,8 @@ use Larapress\Profiles\Models\FormEntry;
 use Larapress\Profiles\Repository\Domain\IDomainRepository;
 use Larapress\Profiles\IProfileUser;
 use Larapress\CRUD\ICRUDUser;
+use Larapress\ECommerce\Models\WalletTransaction;
+use Larapress\ECommerce\Services\Banking\IBankingService;
 
 class FormEntryService implements IFormEntryService
 {
@@ -60,6 +62,21 @@ class FormEntryService implements IFormEntryService
                     }
                 } else {
                     $values = $onProvide($request, $inputNames, $form, null);
+                }
+
+                // add profile completion gift
+                if ($form->id === config('larapress.profiles.defaults.profile-form-id')) {
+                    /** @var IBankingService */
+                    $bankingService = app(IBankingService::class);
+                    $bankingService->addBalanceForUser(
+                        $request,
+                        $user,
+                        config('larapress.ecommerce.lms.profle_gift.amount'),
+                        config('larapress.ecommerce.lms.profle_gift.currency'),
+                        WalletTransaction::TYPE_MANUAL_MODIFY,
+                        WalletTransaction::FLAGS_REGISTRATION_GIFT,
+                        trans('larapress::ecommerce.banking.messages.wallet-descriptions.profile_gift_wallet_desc')
+                    );
                 }
                 return FormEntry::create([
                     'user_id' => $user->id,
