@@ -220,7 +220,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         }
 
         Cache::tags(['user:' . $object->id])->flush();
-        Cache::tags(['user.domains:'.$this->id])->flush();
+        Cache::tags(['user.domains:'.$object->id])->flush();
     }
 
     /**
@@ -316,7 +316,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         }
 
         Cache::tags(['user:' . $object->id])->flush();
-        Cache::tags(['user.domains:'.$this->id])->flush();
+        Cache::tags(['user.domains:'.$object->id])->flush();
     }
 
     /**
