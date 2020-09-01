@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Larapress\CRUD\CRUDControllers\BaseCRUDController;
 use Larapress\Profiles\CRUD\FormEntryCRUDProvider;
-use Larapress\Profiles\Services\IFormEntryService;
+use Larapress\Profiles\Services\FormEntry\IFormEntryService;
 
 class FormEntryController extends BaseCRUDController
 {

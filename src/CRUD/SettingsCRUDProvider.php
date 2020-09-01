@@ -24,34 +24,42 @@ class SettingsCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     public $model = Settings::class;
     public $createValidations = [
         'key' => 'required|string',
-        'val' => 'required|string',
+        'val' => 'required',
         'user_id' => 'nullable|numeric|exists:users,id',
-        'type' => 'nullable|string',
         'domain_id' => 'nullable|numeric|exists:domains,id',
+        'type' => 'nullable|string',
     ];
     public $updateValidations = [
         'key' => 'required|string',
-        'val' => 'required|string',
+        'val' => 'required',
         'user_id' => 'nullable|numeric|exists:users,id',
-        'type' => 'nullable|string',
         'domain_id' => 'nullable|numeric|exists:domains,id',
+        'type' => 'nullable|string',
     ];
-    public $autoSyncRelations = [];
-    public $validSortColumns = ['id', 'key', 'val', 'type', 'user_id', 'domain_id', 'created_at'];
-    public $validRelations = ['user', 'domain'];
-    public $validFilters = [];
-    public $defaultShowRelations = ['user', 'domain'];
-    public $excludeIfNull = [];
-    public $searchColumns = ['val', 'key'];
-    public $filterDefaults = [
-        'sub_domain' => null,
-        'user_id' => null,
-        'type' => null,
+    public $validSortColumns = [
+        'id',
+        'key',
+        'val',
+        'type',
+        'user_id',
+        'author_id',
+        'created_at',
+        'updated_at'
+    ];
+    public $validRelations = [
+        'user',
+        'author',
+        'domains'
+    ];
+    public $searchColumns = [
+        'val',
+        'key'
     ];
     public $filterFields = [
         'type' => 'equals:type',
-        'domain' => 'equals:domain_id',
+        'domains' => 'has:domains,id',
         'user_id' => 'equals:user_id',
+        'author_id' => 'equals:author_id',
     ];
 
     /**
@@ -63,8 +71,8 @@ class SettingsCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
 
-        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
-            return in_array($object->domain_id, $user->getAffiliateDomainIds());
+        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+            return $user->id === $object->author_id;
         }
 
         return true;
@@ -79,21 +87,39 @@ class SettingsCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
 
-        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
-            $query->whereIn('domain_id', $user->getAffiliateDomainIds());
+        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+            $query
+            ->whereHas('domains', function($q) use($user) {
+                $q->whereIn('id', $user->getAffiliateDomainIds());
+            })
+            ->orWhere('author_id', $user->id);
         }
 
         return $query;
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param array $args
+     * @return array
+     */
     public function onBeforeCreate($args)
     {
+        $args['author_id'] = Auth::user()->id;
         return $args;
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param array $args
+     * @return array
+     */
     public function onBeforeUpdate($args)
     {
-        return $this->onBeforeCreate($args);
+        $args['author_id'] = Auth::user()->id;
+        return $args;
     }
 
     /**
@@ -104,8 +130,6 @@ class SettingsCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onAfterUpdate($object, $input_data)
     {
-        Settings::forgetFromCache($object->key, $object->user_id);
-
         return $object;
     }
 }

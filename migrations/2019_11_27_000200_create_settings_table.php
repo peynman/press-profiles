@@ -19,12 +19,12 @@ class CreateSettingsTable extends Migration
             $table->bigInteger('user_id', false, true)->nullable();
             $table->string('type')->nullable();
             $table->string('key');
-            $table->string('val');
+            $table->json('val')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['user_id', 'type']);
-            $table->unique(['deleted_at', 'type', 'key']);
+            $table->index(['deleted_at', 'user_id', 'type', 'key']);
+            $table->unique(['deleted_at', 'type', 'key', 'user_id']);
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('author_id')->references('id')->on('users');

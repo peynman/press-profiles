@@ -1,6 +1,6 @@
 <?php
 
-namespace Larapress\Profiles\Services;
+namespace Larapress\Profiles\Services\FormEntry;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -135,7 +135,7 @@ class FormEntryService implements IFormEntryService
                 ->chunk(100, function ($ids) {
                     Cache::tags(array_map(function ($i) {
                         return 'user.support:' . $i;
-                    }, $ids))->flush();
+                    }, $ids->toArray()))->flush();
                 });
         }
 

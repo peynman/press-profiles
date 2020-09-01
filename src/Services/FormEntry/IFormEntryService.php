@@ -1,6 +1,6 @@
 <?php
 
-namespace Larapress\Profiles\Services;
+namespace Larapress\Profiles\Services\FormEntry;
 
 use Illuminate\Http\Request;
 use Symfony\Component\Routing\Route;

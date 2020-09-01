@@ -1,6 +1,6 @@
 <?php
 
-namespace Larapress\Profiles\Services;
+namespace Larapress\Profiles\Services\FormEntry;
 
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
