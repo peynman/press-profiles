@@ -54,7 +54,6 @@ class FormRepository implements IFormRepository
         $form['sources'] = isset($form->data['sources']) && count($form->data['sources']) > 0 ?
             $this->getFormDataSources($user, $request, $route, $form->data['sources']) : [];
 
-
         if (!is_null($user)) {
             /** @var IDomainRepository */
             $domainRepo = app(IDomainRepository::class);

@@ -9,17 +9,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\Services\BaseCRUDProvider;
 use Larapress\CRUD\Services\ICRUDProvider;
 use Larapress\CRUD\Services\IPermissionsMetadata;
 use Larapress\CRUD\Exceptions\AppException;
-use Larapress\CRUD\Exceptions\ValidationException;
 use Larapress\CRUD\ICRUDUser;
-use Larapress\CRUD\Models\Role;
 use Larapress\CRUD\Repository\IRoleRepository;
 use Larapress\Profiles\IProfileUser;
-use Larapress\Profiles\Models\Domain;
 use Larapress\Profiles\Models\PhoneNumber;
 use Larapress\Profiles\Repository\Domain\IDomainRepository;
 
@@ -50,7 +46,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'flags' => 'nullable|numeric',
     ];
     public $updateValidations = [
-        'name' => 'required|string|min:4|max:190|regex:/(^[A-Za-z0-9-_.]+$)+/|unique:users,name',
+        'name' => 'nullable|string|min:4|max:190|regex:/(^[A-Za-z0-9-_.]+$)+/|unique:users,name',
         'password' => 'nullable|string|min:4|confirmed|regex:/(^[A-Za-z0-9-_.]+$)+/',
         'password_confirmation' => 'required_with:password',
         'roles.*.id' => 'required|exists:roles,id',
@@ -81,6 +77,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'domains',
     ];
     public $searchColumns = [
+        'equals:id',
         'name',
         'has:phones,number',
     ];
@@ -168,7 +165,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             ];
         });
 
-        if (is_null($args['flags'])) {
+        if (isset($args['flags']) && is_null($args['flags'])) {
             unset($args['flags']);
         }
 
@@ -270,7 +267,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             ];
         });
 
-        if (is_null($args['flags'])) {
+        if (isset($args['flags']) && is_null($args['flags'])) {
             unset($args['flags']);
         }
 

@@ -13,8 +13,8 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        'Larapress\Profiles\Services\FormEntryUpdateEvent' => [
-            'Larapress\Profiles\Services\FormEntryUpdateReport',
+        'Larapress\Profiles\Services\FormEntry\FormEntryUpdateEvent' => [
+            'Larapress\Profiles\Services\FormEntry\FormEntryUpdateReport',
         ],
     ];
 

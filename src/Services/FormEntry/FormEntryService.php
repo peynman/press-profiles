@@ -64,20 +64,6 @@ class FormEntryService implements IFormEntryService
                     $values = $onProvide($request, $inputNames, $form, null);
                 }
 
-                // add profile completion gift
-                if ($form->id === config('larapress.profiles.defaults.profile-form-id')) {
-                    /** @var IBankingService */
-                    $bankingService = app(IBankingService::class);
-                    $bankingService->addBalanceForUser(
-                        $request,
-                        $user,
-                        config('larapress.ecommerce.lms.profle_gift.amount'),
-                        config('larapress.ecommerce.lms.profle_gift.currency'),
-                        WalletTransaction::TYPE_MANUAL_MODIFY,
-                        WalletTransaction::FLAGS_REGISTRATION_GIFT,
-                        trans('larapress::ecommerce.banking.messages.wallet-descriptions.profile_gift_wallet_desc')
-                    );
-                }
                 return FormEntry::create([
                     'user_id' => $user->id,
                     'form_id' => $form->id,
@@ -123,21 +109,6 @@ class FormEntryService implements IFormEntryService
             time()
         );
         Cache::tags(['user.form.' . $form->id . '.entry:' . $user->id])->flush();
-
-        // if user is support and this is a support form,
-        // clear cached support form for all users
-        if (
-            $user->hasRole(config('larapress.ecommerce.lms.support_role_id')) &&
-            $form->id == config('larapress.profiles.defaults.profile-support-form-id')
-        ) {
-            FormEntry::select('user_id')
-                ->where('tags', 'support-group-' . $user->id)
-                ->chunk(100, function ($ids) {
-                    Cache::tags(array_map(function ($i) {
-                        return 'user.support:' . $i;
-                    }, $ids->toArray()))->flush();
-                });
-        }
 
         return $entry;
     }
@@ -306,7 +277,11 @@ class FormEntryService implements IFormEntryService
                 if (isset($fieldObj['groups'])) {
                     $callback($fieldObj['groups'], $path . $fieldName . '.', $callback);
                 }
-                $inputNames[] = $fieldName;
+
+                if (!isset($fieldObj['exclude']) || !$fieldObj['exclude']) {
+                    $inputNames[] = $fieldName;
+                }
+
             }
         };
         $collectValidationsDeep($feilds, '', $collectValidationsDeep);

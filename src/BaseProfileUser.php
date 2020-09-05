@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Cache;
 use Larapress\CRUD\BaseFlags;
 use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\Models\Role;
+use Larapress\ECommerce\Models\WalletTransaction;
 use Larapress\Profiles\Flags\UserDomainFlags;
 use Larapress\Profiles\Models\Domain;
 use Larapress\Profiles\Models\EmailAddress;
@@ -132,18 +133,28 @@ trait BaseProfileUser
      * @return void
      */
     public function getProfileAttribute() {
+        if (isset($this->cache['profile'])) {
+            return $this->cache['profile'];
+        }
+
+        return null;
         return Helpers::getCachedValue(
             'larapress.users.'.$this->id.'.profile',
             function () {
+                $entry = null;
                 // if this role has custom form-id for its profiles, use it.
                 $profileRoles = self::getProfilesRoleMap();
                 foreach ($profileRoles as $role => $formId) {
                     if ($this->hasRole($role)) {
-                        return $this->form_entries()->where('form_id', $formId)->first();
+                        $entry = $this->form_entries()->where('form_id', $formId)->first();
                     }
                 }
                 // else use default form-id from config
-                return $this->form_entries()->where('form_id', config('larapress.profiles.defaults.profile-form-id'))->first();
+                if (is_null($entry)) {
+                    $entry = $this->form_entries()->where('form_id', config('larapress.profiles.defaults.profile-form-id'))->first();
+                }
+
+                return $entry;
             },
             ['user.form.'.config('larapress.profiles.defaults.profile-form-id').'.entry:'.$this->id],
             null
