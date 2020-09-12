@@ -77,9 +77,8 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'domains',
     ];
     public $searchColumns = [
-        'equals:id',
         'name',
-        'has:phones,number',
+//        'has:phones,number',
     ];
     public $filterFields = [
         'roles' => 'has:roles',
@@ -327,9 +326,10 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         $user = Auth::user();
 
         if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
-            $query->orWhereHas('domains', function (Builder $q) use ($user) {
-                $q->whereIn('id', $user->getAffiliateDomainIds());
-            });
+            // @todo: find a solution why this makes it slow!
+            // $query->orWhereHas('domains', function (Builder $q) use ($user) {
+            //     $q->whereIn('id', $user->getAffiliateDomainIds());
+            // });
             $query->orWhereHas('form_entries', function($q) use($user) {
                 $q->where('tags', 'support-group-'.$user->id);
             });

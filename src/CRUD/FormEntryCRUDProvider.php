@@ -11,7 +11,8 @@ use Larapress\CRUD\Services\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\FormEntry;
-use Larapress\Profiles\Services\FormEntryUpdateReport;
+use Larapress\Profiles\Services\FormEntry\FormEntryUpdateEvent;
+use Larapress\Profiles\Services\FormEntry\FormEntryUpdateReport;
 use Larapress\Reports\Services\IReportsService;
 
 class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
@@ -95,6 +96,11 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             'values' => $args['formValues'],
         ];
 
+        $class = config('larapress.crud.user.class');
+        /** @var IProfileUser */
+        $tUser = call_user_func([$class, 'find'], $args['user_id']);
+        $args['domain_id'] = $tUser->getRegistrationDomainId();
+
         return $args;
     }
 
@@ -108,6 +114,11 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             'agent' => $request->userAgent(),
             'values' => $args['formValues'],
         ];
+
+        $class = config('larapress.crud.user.class');
+        /** @var IProfileUser */
+        $tUser = call_user_func([$class, 'find'], $args['user_id']);
+        $args['domain_id'] = $tUser->getRegistrationDomainId();
 
         return $args;
     }
@@ -156,7 +167,18 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onAfterCreate($object, $input_data)
     {
+        $object->user->updateUserCache();
         Cache::tags(['user.forms:'.$object->user_id])->flush();
+
+        FormEntryUpdateEvent::dispatch(
+            $object->user,
+            $object->user->getRegistrationDomain(),
+            $object,
+            $object->form,
+            true,
+            'admin:'.Auth::user()->id,
+            time()
+        );
     }
 
     /**
@@ -168,7 +190,18 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onAfterUpdate($object, $input_data)
     {
+        $object->user->updateUserCache();
         Cache::tags(['user.forms:'.$object->user_id])->flush();
+
+        FormEntryUpdateEvent::dispatch(
+            $object->user,
+            $object->user->getRegistrationDomain(),
+            $object,
+            $object->form,
+            false,
+            'admin:'.Auth::user()->id,
+            time()
+        );
     }
 
     /**
@@ -179,6 +212,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onAfterDestroy($object)
     {
+        $object->user->updateUserCache();
         Cache::tags(['user.forms:'.$object->user_id])->flush();
         Cache::tags(['user.profile:'.$object->user_id])->flush();
         Cache::tags(['user.support:'.$object->user_id])->flush();

@@ -58,7 +58,7 @@ class PhoneNumberCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     ];
     public $excludeIfNull = [];
     public $searchColumns = [
-        'number'
+        'number',
     ];
     public $filterDefaults = [];
     public $filterFields = [];
