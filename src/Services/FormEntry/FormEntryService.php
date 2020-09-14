@@ -85,7 +85,7 @@ class FormEntryService implements IFormEntryService
                         $values = $request->all($inputNames);
                     }
                 } else {
-                    $values = $onProvide($request, $inputNames, $form, null);
+                    $values = $onProvide($request, $inputNames, $form, $entry);
                 }
                 $created = false;
                 $entry->update([
