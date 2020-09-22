@@ -2,6 +2,7 @@
 
 namespace Larapress\Profiles\CRUD;
 
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -14,6 +15,9 @@ use Larapress\Profiles\Models\FormEntry;
 use Larapress\Profiles\Services\FormEntry\FormEntryUpdateEvent;
 use Larapress\Profiles\Services\FormEntry\FormEntryUpdateReport;
 use Larapress\Reports\Services\IReportsService;
+use Illuminate\Support\Str;
+use Larapress\Ecommerce\Services\FileUpload\IFileUploadService;
+use Larapress\Profiles\Services\FormEntry\IFormEntryService;
 
 class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 {
@@ -32,13 +36,13 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'user_id' => 'required|exists:users,id',
         'form_id' => 'required|exists:forms,id',
         'tags' => 'nullable',
-        'formValues.*' => 'required',
+        'formValues.*' => 'nullable',
     ];
     public $updateValidations = [
         'user_id' => 'required|exists:users,id',
         'form_id' => 'required|exists:forms,id',
         'tags' => 'nullable',
-        'formValues.*' => 'required',
+        'formValues.*' => 'nullable',
     ];
     public $validSortColumns = [
         'id',
@@ -48,6 +52,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     ];
     public $validRelations = [
         'user',
+        'user.phones',
         'form',
         'domain'
     ];
@@ -89,11 +94,13 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     {
         $request = Request::createFromGlobals();
 
+        /** @var IFormEntryService */
+        $service = app(IFormEntryService::class);
         $args['data'] = [
             'admin' => Auth::user()->id,
             'ip' => $request->ip(),
             'agent' => $request->userAgent(),
-            'values' => $args['formValues'],
+            'values' => $service->replaceBase64ImagesInInputs($args['formValues']),
         ];
 
         $class = config('larapress.crud.user.class');
@@ -108,11 +115,13 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     {
         $request = Request::createFromGlobals();
 
+        /** @var IFormEntryService */
+        $service = app(IFormEntryService::class);
         $args['data'] = [
             'admin' => Auth::user()->id,
             'ip' => $request->ip(),
             'agent' => $request->userAgent(),
-            'values' => $args['formValues'],
+            'values' => $service->replaceBase64ImagesInInputs($args['formValues']),
         ];
 
         $class = config('larapress.crud.user.class');
@@ -217,5 +226,15 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         Cache::tags(['user.profile:'.$object->user_id])->flush();
         Cache::tags(['user.support:'.$object->user_id])->flush();
         Cache::tags(['user.introducer:'.$object->user_id])->flush();
+
+        FormEntryUpdateEvent::dispatch(
+            $object->user,
+            $object->user->getRegistrationDomain(),
+            $object,
+            $object->form,
+            false,
+            'admin:'.Auth::user()->id,
+            time()
+        );
     }
 }

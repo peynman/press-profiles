@@ -16,6 +16,17 @@ class EventServiceProvider extends ServiceProvider
         'Larapress\Profiles\Services\FormEntry\FormEntryUpdateEvent' => [
             'Larapress\Profiles\Services\FormEntry\FormEntryUpdateReport',
         ],
+
+        // activity log listener for events
+        'Larapress\CRUD\Events\CRUDUpdated' => [
+            'Larapress\Profiles\Services\ActivityLog\ActivityLogListener',
+        ],
+        'Larapress\CRUD\Events\CRUDCreated' => [
+            'Larapress\Profiles\Services\ActivityLog\ActivityLogListener',
+        ],
+        'Larapress\CRUD\Events\CRUDDeleted' => [
+            'Larapress\Profiles\Services\ActivityLog\ActivityLogListener',
+        ],
     ];
 
 

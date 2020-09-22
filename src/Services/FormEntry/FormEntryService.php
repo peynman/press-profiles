@@ -2,6 +2,7 @@
 
 namespace Larapress\Profiles\Services\FormEntry;
 
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -15,6 +16,8 @@ use Larapress\Profiles\IProfileUser;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\ECommerce\Models\WalletTransaction;
 use Larapress\ECommerce\Services\Banking\IBankingService;
+use Illuminate\Support\Str;
+use Larapress\Ecommerce\Services\FileUpload\IFileUploadService;
 
 class FormEntryService implements IFormEntryService
 {
@@ -58,7 +61,7 @@ class FormEntryService implements IFormEntryService
                     if (is_null($request)) {
                         $values = [];
                     } else {
-                        $values = $request->all($inputNames);
+                        $values = $this->replaceBase64ImagesInInputs($request->all($inputNames));
                     }
                 } else {
                     $values = $onProvide($request, $inputNames, $form, null);
@@ -82,7 +85,7 @@ class FormEntryService implements IFormEntryService
                     if (is_null($request)) {
                         $values = [];
                     } else {
-                        $values = $request->all($inputNames);
+                        $values = $this->replaceBase64ImagesInInputs($request->all($inputNames));
                     }
                 } else {
                     $values = $onProvide($request, $inputNames, $form, $entry);
@@ -156,7 +159,7 @@ class FormEntryService implements IFormEntryService
                     if (is_null($request)) {
                         $values = [];
                     } else {
-                        $values = $request->all($inputNames);
+                        $values = $this->replaceBase64ImagesInInputs($request->all($inputNames));
                     }
                 } else {
                     $values = $onProvide($request, $inputNames, $form, null);
@@ -179,7 +182,7 @@ class FormEntryService implements IFormEntryService
                     if (is_null($request)) {
                         $values = [];
                     } else {
-                        $values = $request->all($inputNames);
+                        $values = $this->replaceBase64ImagesInInputs($request->all($inputNames));
                     }
                 } else {
                     $values = $onProvide($request, $inputNames, $form, null);
@@ -207,22 +210,55 @@ class FormEntryService implements IFormEntryService
         );
         Cache::tags(['user.form.' . $form->id . '.entry:' . $user->id])->flush();
 
-        // if user is support and this is a support form,
-        // clear cached support form for all users
-        if (
-            $user->hasRole(config('larapress.ecommerce.lms.support_role_id')) &&
-            $form->id == config('larapress.profiles.defaults.profile-support-form-id')
-        ) {
-            FormEntry::select('user_id')
-                ->where('tags', 'support-group-' . $user->id)
-                ->chunk(1000, function ($ids) {
-                    Cache::tags(array_map(function ($i) {
-                        return 'user.support:' . $i;
-                    }, $ids))->flush();
-                });
+        return $entry;
+    }
+
+
+    /**
+     * Undocumented function
+     *
+     * @param array $values
+     * @return array
+     */
+    public function replaceBase64ImagesInInputs($values) {
+        $values = $this->replaceBase64WithFilepath($values, 'profile');
+        $values = $this->replaceBase64WithFilepath($values, 'image');
+        $values = $this->replaceBase64WithFilepath($values, 'melli_card', 'local', 'melli_cards');
+        $unsets = [
+            'p0',
+            'submit',
+            'cancel',
+            'alert',
+            'actions',
+        ];
+        foreach ($unsets as $unset) {
+            if (isset($values[$unset])) {
+                unset($values[$unset]);
+            }
+        }
+        return $values;
+    }
+    /**
+     * Undocumented function
+     *
+     * @param array $values
+     * @param string $prop
+     * @param string $disk
+     * @param string $folder
+     * @return array
+     */
+    protected function replaceBase64WithFilepath($values, $prop, $disk = 'public', $folder = 'avatars') {
+        /** @var IFileUploadService */
+        $this->fileService = app(IFileUploadService::class);
+        if (isset($values[$prop]) && is_string($values[$prop])) {
+            if (Str::startsWith($values[$prop], 'data:image/png;base64,')) {
+                try {
+                    $values[$prop] = '/storage/'.$this->fileService->saveBase64Image($values[$prop], $disk, $folder);
+                } catch (Exception $e) {}
+            }
         }
 
-        return $entry;
+        return $values;
     }
 
     /**

@@ -30,13 +30,13 @@ class ActivityLogCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     public $validRelations = ['user', 'domain'];
     public $defaultShowRelations = ['user', 'domain'];
     public $searchColumns = [
-        'equals:id',
-        'equals:type',
         'subject',
+        'description',
     ];
     public $filterFields = [
         'type' => 'equals:type',
-        'subject' => 'subject',
+        'subject' => 'equals:subject',
+        'user_id' => 'equals:user_id',
         'domain_id' => 'equals:domain_id',
     ];
 

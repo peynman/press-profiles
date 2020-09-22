@@ -34,4 +34,12 @@ interface IFormEntryService {
      * @return FormEntry
      */
     public function updateUserFormEntryTag($request, $user, $formId, $tags, $onProvide = null);
+
+    /**
+     * Undocumented function
+     *
+     * @param array $values
+     * @return array
+     */
+    public function replaceBase64ImagesInInputs($values);
 }

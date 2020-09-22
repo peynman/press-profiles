@@ -21,6 +21,11 @@ use Larapress\Profiles\IProfileUser;
  */
 class ActivityLog extends Model
 {
+    const TYPE_CRUD_CREATE = 1;
+    const TYPE_CRUD_EDIT = 2;
+    const TYPE_CRUD_DELETE = 3;
+    const TYPE_CRUD_VERB = 4;
+
     protected $table = 'activity_logs';
 
     protected $fillable = [
