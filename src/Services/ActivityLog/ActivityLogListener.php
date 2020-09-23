@@ -19,7 +19,7 @@ class ActivityLogListener implements ShouldQueue
             case CRUDCreated::class:
                 ActivityLog::create([
                     'user_id' => is_null($event->user) ? null :$event->user->id,
-                    'domain_id' => $event->user->getMembershipDomainId(),
+                    'domain_id' => is_null($event->user) ? null :$event->user->getMembershipDomainId(),
                     'type' => ActivityLog::TYPE_CRUD_CREATE,
                     'subject' => '#'.$event->model->id,
                     'description' => 'ثبت '.class_basename($event->getProvider()->getModelClass()).' جدید',
@@ -33,7 +33,7 @@ class ActivityLogListener implements ShouldQueue
             case CRUDUpdated::class:
                 ActivityLog::create([
                     'user_id' => is_null($event->user) ? null :$event->user->id,
-                    'domain_id' => $event->user->getMembershipDomainId(),
+                    'domain_id' => is_null($event->user) ? null :$event->user->getMembershipDomainId(),
                     'type' => ActivityLog::TYPE_CRUD_EDIT,
                     'subject' => '#'.$event->model->id,
                     'description' => 'بروز رسانی '.class_basename($event->getProvider()->getModelClass()).' با شناسه '.$event->model->id,
@@ -47,7 +47,7 @@ class ActivityLogListener implements ShouldQueue
             case CRUDDeleted::class:
                 ActivityLog::create([
                     'user_id' => is_null($event->user) ? null :$event->user->id,
-                    'domain_id' => $event->user->getMembershipDomainId(),
+                    'domain_id' => is_null($event->user) ? null : $event->user->getMembershipDomainId(),
                     'type' => ActivityLog::TYPE_CRUD_DELETE,
                     'subject' => '#'.$event->model->id,
                     'description' => 'حذف '.$event->getProvider()->getModelClass().' با شناسه '.$event->model->id,
