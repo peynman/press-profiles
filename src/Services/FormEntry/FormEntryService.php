@@ -41,7 +41,7 @@ class FormEntryService implements IFormEntryService
         $inputNames = !is_null($request) ? $this->validateFormEntryRequestAndGetInputs($request, $form) : [];
 
         if (is_null($request)) {
-            $domain = $user->getRegistrationDomain();
+            $domain = $user->getMembershipDomain();
         } else {
             /** @var IDomainRepository */
             $domainRepo = app(IDomainRepository::class);
@@ -124,7 +124,7 @@ class FormEntryService implements IFormEntryService
      * @param int $formId
      * @param string $tags
      * @param callable $onProvide
-     * @return void
+     * @return FormEntry
      */
     public function updateUserFormEntryTag($request, $user, $formId, $tags, $onProvide = null)
     {
@@ -138,7 +138,7 @@ class FormEntryService implements IFormEntryService
         $inputNames = !is_null($request) ? $this->validateFormEntryRequestAndGetInputs($request, $form) : [];
 
         if (is_null($request)) {
-            $domain = $user->getRegistrationDomain();
+            $domain = $user->getMembershipDomain();
         } else {
             /** @var IDomainRepository */
             $domainRepo = app(IDomainRepository::class);

@@ -77,17 +77,18 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'domains',
     ];
     public $searchColumns = [
-        'name',
-//        'has:phones,number',
+        'equals:name',
+        'has:phones,number',
     ];
     public $filterFields = [
+        'register_from' => 'after:created_at',
+        'register_to' => 'before:created_at',
         'roles' => 'has:roles',
         'phones' => 'has:phones:number',
         'domains' => 'has:domains',
         'year' => 'has:profile:data->values->year',
         'field' => 'has:profile:data->values->field',
     ];
-    public $autoCountRelations = [];
 
     /**
      * Exclude current id in name unique request
@@ -99,21 +100,6 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     {
         $this->updateValidations['name'] .= ',' . $request->route('id');
         return $this->updateValidations;
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return array
-     */
-    public function getFilterDefaultValues()
-    {
-        return [
-            'from' => Carbon::now()->sub(config('larapress.profiles.defaults.date-filter-interval'))->format('Y-m-d'),
-            'to' => Carbon::now()->format('Y-m-d'),
-            'role' => null,
-            'domain' => null,
-        ];
     }
 
     /**
@@ -330,7 +316,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             // $query->orWhereHas('domains', function (Builder $q) use ($user) {
             //     $q->whereIn('id', $user->getAffiliateDomainIds());
             // });
-            $query->orWhereHas('form_entries', function($q) use($user) {
+            $query->whereHas('form_entries', function($q) use($user) {
                 $q->where('tags', 'support-group-'.$user->id);
             });
         }

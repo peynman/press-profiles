@@ -62,8 +62,9 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'domain'
     ];
     public $searchColumns = [
-        'id',
-        'tags',
+        'equals:tags',
+        'has_exact:user,name',
+        'has_exact:user.phones,number',
     ];
     public $filterFields = [
         'type' => 'equals:type',
@@ -106,7 +107,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         $class = config('larapress.crud.user.class');
         /** @var IProfileUser */
         $tUser = call_user_func([$class, 'find'], $args['user_id']);
-        $args['domain_id'] = $tUser->getRegistrationDomainId();
+        $args['domain_id'] = $tUser->getMembershipDomainId();
 
         return $args;
     }
@@ -127,7 +128,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         $class = config('larapress.crud.user.class');
         /** @var IProfileUser */
         $tUser = call_user_func([$class, 'find'], $args['user_id']);
-        $args['domain_id'] = $tUser->getRegistrationDomainId();
+        $args['domain_id'] = $tUser->getMembershipDomainId();
 
         return $args;
     }
@@ -181,7 +182,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 
         FormEntryUpdateEvent::dispatch(
             $object->user,
-            $object->user->getRegistrationDomain(),
+            $object->user->getMembershipDomain(),
             $object,
             $object->form,
             true,
@@ -204,7 +205,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 
         FormEntryUpdateEvent::dispatch(
             $object->user,
-            $object->user->getRegistrationDomain(),
+            $object->user->getMembershipDomain(),
             $object,
             $object->form,
             false,
@@ -229,7 +230,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 
         FormEntryUpdateEvent::dispatch(
             $object->user,
-            $object->user->getRegistrationDomain(),
+            $object->user->getMembershipDomain(),
             $object,
             $object->form,
             false,
