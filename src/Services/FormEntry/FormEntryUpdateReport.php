@@ -53,6 +53,7 @@ class FormEntryUpdateReport implements IReportSource
 
     public function handle(FormEntryUpdateEvent $event)
     {
+        $supportProfileId = isset($event->user->supportProfile['id']) ? $event->user->supportProfile['id']: null;
         /** @var IRoleRepository */
         $roleRepo = app(IRoleRepository::class);
         $highRole = is_null($event->user) ? null : $roleRepo->getUserHighestRole($event->user);
@@ -61,6 +62,7 @@ class FormEntryUpdateReport implements IReportSource
             'role' => is_null($highRole) ? 'guest' : $highRole->name,
             'form' => $event->form->id,
             'created' => $event->created,
+            'support' => $supportProfileId,
         ];
 
         if (isset($event->form->data['report_tags'])) {
