@@ -8,8 +8,9 @@ use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\Repository\IRoleRepository;
 use Larapress\Reports\Services\BaseReportSource;
 use Larapress\Reports\Services\IReportsService;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class FormEntryUpdateReport implements IReportSource
+class FormEntryUpdateReport implements IReportSource, ShouldQueue
 {
     use BaseReportSource;
 

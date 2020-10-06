@@ -47,6 +47,14 @@ interface IProfileUser
     public function forgetDomainsCache();
 
     /**
+     * Undocumented function
+     *
+     * @param string|null $key
+     * @return mixed
+     */
+    public function updateUserCache($key = null);
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function roles();
