@@ -38,7 +38,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 
     public $createValidations = [
         'name' => 'required|string|min:4|max:190|unique:users,name|regex:/(^[A-Za-z0-9-_.]+$)+/',
-        'password' => 'required|string|min:4|confirmed|regex:/(^[A-Za-z0-9-_.]+$)+/',
+        'password' => 'required|string|min:4|confirmed',
         'password_confirmation' => 'required',
         'roles.*.id' => 'required|exists:roles,id',
         'domains.*.id' => 'required|exists:domains,id',
@@ -47,7 +47,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     ];
     public $updateValidations = [
         'name' => 'nullable|string|min:4|max:190|regex:/(^[A-Za-z0-9-_.]+$)+/|unique:users,name',
-        'password' => 'nullable|string|min:4|confirmed|regex:/(^[A-Za-z0-9-_.]+$)+/',
+        'password' => 'nullable|string|min:4|confirmed',
         'password_confirmation' => 'required_with:password',
         'roles.*.id' => 'required|exists:roles,id',
         'domains.*.id' => 'required|exists:domains,id',
