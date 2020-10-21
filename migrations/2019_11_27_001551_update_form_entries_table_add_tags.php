@@ -14,8 +14,8 @@ class UpdateFormEntriesTableAddTags extends Migration
     public function up()
     {
         Schema::table('form_entries', function (Blueprint $table) {
-            $table->string('tags')->nullable();
-            $table->index(['deleted_at', 'form_id', 'domain_id', 'user_id', 'tags'], 'form_entries_query_index_columns');
+            // $table->string('tags')->nullable();
+            // $table->index(['deleted_at', 'form_id', 'domain_id', 'user_id', 'tags'], 'form_entries_query_index_columns');
         });
     }
 
@@ -27,8 +27,8 @@ class UpdateFormEntriesTableAddTags extends Migration
     public function down()
     {
         Schema::table('form_entries', function (Blueprint $table) {
-            $table->dropIndex('form_entries_query_index_columns');
-            $table->dropColumn('tags');
+//            $table->dropIndex('form_entries_query_index_columns');
+  //          $table->dropColumn('tags');
         });
     }
 }

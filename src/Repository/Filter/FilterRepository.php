@@ -14,7 +14,7 @@ class FilterRepository implements IFilterRepository
      */
     public function getByType($type)
     {
-        return Filter::where('type', $type)->get();
+        return Filter::where('type', $type)->orderBy('zorder', 'asc')->get();
     }
 
     /**

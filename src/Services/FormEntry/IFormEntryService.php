@@ -42,4 +42,12 @@ interface IFormEntryService {
      * @return array
      */
     public function replaceBase64ImagesInInputs($values);
+
+    /**
+     * Undocumented function
+     *
+     * @param int|Form $form
+     * @return array
+     */
+    public function getFormValidationRules($form);
 }

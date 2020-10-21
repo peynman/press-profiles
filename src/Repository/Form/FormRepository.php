@@ -55,14 +55,10 @@ class FormRepository implements IFormRepository
             $this->getFormDataSources($user, $request, $route, $form->data['sources']) : [];
 
         if (!is_null($user)) {
-            /** @var IDomainRepository */
-            $domainRepo = app(IDomainRepository::class);
-            $domain = $domainRepo->getRequestDomain($request);
-
             $entry = FormEntry::query()
                 ->where('user_id', $user->id)
                 ->where('form_id', $form->id)
-                ->where('domain_id', $domain->id)
+                ->where('domain_id', $user->getMembershipDomainId())
                 ->first();
 
             if (!is_null($entry)) {

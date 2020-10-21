@@ -213,14 +213,14 @@ class FormEntryService implements IFormEntryService
         return $entry;
     }
 
-
     /**
      * Undocumented function
      *
      * @param array $values
      * @return array
      */
-    public function replaceBase64ImagesInInputs($values) {
+    public function replaceBase64ImagesInInputs($values)
+    {
         $values = $this->replaceBase64WithFilepath($values, 'profile');
         $values = $this->replaceBase64WithFilepath($values, 'image');
         $values = $this->replaceBase64WithFilepath($values, 'melli_card', 'local', 'melli_cards');
@@ -238,38 +238,19 @@ class FormEntryService implements IFormEntryService
         }
         return $values;
     }
+
     /**
      * Undocumented function
      *
-     * @param array $values
-     * @param string $prop
-     * @param string $disk
-     * @param string $folder
+     * @param int|Form $form
      * @return array
      */
-    protected function replaceBase64WithFilepath($values, $prop, $disk = 'public', $folder = 'avatars') {
-        /** @var IFileUploadService */
-        $this->fileService = app(IFileUploadService::class);
-        if (isset($values[$prop]) && is_string($values[$prop])) {
-            if (Str::startsWith($values[$prop], 'data:image/png;base64,')) {
-                try {
-                    $values[$prop] = '/storage/'.$this->fileService->saveBase64Image($values[$prop], $disk, $folder);
-                } catch (Exception $e) {}
-            }
+    public function getFormValidationRules($form)
+    {
+        if (is_numeric($form)) {
+            $form = Form::find($form);
         }
 
-        return $values;
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param Request $request
-     * @param Form $form
-     * @return void
-     */
-    protected function validateFormEntryRequestAndGetInputs(Request $request, Form $form)
-    {
         $rules = [];
         $inputNames = [];
         $feilds = isset($form->data['form']['schema']['fields']) ? $form->data['form']['schema']['fields'] : [];
@@ -286,12 +267,20 @@ class FormEntryService implements IFormEntryService
                                 break;
                             case 'minLength':
                                 if (is_numeric($val)) {
-                                    $rules[$path . $fieldName][] = 'min:' . $val;
+                                    if ($fieldObj['validations']['maxLength']) {
+                                        $rules[$path . $fieldName][] = 'digits_between:' . $val . ',' . $fieldObj['validations']['maxLength'];
+                                    } else {
+                                        $rules[$path . $fieldName][] = 'min:' . $val;
+                                    }
                                 }
                                 break;
                             case 'maxLength':
                                 if (is_numeric($val)) {
-                                    $rules[$path . $fieldName][] = 'max:' . $val;
+                                    if ($fieldObj['validations']['minLength']) {
+                                        $rules[$path . $fieldName][] = 'digits_between:' . $fieldObj['validations']['minLength'] . ',' . $val;
+                                    } else {
+                                        $rules[$path . $fieldName][] = 'max:' . $val;
+                                    }
                                 }
                                 break;
                             case 'numeric':
@@ -317,11 +306,48 @@ class FormEntryService implements IFormEntryService
                 if (!isset($fieldObj['exclude']) || !$fieldObj['exclude']) {
                     $inputNames[] = $fieldName;
                 }
-
             }
         };
         $collectValidationsDeep($feilds, '', $collectValidationsDeep);
 
+        return [$rules, $inputNames];
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param array $values
+     * @param string $prop
+     * @param string $disk
+     * @param string $folder
+     * @return array
+     */
+    protected function replaceBase64WithFilepath($values, $prop, $disk = 'public', $folder = 'avatars')
+    {
+        /** @var IFileUploadService */
+        $this->fileService = app(IFileUploadService::class);
+        if (isset($values[$prop]) && is_string($values[$prop])) {
+            if (Str::startsWith($values[$prop], 'data:image/png;base64,')) {
+                try {
+                    $values[$prop] = '/storage/' . $this->fileService->saveBase64Image($values[$prop], $disk, $folder);
+                } catch (Exception $e) {
+                }
+            }
+        }
+
+        return $values;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param Request $request
+     * @param Form $form
+     * @return void
+     */
+    protected function validateFormEntryRequestAndGetInputs(Request $request, Form $form)
+    {
+        [$rules, $inputNames] = $this->getFormValidationRules($form);
         $validate = Validator::make($request->all($inputNames), $rules);
         if ($validate->fails()) {
             throw new ValidationException($validate);
