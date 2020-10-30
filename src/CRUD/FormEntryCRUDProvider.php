@@ -15,8 +15,6 @@ use Larapress\Profiles\Models\FormEntry;
 use Larapress\Profiles\Services\FormEntry\FormEntryUpdateEvent;
 use Larapress\Profiles\Services\FormEntry\FormEntryUpdateReport;
 use Larapress\Reports\Services\IReportsService;
-use Illuminate\Support\Str;
-use Larapress\Ecommerce\Services\FileUpload\IFileUploadService;
 use Larapress\Profiles\Services\FormEntry\IFormEntryService;
 
 class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
