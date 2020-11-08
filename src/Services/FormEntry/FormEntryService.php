@@ -326,14 +326,22 @@ class FormEntryService implements IFormEntryService
     {
         /** @var IFileUploadService */
         $this->fileService = app(IFileUploadService::class);
-        if (isset($values[$prop]) && is_string($values[$prop])) {
-            if (Str::startsWith($values[$prop], 'data:image/png;base64,')) {
-                try {
-                    $values[$prop] = '/storage/' . $this->fileService->saveBase64Image($values[$prop], $disk, $folder);
-                } catch (Exception $e) {
+        $traverse = function($inputs, $prop, $traverse) use($disk, $folder) {
+            foreach ($inputs as $p => $v) {
+                if (is_string($v) && (Str::startsWith($p, $prop) || Str::endsWith($p, $prop))) {
+                    if (Str::startsWith($inputs[$prop], 'data:image/png;base64,')) {
+                        try {
+                            $inputs[$p] = '/storage/' . $this->fileService->saveBase64Image($inputs[$p], $disk, $folder);
+                        } catch (Exception $e) {
+                        }
+                    }
+                } else if (is_array($v)) {
+                    $inputs[$p] = $traverse($v, $prop, $traverse);
                 }
             }
-        }
+            return $inputs;
+        };
+        $values = $traverse($values, $prop, $traverse);
 
         return $values;
     }
