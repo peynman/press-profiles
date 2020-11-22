@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Cache;
 use Larapress\CRUD\BaseFlags;
 use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\Models\Role;
-use Larapress\ECommerce\Models\WalletTransaction;
+use Larapress\Profiles\Base\FormEntryUserSupportProfileRelationship;
 use Larapress\Profiles\Flags\UserDomainFlags;
 use Larapress\Profiles\Models\Domain;
 use Larapress\Profiles\Models\EmailAddress;
@@ -27,7 +27,64 @@ use Larapress\Profiles\Models\PhoneNumber;
  */
 trait BaseProfileUser
 {
-    protected $cachedDomains = null;
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function roles()
+    {
+        return $this->belongsToMany(
+            Role::class,
+            'user_role',
+            'user_id',
+            'role_id'
+        );
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function domains()
+    {
+        return $this->belongsToMany(
+            Domain::class,
+            'user_domain',
+            'user_id',
+            'domain_id'
+        )->withPivot('flags');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function phones()
+    {
+        return $this->hasMany(
+            PhoneNumber::class,
+            'user_id',
+        );
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function emails()
+    {
+        return $this->hasMany(
+            EmailAddress::class,
+            'user_id',
+        );
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function form_entries() {
+        return $this->hasMany(
+            FormEntry::class,
+            'user_id'
+        );
+    }
 
     /**
      * @return Domain
@@ -108,6 +165,9 @@ trait BaseProfileUser
         return $ids;
     }
 
+
+    protected $cachedDomains = null;
+
     /**
      * @return Domain[]
      */
@@ -128,114 +188,10 @@ trait BaseProfileUser
     }
 
     /**
-     * Undocumented function
-     *
-     * @return void
-     */
-    public function getProfileAttribute() {
-        if (isset($this->cache['profile'])) {
-            return $this->cache['profile'];
-        }
-
-        return null;
-        return Helpers::getCachedValue(
-            'larapress.users.'.$this->id.'.profile',
-            function () {
-                $entry = null;
-                // if this role has custom form-id for its profiles, use it.
-                $profileRoles = self::getProfilesRoleMap();
-                foreach ($profileRoles as $role => $formId) {
-                    if ($this->hasRole($role)) {
-                        $entry = $this->form_entries()->where('form_id', $formId)->first();
-                    }
-                }
-                // else use default form-id from config
-                if (is_null($entry)) {
-                    $entry = $this->form_entries()->where('form_id', config('larapress.profiles.defaults.profile-form-id'))->first();
-                }
-
-                return $entry;
-            },
-            ['user.form.'.config('larapress.profiles.defaults.profile-form-id').'.entry:'.$this->id],
-            null
-        );
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function roles()
-    {
-        return $this->belongsToMany(
-            Role::class,
-            'user_role',
-            'user_id',
-            'role_id'
-        );
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function domains()
-    {
-        return $this->belongsToMany(
-            Domain::class,
-            'user_domain',
-            'user_id',
-            'domain_id'
-        )->withPivot('flags');
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function phones()
-    {
-        return $this->hasMany(
-            PhoneNumber::class,
-            'user_id',
-        );
-    }
-
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function emails()
-    {
-        return $this->hasMany(
-            EmailAddress::class,
-            'user_id',
-        );
-    }
-
-    /**
      * @return void
      */
     public function forgetDomainsCache()
     {
         Cache::tags(['user.domains:'.$this->id])->flush();
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function form_entries() {
-        return $this->hasMany(
-            FormEntry::class,
-            'user_id'
-        );
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return array
-     */
-    public static function getProfilesRoleMap() {
-        return [
-            'support' => config('larapress.profiles.defaults.profile-support-form-id')
-        ];
     }
 }

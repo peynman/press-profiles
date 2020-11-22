@@ -2,6 +2,7 @@
 
 namespace Larapress\Profiles;
 
+use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\Models\Domain;
 
 /**
@@ -9,7 +10,7 @@ use Larapress\Profiles\Models\Domain;
  *
  * @property int        $flags
  */
-interface IProfileUser
+interface IProfileUser extends ICRUDUser
 {
     /**
      * @return Domain
@@ -45,14 +46,6 @@ interface IProfileUser
      * @return void
      */
     public function forgetDomainsCache();
-
-    /**
-     * Undocumented function
-     *
-     * @param string|null $key
-     * @return mixed
-     */
-    public function updateUserCache($key = null);
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany

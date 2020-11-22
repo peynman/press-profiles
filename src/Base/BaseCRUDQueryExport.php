@@ -2,6 +2,7 @@
 
 namespace Larapress\Profiles\Base;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Larapress\CRUD\Services\ICRUDExporter;
@@ -23,7 +24,7 @@ class BaseCRUDQueryExport implements ICRUDExporter
         }, 200, [
             'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
             'Content-type'        => 'text/csv',
-            'Content-Disposition' => 'attachment; filename=galleries.csv',
+            'Content-Disposition' => 'attachment; filename='.Carbon::now()->toIso8601String().'.csv',
             'Expires'             => '0',
             'Pragma'              => 'public'
         ]);

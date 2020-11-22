@@ -185,7 +185,7 @@ class FormEntryService implements IFormEntryService
                         $values = $this->replaceBase64ImagesInInputs($request->all($inputNames));
                     }
                 } else {
-                    $values = $onProvide($request, $inputNames, $form, null);
+                    $values = $onProvide($request, $inputNames, $form, $entry);
                 }
                 $created = false;
                 $entry->update([

@@ -65,9 +65,12 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'has_exact:user.phones,number',
     ];
     public $filterFields = [
+        'created_from' => 'after:created_at',
+        'created_to' => 'before:created_at',
         'type' => 'equals:type',
         'domain' => 'in:domain_id',
         'user_id' => 'equals:user_id',
+        'form_id' => 'equals:form_id',
         'tags' => 'like:tags',
     ];
 
@@ -175,7 +178,6 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onAfterCreate($object, $input_data)
     {
-        $object->user->updateUserCache();
         Cache::tags(['user.forms:'.$object->user_id])->flush();
 
         FormEntryUpdateEvent::dispatch(
@@ -198,7 +200,6 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onAfterUpdate($object, $input_data)
     {
-        $object->user->updateUserCache();
         Cache::tags(['user.forms:'.$object->user_id])->flush();
 
         FormEntryUpdateEvent::dispatch(
@@ -220,7 +221,6 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onAfterDestroy($object)
     {
-        $object->user->updateUserCache();
         Cache::tags(['user.forms:'.$object->user_id])->flush();
         Cache::tags(['user.profile:'.$object->user_id])->flush();
         Cache::tags(['user.support:'.$object->user_id])->flush();

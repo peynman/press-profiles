@@ -18,6 +18,6 @@ class UserDomainFlags
 
     public static function getTitle($flag)
     {
-        return self::__getFlagProperty($flag, config('larapress.profiles.translations.namespace').'::models.domains.flags');
+        return self::__getFlagProperty($flag, 'larapress::models.domains.flags');
     }
 }

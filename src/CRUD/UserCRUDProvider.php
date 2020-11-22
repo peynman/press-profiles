@@ -61,8 +61,11 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'domains',
         'phones',
         'emails',
-        'profile',
-        'supportUserProfile',
+        'form_support_user_profile',
+        'form_profile_default',
+        'form_profile_support',
+        'form_support_registration_entry',
+        'wallet_balance',
     ];
     public $validSortColumns = [
         'id',
@@ -81,8 +84,8 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'has:phones,number',
     ];
     public $filterFields = [
-        'register_from' => 'after:created_at',
-        'register_to' => 'before:created_at',
+        'created_from' => 'after:created_at',
+        'created_to' => 'before:created_at',
         'roles' => 'has:roles',
         'phones' => 'has:phones:number',
         'domains' => 'has:domains',

@@ -54,29 +54,35 @@ class FormEntryUpdateReport implements IReportSource, ShouldQueue
 
     public function handle(FormEntryUpdateEvent $event)
     {
-        $supportProfileId = isset($event->user->supportProfile['id']) ? $event->user->supportProfile['id']: null;
+        $user = $event->getUser();
+        $form = $event->getForm();
+
+        $supportProfileId = is_null($user) ? null : $user->getSupportUserId();
+
         /** @var IRoleRepository */
         $roleRepo = app(IRoleRepository::class);
-        $highRole = is_null($event->user) ? null : $roleRepo->getUserHighestRole($event->user);
+        $highRole = is_null($user) ? null : $roleRepo->getUserHighestRole($user)->name;
+
         $tags = [
-            'domain' => $event->domain->id,
-            'role' => is_null($highRole) ? 'guest' : $highRole->name,
-            'form' => $event->form->id,
+            'domain' => $event->domainId,
+            'role' => is_null($highRole) ? 'guest' : $highRole,
+            'form' => $event->formId,
             'created' => $event->created,
             'support' => $supportProfileId,
         ];
 
-        if (isset($event->form->data['report_tags'])) {
-            $values = $event->entry->data['values'];
-            $askedTags = explode(',', $event->form->data['report_tags']);
+        if (isset($form->data['report_tags'])) {
+            $entry = $event->getFormEntry();
+            $values = $entry->data['values'];
+            $askedTags = explode(',', $form->data['report_tags']);
             foreach($askedTags as $tag) {
                 $val = Helpers::getArrayWithPath($values, $tag);
                 $tags[$tag] = $val;
             }
         }
 
-        if (!is_null($event->user)) {
-            if ($event->form->id === config('larapress.profiles.defaults.profile-form-id')) {
+        if (!is_null($user)) {
+            if ($form->id === config('larapress.ecommerce.lms.profile_form_id')) {
                 $tags['profile'] = true;
             }
         }

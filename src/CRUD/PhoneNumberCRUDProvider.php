@@ -61,7 +61,10 @@ class PhoneNumberCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'number',
     ];
     public $filterDefaults = [];
-    public $filterFields = [];
+    public $filterFields = [
+        'created_from' => 'after:created_at',
+        'created_to' => 'before:created_at',
+    ];
 
     /**
      * @param Builder $query

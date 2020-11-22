@@ -1,16 +1,6 @@
 <?php
 
 return [
-    'defaults' => [
-        'date-filter-interval' => '-1y',
-        'cache-ttl' => '1d',
-        'profile-form-id' => 1
-    ],
-
-    'translations' => [
-        'namespace' => 'larapress'
-    ],
-
     'permissions' => [
         \Larapress\Profiles\CRUD\UserCRUDProvider::class,
         \Larapress\Profiles\CRUD\ActivityLogCRUDProvider::class,
