@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Larapress\CRUD\Exceptions\AppException;
 use Larapress\CRUD\Exceptions\ValidationException;
@@ -224,6 +225,7 @@ class FormEntryService implements IFormEntryService
         $values = $this->replaceBase64WithFilepath($values, 'profile');
         $values = $this->replaceBase64WithFilepath($values, 'image');
         $values = $this->replaceBase64WithFilepath($values, 'melli_card', 'local', 'melli_cards');
+
         $unsets = [
             'p0',
             'submit',
@@ -329,10 +331,12 @@ class FormEntryService implements IFormEntryService
         $traverse = function($inputs, $prop, $traverse) use($disk, $folder) {
             foreach ($inputs as $p => $v) {
                 if (is_string($v) && (Str::startsWith($p, $prop) || Str::endsWith($p, $prop))) {
-                    if (Str::startsWith($inputs[$prop], 'data:image/png;base64,')) {
+                    if (Str::startsWith($inputs[$p], 'data:image/png;base64,')) {
                         try {
-                            $inputs[$p] = '/storage/' . $this->fileService->saveBase64Image($inputs[$p], $disk, $folder);
+                            $filepath = $this->fileService->saveBase64Image($inputs[$p], $disk, $folder);;
+                            $inputs[$p] = '/storage/' . $filepath;
                         } catch (Exception $e) {
+                            Log::critical('Failed auto saving base64 image form: '. $e->getMessage(), $e->getTrace());
                         }
                     }
                 } else if (is_array($v)) {
