@@ -57,7 +57,6 @@ class ActivityLogListener implements ShouldQueue
                     'data' => [
                         'provider' => get_class($provider),
                         'recorded_at' => $event->timestamp,
-                        'model' => $event->data['model'],
                     ]
                 ]);
             break;
