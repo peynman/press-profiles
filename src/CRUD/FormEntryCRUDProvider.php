@@ -50,14 +50,21 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     ];
     public $validRelations = [
         'user',
-        'user.phones',
         'form',
-        'domain'
+        'domain',
+        'user.phones',
+        'user.form_support_user_profile',
+        'user.form_profile_default',
+        'user.form_profile_support',
+        'user.form_support_registration_entry',
+        'user.wallet_balance',
+        'entry_tag_resolve',
     ];
     public $defaultShowRelations = [
         'user',
         'form',
-        'domain'
+        'domain',
+        'entry_tag_resolve',
     ];
     public $searchColumns = [
         'equals:tags',
