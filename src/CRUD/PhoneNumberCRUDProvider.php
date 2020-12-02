@@ -49,7 +49,12 @@ class PhoneNumberCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     ];
     public $validRelations = [
         'user',
-        'domain'
+        'domain',
+        'user.form_support_user_profile',
+        'user.form_profile_default',
+        'user.form_profile_support',
+        'user.form_support_registration_entry',
+        'user.wallet_balance',
     ];
     public $validFilters = [];
     public $defaultShowRelations = [
