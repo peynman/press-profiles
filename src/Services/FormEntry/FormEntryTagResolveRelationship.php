@@ -45,8 +45,8 @@ class FormEntryTagResolveRelationship extends Relation
     public function addEagerConstraints(array $models)
     {
         $this->query
-            ->whereIn('form_entries.tags', collect($models)->map(function (FormEntry $model) {
-                return $model->tags;
+            ->whereIn('form_entries.id', collect($models)->map(function (FormEntry $model) {
+                return $model->id;
             }));
 
         $this->isReadyToLoad = true;

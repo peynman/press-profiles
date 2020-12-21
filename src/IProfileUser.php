@@ -56,4 +56,9 @@ interface IProfileUser extends ICRUDUser
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function domains();
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function form_entries();
 }

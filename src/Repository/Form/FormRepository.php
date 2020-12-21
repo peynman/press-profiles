@@ -38,17 +38,32 @@ class FormRepository implements IFormRepository
             throw new AppException(AppException::ERR_OBJECT_NOT_FOUND);
         }
 
-        if (isset($form->data['roles'])) {
+        if (isset($form->data['roles']) && count($form->data['roles']) > 0) {
             if (isset($form->data['roles'][0]['id'])) {
                 $roles = collect($form->data['roles'])->pluck('id')->toArray();
             } else {
-                $roles = array_keys($form->data['roles']);
+                $roles = isset($form->data['roles'][0]) ? $form->data['roles'] : array_keys($form->data['roles']);
             }
             if (count($roles) > 0) {
                 if (is_null($user) || !$user->hasRole($roles)) {
                     throw new AppException(AppException::ERR_ACCESS_DENIED);
                 }
             }
+        }
+        if (isset($form->data['blocks'])&& count($form->data['blocks']) > 0) {
+            if (isset($form->data['blocks'][0]['id'])) {
+                $roles = collect($form->data['blocks'])->pluck('id')->toArray();
+            } else {
+                $roles = isset($form->data['blocks'][0]) ? $form->data['blocks'] : array_keys($form->data['blocks']);
+            }
+            if (count($roles) > 0) {
+                if (is_null($user) || $user->hasRole($roles)) {
+                    throw new AppException(AppException::ERR_ACCESS_DENIED);
+                }
+            }
+        }
+        if (isset($form->data['registerred']) && !$form->data['registerred']) {
+            throw new AppException(AppException::ERR_ACCESS_DENIED);
         }
 
         $form['sources'] = isset($form->data['sources']) && count($form->data['sources']) > 0 ?

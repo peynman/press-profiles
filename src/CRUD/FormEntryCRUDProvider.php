@@ -16,6 +16,7 @@ use Larapress\Profiles\Services\FormEntry\FormEntryUpdateEvent;
 use Larapress\Profiles\Services\FormEntry\FormEntryUpdateReport;
 use Larapress\Reports\Services\IReportsService;
 use Larapress\Profiles\Services\FormEntry\IFormEntryService;
+use Larapress\ECommerce\IECommerceUser;
 
 class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 {
@@ -147,10 +148,10 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onBeforeAccess($object)
     {
-        /** @var ICRUDUser|IProfileUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
 
-        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
             return in_array($object->domain_id, $user->getAffiliateDomainIds());
         }
 
@@ -163,18 +164,40 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onBeforeQuery($query)
     {
-        /** @var ICRUDUser|IProfileUser $user */
+        /** @var IECommerceUser $user */
         $user = Auth::user();
 
-        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
-            $query->orWhereIn('domain_id', $user->getAffiliateDomainIds());
-            $query->orWhereHas('user.form_entries', function($q) use($user) {
-                $q->where('tags', 'support-group-'.$user->id);
-            });
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+            if ($user->hasRole(config('larapress.ecommerce.lms.support_role_id'))) {
+                $query->whereHas('user.form_entries', function ($q) use ($user) {
+                    $q->where('tags', 'support-group-' . $user->id);
+                });
+            } else if ($user->hasRole(config('larapress.ecommerce.lms.owner_role_id'))) {
+                $flatten_array = function ($arr) {
+                    $flatten = [];
+                    foreach ($arr as $item) {
+                        if (gettype($item) === 'string') {
+                            $flatten[] = $item;
+                        } else {
+                            foreach ($item as $inner) {
+                                $flatten[] = $inner;
+                            }
+                        }
+                    }
+                    return $flatten;
+                };
+
+                $ownerEntries = $flatten_array(collect($user->getOwenedProductsIds())->map(function ($id) {
+                    return ['course-'.$id.'-presence', 'course-'.$id.'-taklif', 'azmoon-'.$id];
+                })->toArray());
+                $query->whereIn('tags', $ownerEntries);
+            } else {
+                $query->whereIn('domain_id', $user->getAffiliateDomainIds());
+            }
         }
 
         return $query;
-    }
+}
 
     /**
      * Undocumented function
@@ -185,7 +208,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onAfterCreate($object, $input_data)
     {
-        Cache::tags(['user.forms:'.$object->user_id])->flush();
+        Cache::tags(['user.forms:' . $object->user_id])->flush();
 
         FormEntryUpdateEvent::dispatch(
             $object->user,
@@ -193,7 +216,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             $object,
             $object->form,
             true,
-            'admin:'.Auth::user()->id,
+            'admin:' . Auth::user()->id,
             time()
         );
     }
@@ -207,7 +230,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onAfterUpdate($object, $input_data)
     {
-        Cache::tags(['user.forms:'.$object->user_id])->flush();
+        Cache::tags(['user.forms:' . $object->user_id])->flush();
 
         FormEntryUpdateEvent::dispatch(
             $object->user,
@@ -215,7 +238,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             $object,
             $object->form,
             false,
-            'admin:'.Auth::user()->id,
+            'admin:' . Auth::user()->id,
             time()
         );
     }
@@ -228,10 +251,10 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onAfterDestroy($object)
     {
-        Cache::tags(['user.forms:'.$object->user_id])->flush();
-        Cache::tags(['user.profile:'.$object->user_id])->flush();
-        Cache::tags(['user.support:'.$object->user_id])->flush();
-        Cache::tags(['user.introducer:'.$object->user_id])->flush();
+        Cache::tags(['user.forms:' . $object->user_id])->flush();
+        Cache::tags(['user.profile:' . $object->user_id])->flush();
+        Cache::tags(['user.support:' . $object->user_id])->flush();
+        Cache::tags(['user.introducer:' . $object->user_id])->flush();
 
         FormEntryUpdateEvent::dispatch(
             $object->user,
@@ -239,7 +262,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             $object,
             $object->form,
             false,
-            'admin:'.Auth::user()->id,
+            'admin:' . Auth::user()->id,
             time()
         );
     }

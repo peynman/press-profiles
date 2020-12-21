@@ -15,6 +15,7 @@ use Larapress\CRUD\Services\IPermissionsMetadata;
 use Larapress\CRUD\Exceptions\AppException;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\CRUD\Repository\IRoleRepository;
+use Larapress\ECommerce\IECommerceUser;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\PhoneNumber;
 use Larapress\Profiles\Repository\Domain\IDomainRepository;
@@ -55,18 +56,6 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'flags' => 'nullable|numeric',
     ];
 
-    public $validRelations = [
-        'roles',
-        'roles.permissions',
-        'domains',
-        'phones',
-        'emails',
-        'form_support_user_profile',
-        'form_profile_default',
-        'form_profile_support',
-        'form_support_registration_entry',
-        'wallet_balance',
-    ];
     public $validSortColumns = [
         'id',
         'name',
@@ -92,6 +81,42 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'year' => 'has:profile:data->values->year',
         'field' => 'has:profile:data->values->field',
     ];
+
+    public function getValidRelations()
+    {
+        return [
+            'roles' => function($user) {
+                return $user->hasPermission(config('larapress.crud.routes.roles.name').'.view');
+            },
+            'roles.permissions' => function($user) {
+                return $user->hasPermission(config('larapress.crud.routes.roles.name').'.view');
+            },
+            'domains' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.domains.name').'.view');
+            },
+            'phones' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.phone-numbers.name').'.view');
+            },
+            'emails' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.emails.name').'.view');
+            },
+            'form_support_user_profile' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
+            },
+            'form_profile_default' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
+            },
+            'form_profile_support' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
+            },
+            'form_support_registration_entry' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
+            },
+            'wallet_balance' => function($user) {
+                return $user->hasPermission(config('larapress.ecommerce.routes.wallet-transactions.name').'.view');
+            },
+        ];
+    }
 
     /**
      * Exclude current id in name unique request
@@ -311,17 +336,19 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onBeforeQuery($query)
     {
-        /** @var IProfileUser|ICRUDUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
 
         if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
-            // @todo: find a solution why this makes it slow!
-            // $query->orWhereHas('domains', function (Builder $q) use ($user) {
-            //     $q->whereIn('id', $user->getAffiliateDomainIds());
-            // });
-            $query->whereHas('form_entries', function($q) use($user) {
-                $q->where('tags', 'support-group-'.$user->id);
-            });
+            if ($user->hasRole(config('larapress.ecommerce.lms.support_role_id'))) {
+                $query->whereHas('form_entries', function($q) use($user) {
+                    $q->where('tags', 'support-group-'.$user->id);
+                });
+            } else if (!$user->hasRole(config('larapress.ecommerce.lms.owner_role_id'))) {
+                $query->whereHas('domains', function (Builder $q) use ($user) {
+                    $q->whereIn('id', $user->getAffiliateDomainIds());
+                });
+            }
         }
 
         return $query;
