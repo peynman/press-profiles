@@ -2,8 +2,6 @@
 
 namespace Larapress\Profiles\CRUD;
 
-use Carbon\Carbon;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +13,6 @@ use Larapress\CRUD\Services\IPermissionsMetadata;
 use Larapress\CRUD\Exceptions\AppException;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\CRUD\Repository\IRoleRepository;
-use Larapress\ECommerce\IECommerceUser;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\PhoneNumber;
 use Larapress\Profiles\Repository\Domain\IDomainRepository;

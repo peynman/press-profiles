@@ -49,18 +49,6 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'domain_id',
         'form_id',
     ];
-    public $validRelations = [
-        'user',
-        'form',
-        'domain',
-        'user.phones',
-        'user.form_support_user_profile',
-        'user.form_profile_default',
-        'user.form_profile_support',
-        'user.form_support_registration_entry',
-        'user.wallet_balance',
-        'entry_tag_resolve',
-    ];
     public $defaultShowRelations = [
         'user',
         'form',
@@ -81,6 +69,43 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'form_id' => 'equals:form_id',
         'tags' => 'like:tags',
     ];
+
+    /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function getValidRelations()
+    {
+        return [
+            'user' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.users.name').'.view');
+            },
+            'domain' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.domains.name').'.view');
+            },
+            'user.phones' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.phone-numbers.name').'.view');
+            },
+            'user.form_support_user_profile' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
+            },
+            'user.form_profile_default' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
+            },
+            'user.form_profile_support' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
+            },
+            'user.form_support_registration_entry' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
+            },
+            'user.wallet_balance'  => function($user) {
+                return $user->hasPermission(config('larapress.ecommerce.routes.wallet-transactions.name').'.view');
+            },
+            'form',
+            'entry_tag_resolve',
+        ];
+    }
 
     /**
      *
