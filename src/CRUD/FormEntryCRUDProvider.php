@@ -59,6 +59,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'equals:tags',
         'has_exact:user,name',
         'has_exact:user.phones,number',
+        'has:data->values',
     ];
     public $filterFields = [
         'created_from' => 'after:created_at',
