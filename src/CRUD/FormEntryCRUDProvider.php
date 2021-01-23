@@ -69,6 +69,8 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'user_id' => 'equals:user_id',
         'form_id' => 'equals:form_id',
         'tags' => 'like:tags',
+        'firstname' => 'like:data->values->firstname',
+        'lastname' => 'like:data->values->lastname',
     ];
 
     /**

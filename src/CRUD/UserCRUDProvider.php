@@ -63,7 +63,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'roles',
         'phones',
         'emails',
-        'domains',
+        'domains'
     ];
     public $searchColumns = [
         'equals:name',
@@ -111,6 +111,18 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             },
             'wallet_balance' => function($user) {
                 return $user->hasPermission(config('larapress.ecommerce.routes.wallet-transactions.name').'.view');
+            },
+            'sales_fixed' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.users.name').'.sales');
+            },
+            'sales_periodic' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.users.name').'.sales');
+            },
+            'sales_real' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.users.name').'.sales');
+            },
+            'sales_virtual' => function($user) {
+                return $user->hasPermission(config('larapress.profiles.routes.users.name').'.sales');
             },
         ];
     }
