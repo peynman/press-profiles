@@ -32,7 +32,6 @@ class Form extends Model
         'author_id',
     ];
 
-
     public $casts = [
         'data' => 'array'
     ];

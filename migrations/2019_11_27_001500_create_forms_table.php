@@ -27,6 +27,13 @@ class CreateFormsTable extends Migration
 
             $table->foreign('author_id')->references('id')->on('users');
         });
+        Schema::create('forms_domans', function (Blueprint $table) {
+            $table->bigInteger('domain_id', false, true);
+            $table->bigInteger('form_id', false, true);
+
+            $table->foreign('form_id')->references('id')->on('forms');
+            $table->foreign('domain_id')->references('id')->on('domains');
+        });
     }
 
     /**
@@ -36,6 +43,7 @@ class CreateFormsTable extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('forms_domans');
         Schema::dropIfExists('forms');
     }
 }
