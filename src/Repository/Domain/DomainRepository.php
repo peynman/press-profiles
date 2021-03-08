@@ -37,7 +37,8 @@ class DomainRepository implements IDomainRepository
      * @param IProfileUser $user
      * @return array
      */
-    public function getDomainFlags(IProfileUser $user) {
+    public function getDomainFlags(IProfileUser $user)
+    {
         return UserDomainFlags::toArray();
     }
 
@@ -51,10 +52,10 @@ class DomainRepository implements IDomainRepository
         $domain_str = $request->getHost();
         return Helpers::getCachedValue(
             'domain:'.$domain_str,
-            function () use($domain_str) {
-                $domain = Domain::where(function(Builder $q) use ($domain_str) {
+            function () use ($domain_str) {
+                $domain = Domain::where(function (Builder $q) use ($domain_str) {
                     $q->orWhere('domain', $domain_str);
-                    $q->orWhereHas('sub_domains', function(Builder $q) use($domain_str) {
+                    $q->orWhereHas('sub_domains', function (Builder $q) use ($domain_str) {
                         $q->where('sub_domain', $domain_str);
                     });
                 })->first();

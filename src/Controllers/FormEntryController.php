@@ -20,7 +20,8 @@ class FormEntryController extends BaseCRUDController
         );
     }
 
-    public static function registerPublicApiRoutes() {
+    public static function registerPublicApiRoutes()
+    {
         Route::post(config('larapress.profiles.routes.form-entries.name').'/update/{form_id}', '\\'.self::class.'@updateEntry')
                 ->name(config('larapress.profiles.routes.form-entries.name').'.any.update-form-entry');
     }
@@ -33,7 +34,8 @@ class FormEntryController extends BaseCRUDController
      * @param [type] $formId
      * @return Illuminate\Http\Response
      */
-    public function updateEntry(IFormEntryService $serivce, Request $request, $formId) {
+    public function updateEntry(IFormEntryService $serivce, Request $request, $formId)
+    {
         return $serivce->updateFormEntry($request, Auth::user(), $formId);
     }
 }

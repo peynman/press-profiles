@@ -79,7 +79,8 @@ trait BaseProfileUser
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function form_entries() {
+    public function form_entries()
+    {
         return $this->hasMany(
             FormEntry::class,
             'user_id'

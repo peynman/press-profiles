@@ -44,5 +44,4 @@ class Filter extends Model
     {
         return $this->belongsTo(config('larapress.crud.user.class'), 'author_id');
     }
-
 }

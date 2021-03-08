@@ -5,7 +5,8 @@ namespace Larapress\Profiles\Services\Settings;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\Domain;
 
-interface ISettingsService {
+interface ISettingsService
+{
     /**
      * Undocumented function
      *
@@ -43,5 +44,4 @@ interface ISettingsService {
      * @return void
      */
     public function applyUserSettings(IProfileUser $user);
-
 }

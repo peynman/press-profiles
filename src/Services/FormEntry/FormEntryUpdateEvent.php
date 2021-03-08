@@ -51,15 +51,18 @@ class FormEntryUpdateEvent implements ShouldQueue
     }
 
 
-    public function getUser(): IECommerceUser {
+    public function getUser(): IECommerceUser
+    {
         return call_user_func([config('larapress.crud.user.class'), "find"], $this->userId);
     }
 
-    public function getForm() : Form {
+    public function getForm() : Form
+    {
         return Form::find($this->formId);
     }
 
-    public function getFormEntry() : FormEntry {
+    public function getFormEntry() : FormEntry
+    {
         return FormEntry::find($this->entryId);
     }
 }

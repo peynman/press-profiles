@@ -5,7 +5,8 @@ namespace Larapress\Profiles\Services\FormEntry;
 use Illuminate\Http\Request;
 use Symfony\Component\Routing\Route;
 
-interface IFormEntryService {
+interface IFormEntryService
+{
 
     /**
      * add new form entry

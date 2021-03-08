@@ -328,18 +328,19 @@ class FormEntryService implements IFormEntryService
     {
         /** @var IFileUploadService */
         $this->fileService = app(IFileUploadService::class);
-        $traverse = function($inputs, $prop, $traverse) use($disk, $folder) {
+        $traverse = function ($inputs, $prop, $traverse) use ($disk, $folder) {
             foreach ($inputs as $p => $v) {
                 if (is_string($v) && (Str::startsWith($p, $prop) || Str::endsWith($p, $prop))) {
                     if (Str::startsWith($inputs[$p], 'data:image/png;base64,')) {
                         try {
-                            $filepath = $this->fileService->saveBase64Image($inputs[$p], $disk, $folder);;
+                            $filepath = $this->fileService->saveBase64Image($inputs[$p], $disk, $folder);
+                            ;
                             $inputs[$p] = '/storage/' . $filepath;
                         } catch (Exception $e) {
                             Log::critical('Failed auto saving base64 image form: '. $e->getMessage(), $e->getTrace());
                         }
                     }
-                } else if (is_array($v)) {
+                } elseif (is_array($v)) {
                     $inputs[$p] = $traverse($v, $prop, $traverse);
                 }
             }

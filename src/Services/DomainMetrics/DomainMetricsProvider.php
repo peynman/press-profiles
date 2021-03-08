@@ -4,7 +4,8 @@ namespace Larapress\Profiles\Services\DomainMetircs;
 
 use Larapress\Reports\Services\IReportsServiceProvider;
 
-class DomainMetircsProvider implements IReportsServiceProvider {
+class DomainMetircsProvider implements IReportsServiceProvider
+{
     /**
      * Undocumented function
      *
@@ -12,7 +13,8 @@ class DomainMetircsProvider implements IReportsServiceProvider {
      * @param array $options
      * @return array
      */
-    public function getFiltersForReports($user, $options) {
+    public function getFiltersForReports($user, $options)
+    {
         $filters = [];
 
         if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {

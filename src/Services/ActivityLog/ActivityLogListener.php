@@ -9,7 +9,6 @@ use Larapress\CRUD\Events\CRUDUpdated;
 use Larapress\CRUD\Services\ICRUDProvider;
 use Larapress\Profiles\Models\ActivityLog;
 
-
 class ActivityLogListener implements ShouldQueue
 {
     public function handle($event)
@@ -32,7 +31,7 @@ class ActivityLogListener implements ShouldQueue
                         'model' => $event->data['model'],
                     ]
                 ]);
-            break;
+                break;
             case CRUDUpdated::class:
                 ActivityLog::create([
                     'user_id' => $event->userId,
@@ -46,7 +45,7 @@ class ActivityLogListener implements ShouldQueue
                         'model' => $event->data['model'],
                     ]
                 ]);
-            break;
+                break;
             case CRUDDeleted::class:
                 ActivityLog::create([
                     'user_id' => $event->userId,
@@ -59,7 +58,7 @@ class ActivityLogListener implements ShouldQueue
                         'recorded_at' => $event->timestamp,
                     ]
                 ]);
-            break;
+                break;
         }
     }
 }

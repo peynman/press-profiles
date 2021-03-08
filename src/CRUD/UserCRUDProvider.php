@@ -99,46 +99,46 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     public function getValidRelations()
     {
         return [
-            'roles' => function($user) {
+            'roles' => function ($user) {
                 return $user->hasPermission(config('larapress.crud.routes.roles.name').'.view');
             },
-            'roles.permissions' => function($user) {
+            'roles.permissions' => function ($user) {
                 return $user->hasPermission(config('larapress.crud.routes.roles.name').'.view');
             },
-            'domains' => function($user) {
+            'domains' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.domains.name').'.view');
             },
-            'phones' => function($user) {
+            'phones' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.phone-numbers.name').'.view');
             },
-            'emails' => function($user) {
+            'emails' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.emails.name').'.view');
             },
-            'form_support_user_profile' => function($user) {
+            'form_support_user_profile' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
             },
-            'form_profile_default' => function($user) {
+            'form_profile_default' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
             },
-            'form_profile_support' => function($user) {
+            'form_profile_support' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
             },
-            'form_support_registration_entry' => function($user) {
+            'form_support_registration_entry' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
             },
-            'wallet_balance' => function($user) {
+            'wallet_balance' => function ($user) {
                 return $user->hasPermission(config('larapress.ecommerce.routes.wallet-transactions.name').'.view');
             },
-            'sales_fixed' => function($user) {
+            'sales_fixed' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.users.name').'.sales');
             },
-            'sales_periodic' => function($user) {
+            'sales_periodic' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.users.name').'.sales');
             },
-            'sales_real' => function($user) {
+            'sales_real' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.users.name').'.sales');
             },
-            'sales_virtual' => function($user) {
+            'sales_virtual' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.users.name').'.sales');
             },
         ];
@@ -356,10 +356,10 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 
         if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
             if ($user->hasRole(config('larapress.ecommerce.lms.support_role_id'))) {
-                $query->whereHas('form_entries', function($q) use($user) {
+                $query->whereHas('form_entries', function ($q) use ($user) {
                     $q->where('tags', 'support-group-'.$user->id);
                 });
-            } else if (!$user->hasRole(config('larapress.ecommerce.lms.owner_role_id'))) {
+            } elseif (!$user->hasRole(config('larapress.ecommerce.lms.owner_role_id'))) {
                 $query->whereHas('domains', function (Builder $q) use ($user) {
                     $q->whereIn('id', $user->getAffiliateDomainIds());
                 });

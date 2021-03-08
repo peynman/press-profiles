@@ -81,28 +81,28 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     public function getValidRelations()
     {
         return [
-            'user' => function($user) {
+            'user' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.users.name').'.view');
             },
-            'domain' => function($user) {
+            'domain' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.domains.name').'.view');
             },
-            'user.phones' => function($user) {
+            'user.phones' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.phone-numbers.name').'.view');
             },
-            'user.form_support_user_profile' => function($user) {
+            'user.form_support_user_profile' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
             },
-            'user.form_profile_default' => function($user) {
+            'user.form_profile_default' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
             },
-            'user.form_profile_support' => function($user) {
+            'user.form_profile_support' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
             },
-            'user.form_support_registration_entry' => function($user) {
+            'user.form_support_registration_entry' => function ($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
             },
-            'user.wallet_balance' => function($user) {
+            'user.wallet_balance' => function ($user) {
                 return $user->hasPermission(config('larapress.ecommerce.routes.wallet_transactions.name').'.view');
             },
             'form',
@@ -200,7 +200,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
                 $query->whereHas('user.form_entries', function ($q) use ($user) {
                     $q->where('tags', 'support-group-' . $user->id);
                 });
-            } else if ($user->hasRole(config('larapress.ecommerce.lms.owner_role_id'))) {
+            } elseif ($user->hasRole(config('larapress.ecommerce.lms.owner_role_id'))) {
                 $flatten_array = function ($arr) {
                     $flatten = [];
                     foreach ($arr as $item) {
@@ -225,7 +225,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         }
 
         return $query;
-}
+    }
 
     /**
      * Undocumented function

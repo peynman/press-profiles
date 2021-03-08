@@ -73,7 +73,7 @@ class FormEntryUpdateReport implements IReportSource, ShouldQueue
             $entry = $event->getFormEntry();
             $values = $entry->data['values'];
             $askedTags = explode(',', $form->data['report_tags']);
-            foreach($askedTags as $tag) {
+            foreach ($askedTags as $tag) {
                 $val = Helpers::getArrayWithPath($values, $tag);
                 $tags[$tag] = $val;
             }

@@ -6,7 +6,8 @@ namespace Larapress\Profiles\Repository\Form;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 
-interface IFormRepository {
+interface IFormRepository
+{
 
     /**
      * Undocumented function

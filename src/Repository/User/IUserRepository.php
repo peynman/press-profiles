@@ -2,7 +2,8 @@
 
 namespace Larapress\Profiles\Repository\User;
 
-interface IUserRepository {
+interface IUserRepository
+{
 
     /**
      * Undocumented function

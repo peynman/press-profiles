@@ -89,7 +89,7 @@ class SettingsCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 
         if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
             $query
-            ->whereHas('domains', function($q) use($user) {
+            ->whereHas('domains', function ($q) use ($user) {
                 $q->whereIn('id', $user->getAffiliateDomainIds());
             })
             ->orWhere('author_id', $user->id);

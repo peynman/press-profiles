@@ -148,17 +148,17 @@ class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             $user->domains()->attach($object->id, [
                 'flags' => UserDomainFlags::AFFILIATE_DOMAIN,
             ]);
-        } else
-            // allow super user to create domains in place of other users
-        if (isset($input_data['target_user_id']) && !is_null($input_data['target_user_id'])) {
-            $targetUser = call_user_func([config('larapress.crud.user.class'), 'find'], $input_data['target_user_id']);
-            if (!is_null($targetUser)) {
-                $targetUser->domains()->attach(
-                    $object->id,
-                    [
+        } else {             // allow super user to create domains in place of other users
+            if (isset($input_data['target_user_id']) && !is_null($input_data['target_user_id'])) {
+                $targetUser = call_user_func([config('larapress.crud.user.class'), 'find'], $input_data['target_user_id']);
+                if (!is_null($targetUser)) {
+                    $targetUser->domains()->attach(
+                        $object->id,
+                        [
                         'flags' => UserDomainFlags::AFFILIATE_DOMAIN,
-                    ]
-                );
+                        ]
+                    );
+                }
             }
         }
 

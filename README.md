@@ -4,8 +4,8 @@
 A package to provide common Models for a Larapress Web Application.
 
 ## Dependencies
-* [Larapress CRUD](./../press-crud)
-* [Larapress Reports](./../press-reports)
+* [Larapress CRUD](../../../press-crud)
+* [Larapress Reports](../../../press-reports)
 
 ## Install
 1. ```composer require ```
@@ -23,8 +23,4 @@ A package to provide common Models for a Larapress Web Application.
 * Add ``IProfileUser`` and ``BaseProfileUser`` to your ``User`` class
 
 ## Development/Contribution Guid
-* create a new laravel project
-* add this project as a submodule at path packages/larapress-crud
-* use phpunit, phpcs
-    * ```vendor/bin/phpunit -c packages/larapress-profiles/phpunit.xml```
-    * ```vendor/bin/phpcs --standard=packages/larapress-profiles/phpcs.xml packages/larapress-profiles/```
+* See guid in [Larapress CRUD](../../../press-crud)

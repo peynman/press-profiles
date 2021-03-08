@@ -18,7 +18,6 @@ class FormEntryTagResolveRelationship extends Relation
     {
         $this->table = $query->getModel()->getTable();
         parent::__construct(Product::query(), $parent);
-
     }
 
     /**
@@ -30,7 +29,7 @@ class FormEntryTagResolveRelationship extends Relation
     {
         $this->query
             ->select([$this->table.'.id', $this->table.'.name'])
-            ->leftJoin('form_entries', function($join) {
+            ->leftJoin('form_entries', function ($join) {
                 $join->on('form_entries.tags', '=', DB::raw('CONCAT(\'course-\', '.$this->table.'.id, \'-presence\')'));
             });
     }

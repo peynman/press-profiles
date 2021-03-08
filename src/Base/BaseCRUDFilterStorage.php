@@ -55,7 +55,7 @@ class BaseCRUDFilterStorage implements ICRUDFilterStorage
     {
         $providerName = get_class($provider);
         $filtersKey = $this->getFilterKey($sessionId, $providerName);
-        $values = $this->settingsRepository->get($filtersKey, 'crud',null, auth()->guest() ? null : auth()->user()->id);
+        $values = $this->settingsRepository->get($filtersKey, 'crud', null, auth()->guest() ? null : auth()->user()->id);
         $defaults = $provider->getFilterDefaultValues();
 
         return array_merge($defaults, is_array($values) ? $values : []);

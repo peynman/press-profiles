@@ -73,7 +73,8 @@ class Domain extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function sub_domains() {
+    public function sub_domains()
+    {
         return $this->hasMany(
             DomainSub::class,
             'domain_id'

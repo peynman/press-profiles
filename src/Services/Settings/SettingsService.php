@@ -7,7 +7,8 @@ use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\Domain;
 use Larapress\Profiles\Models\Settings;
 
-class SettingsService implements ISettingsService {
+class SettingsService implements ISettingsService
+{
 
     /**
      * Undocumented function
@@ -17,8 +18,8 @@ class SettingsService implements ISettingsService {
      * @param string|null $type
      * @return Settings
      */
-    public function updateGlobalSettings(string $key, $value, $type) {
-
+    public function updateGlobalSettings(string $key, $value, $type)
+    {
     }
 
     /**
@@ -30,8 +31,8 @@ class SettingsService implements ISettingsService {
      * @param string|null $type
      * @return Settings
      */
-    public function updateUserSettings(string $key, IProfileUser $user, $value, $type) {
-
+    public function updateUserSettings(string $key, IProfileUser $user, $value, $type)
+    {
     }
 
     /**
@@ -40,12 +41,13 @@ class SettingsService implements ISettingsService {
      * @param Domain $domain
      * @return void
      */
-    public function applyGlobalSettingsForDomain($domain) {
+    public function applyGlobalSettingsForDomain($domain)
+    {
         $query = Settings::query()
             ->where('type', 'config')
             ->whereNull('user_id');
         if (!is_null($domain)) {
-            $query->whereHas('domains', function(Builder $q) use($domain) {
+            $query->whereHas('domains', function (Builder $q) use ($domain) {
                 $q->where('id', $domain->id);
             });
         }
@@ -65,7 +67,8 @@ class SettingsService implements ISettingsService {
      * @param IProfileUser $user
      * @return void
      */
-    public function applyUserSettings(IProfileUser $user) {
+    public function applyUserSettings(IProfileUser $user)
+    {
         $query = Settings::query()
             ->where('type', 'config')
             ->where('user_id', '=', $user->id);

@@ -44,21 +44,24 @@ class FormEntry extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function user() {
+    public function user()
+    {
         return $this->belongsTo(config('larapress.crud.user.class'), 'user_id');
     }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function form() {
+    public function form()
+    {
         return $this->belongsTo(Form::class, 'form_id');
     }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function domain() {
+    public function domain()
+    {
         return $this->belongsTo(Domain::class, 'domain_id');
     }
 
@@ -67,7 +70,8 @@ class FormEntry extends Model
      *
      * @return FormEntryTagResolveRelationship
      */
-    public function entry_tag_resolve() {
+    public function entry_tag_resolve()
+    {
         return new FormEntryTagResolveRelationship($this, Product::query());
     }
 }

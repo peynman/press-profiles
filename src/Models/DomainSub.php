@@ -27,7 +27,8 @@ class DomainSub extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function domain() {
+    public function domain()
+    {
         return $this->belongsTo(
             Domain::class,
             'domain_id'

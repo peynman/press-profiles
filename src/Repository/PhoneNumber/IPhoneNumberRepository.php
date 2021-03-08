@@ -4,7 +4,8 @@ namespace Larapress\Profiles\Repository\PhoneNumber;
 
 use Larapress\Profiles\IProfileUser;
 
-interface IPhoneNumberRepository {
+interface IPhoneNumberRepository
+{
     /**
      * Undocumented function
      *

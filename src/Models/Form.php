@@ -40,14 +40,16 @@ class Form extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function author() {
+    public function author()
+    {
         return $this->belongsTo(config('larapress.crud.user.class'), 'author_id');
     }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function entries() {
+    public function entries()
+    {
         return $this->hasMany(
             FormEntry::class,
             'form_id',

@@ -71,7 +71,8 @@ class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      * @param Request $request
      * @return void
      */
-    public function getUpdateRules(Request $request) {
+    public function getUpdateRules(Request $request)
+    {
         $this->updateValidations['name'] .= ',' . $request->route('id');
         return $this->updateValidations;
     }
@@ -83,7 +84,7 @@ class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      * @param [type] $args
      * @return void
      */
-    public function onBeforeCreate( $args )
+    public function onBeforeCreate($args)
     {
         $args['author_id'] = Auth::user()->id;
         return $args;
@@ -120,5 +121,4 @@ class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 
         return $query;
     }
-
 }
