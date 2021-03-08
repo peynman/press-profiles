@@ -5,6 +5,7 @@ namespace Larapress\Profiles\Repository\Domain;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Larapress\CRUD\BaseFlags;
+use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\CRUD\DomainCRUDProvider;
 use Larapress\Profiles\Flags\UserDomainFlags;
@@ -48,15 +49,20 @@ class DomainRepository implements IDomainRepository
     public function getRequestDomain(Request $request)
     {
         $domain_str = $request->getHost();
-
-        $domain = Domain::where(function(Builder $q) use ($domain_str) {
-            $q->orWhere('domain', $domain_str);
-            $q->orWhereHas('sub_domains', function(Builder $q) use($domain_str) {
-                $q->where('sub_domain', $domain_str);
-            });
-        })->first();
-
-        return $domain;
+        return Helpers::getCachedValue(
+            'domain:'.$domain_str,
+            function () use($domain_str) {
+                $domain = Domain::where(function(Builder $q) use ($domain_str) {
+                    $q->orWhere('domain', $domain_str);
+                    $q->orWhereHas('sub_domains', function(Builder $q) use($domain_str) {
+                        $q->where('sub_domain', $domain_str);
+                    });
+                })->first();
+                return $domain;
+            },
+            ['domains'],
+            null
+        );
     }
 
     /**

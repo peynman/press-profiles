@@ -6,7 +6,7 @@
     "minimum-stability": "dev",
     "authors": [{
         "name": "Peyman Abdi",
-        "email": "peyman.abdi.work@gmail.com"
+        "email": "larapress@peynman.ir"
     }],
     "autoload": {
         "psr-4": {

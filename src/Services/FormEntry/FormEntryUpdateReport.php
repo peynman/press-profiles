@@ -59,9 +59,7 @@ class FormEntryUpdateReport implements IReportSource, ShouldQueue
 
         $supportProfileId = is_null($user) ? null : $user->getSupportUserId();
 
-        /** @var IRoleRepository */
-        $roleRepo = app(IRoleRepository::class);
-        $highRole = is_null($user) ? null : $roleRepo->getUserHighestRole($user)->name;
+        $highRole = is_null($user) ? null : $user->getUserHighestRole()->name;
 
         $tags = [
             'domain' => $event->domainId,

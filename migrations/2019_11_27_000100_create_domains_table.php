@@ -25,6 +25,7 @@ class CreateDomainsTable extends Migration
             $table->softDeletes();
 
             $table->unique(['deleted_at', 'domain']);
+            $table->index(['deleted_at', 'created_at', 'updated_at', 'domain', 'flags']);
 
             $table->foreign('author_id')->references('id')->on('users');
         });

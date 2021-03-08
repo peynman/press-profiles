@@ -23,7 +23,7 @@ class CreateSettingsTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['deleted_at', 'user_id', 'type', 'key']);
+            $table->index(['deleted_at', 'created_at', 'updated_at', 'user_id', 'type', 'key']);
             $table->unique(['deleted_at', 'type', 'key', 'user_id']);
 
             $table->foreign('user_id')->references('id')->on('users');

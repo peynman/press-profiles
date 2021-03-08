@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Larapress\Profiles\CRUDControllers;
+namespace Larapress\Profiles\Controllers;
 
 use Larapress\CRUD\CRUDControllers\BaseCRUDController;
 use Larapress\Profiles\CRUD\FilterCRUDProvider;

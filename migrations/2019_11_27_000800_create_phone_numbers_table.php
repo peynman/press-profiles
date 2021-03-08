@@ -24,6 +24,7 @@ class CreatePhoneNumbersTable extends Migration
             $table->softDeletes();
 
             $table->unique(['deleted_at', 'domain_id', 'number']);
+            $table->index(['deleted_at', 'created_at', 'updated_at', 'domain_id', 'number', 'flags']);
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('domain_id')->references('id')->on('domains');

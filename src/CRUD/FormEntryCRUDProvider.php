@@ -102,8 +102,8 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             'user.form_support_registration_entry' => function($user) {
                 return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
             },
-            'user.wallet_balance'  => function($user) {
-                return $user->hasPermission(config('larapress.ecommerce.routes.wallet-transactions.name').'.view');
+            'user.wallet_balance' => function($user) {
+                return $user->hasPermission(config('larapress.ecommerce.routes.wallet_transactions.name').'.view');
             },
             'form',
             'entry_tag_resolve',

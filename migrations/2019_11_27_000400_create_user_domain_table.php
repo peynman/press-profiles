@@ -19,6 +19,8 @@ class CreateUserDomainTable extends Migration
             $table->integer('flags', false, true)->default(0);
             $table->json('data')->nullable();
 
+            $table->index(['user_id', 'domain_id', 'flags']);
+
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('domain_id')->references('id')->on('domains');
         });

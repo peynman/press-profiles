@@ -50,11 +50,6 @@ interface IProfileUser extends ICRUDUser
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function roles();
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
     public function domains();
 
     /**

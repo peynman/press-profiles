@@ -11,18 +11,19 @@ return [
         \Larapress\Profiles\CRUD\FilterCRUDProvider::class,
         \Larapress\Profiles\CRUD\FormCRUDProvider::class,
         \Larapress\Profiles\CRUD\FormEntryCRUDProvider::class,
+        \Larapress\Profiles\CRUD\DeviceCRUDProvider::class,
     ],
 
     'controllers' => [
-        \Larapress\Profiles\CRUDControllers\UserController::class,
-        \Larapress\Profiles\CRUDControllers\ActivityLogController::class,
-        \Larapress\Profiles\CRUDControllers\DomainController::class,
-        \Larapress\Profiles\CRUDControllers\EmailAddressController::class,
-        \Larapress\Profiles\CRUDControllers\PhoneNumberController::class,
-        \Larapress\Profiles\CRUDControllers\SettingsController::class,
-        \Larapress\Profiles\CRUDControllers\FilterController::class,
-        \Larapress\Profiles\CRUDControllers\FormController::class,
-        \Larapress\Profiles\CRUDControllers\FormEntryController::class,
+        \Larapress\Profiles\Controllers\UserController::class,
+        \Larapress\Profiles\Controllers\ActivityLogController::class,
+        \Larapress\Profiles\Controllers\DomainController::class,
+        \Larapress\Profiles\Controllers\EmailAddressController::class,
+        \Larapress\Profiles\Controllers\PhoneNumberController::class,
+        \Larapress\Profiles\Controllers\SettingsController::class,
+        \Larapress\Profiles\Controllers\FilterController::class,
+        \Larapress\Profiles\Controllers\FormController::class,
+        \Larapress\Profiles\Controllers\FormEntryController::class,
     ],
 
     'security' => [

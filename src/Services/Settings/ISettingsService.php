@@ -3,6 +3,7 @@
 namespace Larapress\Profiles\Services\Settings;
 
 use Larapress\Profiles\IProfileUser;
+use Larapress\Profiles\Models\Domain;
 
 interface ISettingsService {
     /**
@@ -25,4 +26,22 @@ interface ISettingsService {
      * @return Settings
      */
     public function updateUserSettings(string $key, IProfileUser $user, $value, $type);
+
+
+    /**
+     * Undocumented function
+     *
+     * @param Domain $domain
+     * @return void
+     */
+    public function applyGlobalSettingsForDomain($domain);
+
+    /**
+     * Undocumented function
+     *
+     * @param IProfileUser $user
+     * @return void
+     */
+    public function applyUserSettings(IProfileUser $user);
+
 }

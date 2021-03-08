@@ -23,9 +23,10 @@ class CreateActivityLogsTable extends Migration
             $table->json('data')->nullable();
             $table->timestamps();
 
+            $table->index(['created_at', 'updated_at', 'domain_id', 'type', 'user_id', 'subject']);
+
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('domain_id')->references('id')->on('domains');
-            $table->index(['created_at', 'domain_id', 'type', 'subject', 'user_id']);
         });
     }
 

@@ -29,10 +29,6 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         self::DELETE,
         self::REPORTS,
     ];
-    public function getModelClass()
-    {
-        return config('larapress.crud.user.class');
-    }
 
     public $createValidations = [
         'name' => 'required|string|min:4|max:190|unique:users,name|regex:/(^[A-Za-z0-9-_.]+$)+/',
@@ -43,16 +39,6 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'phones.*.number' => 'nullable|numeric|regex:/(09)[0-9]{9}/',
         'flags' => 'nullable|numeric',
     ];
-    public $updateValidations = [
-        'name' => 'nullable|string|min:4|max:190|regex:/(^[A-Za-z0-9-_.]+$)+/|unique:users,name',
-        'password' => 'nullable|string|min:4|confirmed',
-        'password_confirmation' => 'required_with:password',
-        'roles.*.id' => 'required|exists:roles,id',
-        'domains.*.id' => 'required|exists:domains,id',
-        'phones.*.number' => 'nullable|numeric|regex:/(09)[0-9]{9}/',
-        'flags' => 'nullable|numeric',
-    ];
-
     public $validSortColumns = [
         'id',
         'name',
@@ -79,6 +65,37 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'field' => 'has:profile:data->values->field',
     ];
 
+    public function getModelClass()
+    {
+        return config('larapress.crud.user.class');
+    }
+
+    /**
+     * Exclude current id in name unique request
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function getUpdateRules(Request $request)
+    {
+        $updateValidations = [
+            'name' => 'nullable|string|min:4|max:190|regex:/(^[A-Za-z0-9-_.]+$)+/|unique:users,name',
+            'password' => 'nullable|string|min:4|confirmed',
+            'password_confirmation' => 'required_with:password',
+            'roles.*.id' => 'required|exists:roles,id',
+            'domains.*.id' => 'required|exists:domains,id',
+            'phones.*.number' => 'nullable|numeric|regex:/(09)[0-9]{9}/',
+            'flags' => 'nullable|numeric',
+        ];
+        $updateValidations['name'] .= ',' . $request->route('id').',id';
+        return $updateValidations;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return array
+     */
     public function getValidRelations()
     {
         return [
@@ -125,18 +142,6 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
                 return $user->hasPermission(config('larapress.profiles.routes.users.name').'.sales');
             },
         ];
-    }
-
-    /**
-     * Exclude current id in name unique request
-     *
-     * @param Request $request
-     * @return void
-     */
-    public function getUpdateRules(Request $request)
-    {
-        $this->updateValidations['name'] .= ',' . $request->route('id');
-        return $this->updateValidations;
     }
 
     /**
@@ -335,6 +340,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         }
 
         Cache::tags(['user:' . $object->id])->flush();
+        Cache::tags(['user.roles:' . $object->id])->flush();
         Cache::tags(['user.domains:'.$object->id])->flush();
     }
 

@@ -4,6 +4,7 @@ namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Larapress\CRUD\Services\BaseCRUDProvider;
 use Larapress\CRUD\Services\ICRUDProvider;
 use Larapress\CRUD\Services\IPermissionsMetadata;
@@ -140,7 +141,7 @@ class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onAfterCreate($object, $input_data)
     {
-        /** @var ICRUDUser|IProfileUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
 
         if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
@@ -176,7 +177,7 @@ class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onAfterUpdate($object, $input_data)
     {
-        /** @var ICRUDUser|IProfileUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
 
         // allow super user to create domains in place of other users
@@ -200,5 +201,6 @@ class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         }
 
         $user->forgetDomainsCache();
+        Cache::tags(['domains'])->flush();
     }
 }
