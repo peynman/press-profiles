@@ -1,6 +1,6 @@
 <?php
 
-namespace Larapress\Profiles\Services\DomainMetircs;
+namespace Larapress\Profiles\Services\DomainMetrics;
 
 use Larapress\Reports\Services\IReportsServiceProvider;
 
