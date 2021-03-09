@@ -24,8 +24,17 @@ class CreateFiltersTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
+            $table->index(
+                [
+                    'deleted_at',
+                    'created_at',
+                    'updated_at',
+                    'type',
+                    'name',
+                ],
+                'filters_full_index'
+            );
             $table->unique(['deleted_at', 'type', 'name']);
-            $table->index(['deleted_at', 'created_at', 'updated_at', 'type', 'name']);
 
             $table->foreign('author_id')->references('id')->on('users');
         });

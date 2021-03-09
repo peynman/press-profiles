@@ -23,7 +23,17 @@ class CreateDevicesTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['deleted_at', 'created_at', 'updated_at', 'user_id', 'client_type', 'flags']);
+            $table->index(
+                [
+                    'deleted_at',
+                    'created_at',
+                    'updated_at',
+                    'user_id',
+                    'client_type',
+                    'flags'
+                ],
+                'devices_full_index'
+            );
 
             $table->foreign('user_id')->references('id')->on('users');
         });

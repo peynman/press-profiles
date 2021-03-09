@@ -24,7 +24,19 @@ class CreateFormEntriesTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['deleted_at', 'created_at', 'updated_at', 'form_id', 'domain_id', 'user_id', 'tags', 'flags']);
+            $table->index(
+                [
+                    'deleted_at',
+                    'created_at',
+                    'updated_at',
+                    'form_id',
+                    'domain_id',
+                    'user_id',
+                    'tags',
+                    'flags'
+                ],
+                'form_entries_full_index'
+            );
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('form_id')->references('id')->on('forms');

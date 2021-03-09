@@ -23,13 +23,24 @@ class CreateFormsTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['deleted_at', 'created_at', 'updated_at', 'author_id', 'name']);
+            $table->index(
+                [
+                    'deleted_at',
+                    'created_at',
+                    'updated_at',
+                    'author_id',
+                    'name'
+                ],
+                'forms_full_index'
+            );
 
             $table->foreign('author_id')->references('id')->on('users');
         });
-        Schema::create('forms_domans', function (Blueprint $table) {
+        Schema::create('form_domain', function (Blueprint $table) {
             $table->bigInteger('domain_id', false, true);
             $table->bigInteger('form_id', false, true);
+
+            $table->index(['domain_id', 'form_id']);
 
             $table->foreign('form_id')->references('id')->on('forms');
             $table->foreign('domain_id')->references('id')->on('domains');
@@ -43,7 +54,7 @@ class CreateFormsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('forms_domans');
+        Schema::dropIfExists('form_domain');
         Schema::dropIfExists('forms');
     }
 }

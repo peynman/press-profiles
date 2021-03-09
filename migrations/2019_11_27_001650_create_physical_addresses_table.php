@@ -29,7 +29,19 @@ class CreatePhysicalAddressesTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['deleted_at', 'created_at', 'updated_at', 'user_id', 'domain_id', 'country_code', 'province_code', 'city_code']);
+            $table->index(
+                [
+                    'deleted_at',
+                    'created_at',
+                    'updated_at',
+                    'user_id',
+                    'domain_id',
+                    'country_code',
+                    'province_code',
+                    'city_code'
+                ],
+                'physical_addresses_full_index'
+            );
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('domain_id')->references('id')->on('domains');

@@ -23,16 +23,28 @@ class CreateSettingsTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['deleted_at', 'created_at', 'updated_at', 'user_id', 'type', 'key']);
+            $table->index(
+                [
+                    'deleted_at',
+                    'created_at',
+                    'updated_at',
+                    'user_id',
+                    'type',
+                    'key'
+                ],
+                'settings_full_index'
+            );
             $table->unique(['deleted_at', 'type', 'key', 'user_id']);
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('author_id')->references('id')->on('users');
         });
 
-        Schema::create('setting_domain', function(Blueprint $table) {
+        Schema::create('setting_domain', function (Blueprint $table) {
             $table->bigInteger('setting_id', false, true);
             $table->bigInteger('domain_id', false, true);
+
+            $table->index(['setting_id', 'domain_id']);
 
             $table->foreign('setting_id')->references('id')->on('settings');
             $table->foreign('domain_id')->references('id')->on('domains');

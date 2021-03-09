@@ -24,7 +24,17 @@ class CreateEmailAddressesTable extends Migration
             $table->softDeletes();
 
             $table->unique(['deleted_at', 'domain_id', 'email']);
-            $table->index(['deleted_at', 'created_at', 'updated_at', 'domain_id', 'email', 'flags']);
+            $table->index(
+                [
+                    'deleted_at',
+                    'created_at',
+                    'updated_at',
+                    'domain_id',
+                    'email',
+                    'flags'
+                ],
+                'email_addresses_full_index'
+            );
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('domain_id')->references('id')->on('domains');
