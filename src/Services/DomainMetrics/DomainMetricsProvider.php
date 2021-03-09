@@ -4,7 +4,7 @@ namespace Larapress\Profiles\Services\DomainMetrics;
 
 use Larapress\Reports\Services\IReportsServiceProvider;
 
-class DomainMetircsProvider implements IReportsServiceProvider
+class DomainMetricsProvider implements IReportsServiceProvider
 {
     /**
      * Undocumented function
