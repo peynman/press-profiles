@@ -20,6 +20,9 @@ use Larapress\CRUD\ICRUDUser;
  */
 class EmailAddress extends Model
 {
+    const FLAGS_VERIFIED = 1;
+    const FLAGS_DO_NOT_CONTACT = 2;
+
     use SoftDeletes;
 
     protected $table = 'email_addresses';

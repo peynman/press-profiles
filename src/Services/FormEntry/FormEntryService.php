@@ -2,26 +2,26 @@
 
 namespace Larapress\Profiles\Services\FormEntry;
 
-use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Larapress\CRUD\Exceptions\AppException;
 use Larapress\CRUD\Exceptions\ValidationException;
+use Larapress\FileShare\Services\FileUpload\IFileUploadService;
 use Larapress\Profiles\Models\Form;
 use Larapress\Profiles\Models\FormEntry;
 use Larapress\Profiles\Repository\Domain\IDomainRepository;
 use Larapress\Profiles\IProfileUser;
-use Larapress\CRUD\ICRUDUser;
-use Larapress\ECommerce\Models\WalletTransaction;
-use Larapress\ECommerce\Services\Banking\IBankingService;
-use Illuminate\Support\Str;
-use Larapress\Ecommerce\Services\FileUpload\IFileUploadService;
 
 class FormEntryService implements IFormEntryService
 {
+    /** @var IFileUploadService $fileService */
+    protected $fileService;
+    public function __construct(IFileUploadService $fileService)
+    {
+        $this->fileService = $fileService;
+    }
+
     /**
      * @param Request|null $request
      * @param int $formId
@@ -222,9 +222,9 @@ class FormEntryService implements IFormEntryService
      */
     public function replaceBase64ImagesInInputs($values)
     {
-        $values = $this->replaceBase64WithFilepath($values, 'profile');
-        $values = $this->replaceBase64WithFilepath($values, 'image');
-        $values = $this->replaceBase64WithFilepath($values, 'melli_card', 'local', 'melli_cards');
+        $values = $this->fileService->replaceBase64WithFilePathInArray($values, 'profile');
+        $values = $this->fileService->replaceBase64WithFilePathInArray($values, 'image');
+        $values = $this->fileService->replaceBase64WithFilePathInArray($values, 'melli_card', 'local', 'melli_cards');
 
         $unsets = [
             'p0',
@@ -315,41 +315,6 @@ class FormEntryService implements IFormEntryService
         return [$rules, $inputNames];
     }
 
-    /**
-     * Undocumented function
-     *
-     * @param array $values
-     * @param string $prop
-     * @param string $disk
-     * @param string $folder
-     * @return array
-     */
-    protected function replaceBase64WithFilepath($values, $prop, $disk = 'public', $folder = 'avatars')
-    {
-        /** @var IFileUploadService */
-        $this->fileService = app(IFileUploadService::class);
-        $traverse = function ($inputs, $prop, $traverse) use ($disk, $folder) {
-            foreach ($inputs as $p => $v) {
-                if (is_string($v) && (Str::startsWith($p, $prop) || Str::endsWith($p, $prop))) {
-                    if (Str::startsWith($inputs[$p], 'data:image/png;base64,')) {
-                        try {
-                            $filepath = $this->fileService->saveBase64Image($inputs[$p], $disk, $folder);
-                            ;
-                            $inputs[$p] = '/storage/' . $filepath;
-                        } catch (Exception $e) {
-                            Log::critical('Failed auto saving base64 image form: '. $e->getMessage(), $e->getTrace());
-                        }
-                    }
-                } elseif (is_array($v)) {
-                    $inputs[$p] = $traverse($v, $prop, $traverse);
-                }
-            }
-            return $inputs;
-        };
-        $values = $traverse($values, $prop, $traverse);
-
-        return $values;
-    }
 
     /**
      * Undocumented function

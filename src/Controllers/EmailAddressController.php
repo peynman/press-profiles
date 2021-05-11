@@ -2,9 +2,14 @@
 
 namespace Larapress\Profiles\Controllers;
 
-use Larapress\CRUD\CRUDControllers\BaseCRUDController;
+use Larapress\CRUD\Services\CRUD\BaseCRUDController;
 use Larapress\Profiles\CRUD\EmailAddressCRUDProvider;
 
+/**
+ * Standard CRUD Controller for Email Address resource.
+ *
+ * @group Email Address Management
+ */
 class EmailAddressController extends BaseCRUDController
 {
     public static function registerRoutes()

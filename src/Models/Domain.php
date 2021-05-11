@@ -2,11 +2,12 @@
 
 namespace Larapress\Profiles\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Http\Request;
 use Larapress\CRUD\ICRUDUser;
-use Larapress\Profiles\CRUD\DomainCRUDProvider;
+use Larapress\Profiles\Factories\DomainFactory;
 use Larapress\Profiles\IProfileUser;
 
 /**
@@ -30,6 +31,8 @@ use Larapress\Profiles\IProfileUser;
  */
 class Domain extends Model
 {
+    use HasFactory;
+
     const FLAG_DEFAULT_DOMAIN = 1;
 
     use SoftDeletes;
@@ -48,6 +51,17 @@ class Domain extends Model
     protected $casts = [
         'data' => 'array',
     ];
+
+    /**
+     * Undocumented function
+     *
+     * @return Factory
+     */
+    protected static function newFactory()
+    {
+        return DomainFactory::new();
+    }
+
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

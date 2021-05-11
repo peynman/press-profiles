@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Larapress\CRUD\Services\BaseCRUDProvider;
-use Larapress\CRUD\Services\ICRUDProvider;
-use Larapress\CRUD\Services\IPermissionsMetadata;
+use Larapress\CRUD\Services\CRUD\BaseCRUDProvider;
+use Larapress\CRUD\Services\CRUD\ICRUDProvider;
+use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
 use Larapress\CRUD\Exceptions\AppException;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\CRUD\Repository\IRoleRepository;
@@ -17,11 +17,16 @@ use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\PhoneNumber;
 use Larapress\Profiles\Repository\Domain\IDomainRepository;
 
+/**
+ * User CRUD rules and features
+ */
 class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 {
     use BaseCRUDProvider;
 
     public $name_in_config = 'larapress.profiles.routes.users.name';
+    public $extend_in_config = 'larapress.profiles.routes.users.extend.providers';
+
     public $verbs = [
         self::VIEW,
         self::CREATE,
@@ -30,15 +35,37 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         self::REPORTS,
     ];
 
+    /**
+     * @bodyParam name string required The username to use for the new user. Example: user23124
+     * @bodyParam password string required The password to use for the new user. Example: somepassworDS123
+     * @bodyParam phones object[] A list of phone numbers to attach to user.
+     * @bodyParam phones[].number string required The new number to attach to user. Example: 98912132456432
+     * @bodyParam phones[].flags int required Default flags to set on created phone number resource. Example: 0
+     * @bodyParam domains object[] A list of domains to attach to user.
+     * @bodyParam domains[].id int required The id of the domain to attach. Example: 1
+     * @bodyParam domains[].flags int required Default flags to set on users relation to the domain. Example: 0
+     */
     public $createValidations = [
         'name' => 'required|string|min:4|max:190|unique:users,name|regex:/(^[A-Za-z0-9-_.]+$)+/',
         'password' => 'required|string|min:4|confirmed',
         'password_confirmation' => 'required',
+        'roles' => 'required|array',
+        'domains' => 'required|array',
+        'phones' => 'nullable|array',
+        'emails' => 'nullable|array',
         'roles.*.id' => 'required|exists:roles,id',
         'domains.*.id' => 'required|exists:domains,id',
         'phones.*.number' => 'nullable|numeric|regex:/(09)[0-9]{9}/',
+        'emails.*.email' => 'nullable|email',
         'flags' => 'nullable|numeric',
     ];
+
+    /**
+     * Undocumented variable
+     *
+     * @bodyParam id int Sort based on id
+     *
+     */
     public $validSortColumns = [
         'id',
         'name',
@@ -71,10 +98,11 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     }
 
     /**
-     * Exclude current id in name unique request
-     *
      * @param Request $request
-     * @return void
+     *
+     *
+     *
+     * @return array
      */
     public function getUpdateRules(Request $request)
     {
@@ -82,12 +110,17 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             'name' => 'nullable|string|min:4|max:190|regex:/(^[A-Za-z0-9-_.]+$)+/|unique:users,name',
             'password' => 'nullable|string|min:4|confirmed',
             'password_confirmation' => 'required_with:password',
+            'roles' => 'required|array',
+            'domains' => 'required|array',
+            'phones' => 'nullable|array',
+            'emails' => 'nullable|array',
             'roles.*.id' => 'required|exists:roles,id',
             'domains.*.id' => 'required|exists:domains,id',
             'phones.*.number' => 'nullable|numeric|regex:/(09)[0-9]{9}/',
+            'emails.*.email' => 'nullable|email',
             'flags' => 'nullable|numeric',
         ];
-        $updateValidations['name'] .= ',' . $request->route('id').',id';
+        $updateValidations['name'] .= ',' . $request->route('id') . ',id';
         return $updateValidations;
     }
 
@@ -100,46 +133,46 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     {
         return [
             'roles' => function ($user) {
-                return $user->hasPermission(config('larapress.crud.routes.roles.name').'.view');
+                return $user->hasPermission(config('larapress.crud.routes.roles.name') . '.view');
             },
             'roles.permissions' => function ($user) {
-                return $user->hasPermission(config('larapress.crud.routes.roles.name').'.view');
+                return $user->hasPermission(config('larapress.crud.routes.roles.name') . '.view');
             },
             'domains' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.domains.name').'.view');
+                return $user->hasPermission(config('larapress.profiles.routes.domains.name') . '.view');
             },
             'phones' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.phone-numbers.name').'.view');
+                return $user->hasPermission(config('larapress.profiles.routes.phone-numbers.name') . '.view');
             },
             'emails' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.emails.name').'.view');
+                return $user->hasPermission(config('larapress.profiles.routes.emails.name') . '.view');
             },
             'form_support_user_profile' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
+                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name') . '.view');
             },
             'form_profile_default' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
+                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name') . '.view');
             },
             'form_profile_support' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
+                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name') . '.view');
             },
             'form_support_registration_entry' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
+                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name') . '.view');
             },
             'wallet_balance' => function ($user) {
-                return $user->hasPermission(config('larapress.ecommerce.routes.wallet-transactions.name').'.view');
+                return $user->hasPermission(config('larapress.ecommerce.routes.wallet-transactions.name') . '.view');
             },
             'sales_fixed' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.users.name').'.sales');
+                return $user->hasPermission(config('larapress.profiles.routes.users.name') . '.sales');
             },
             'sales_periodic' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.users.name').'.sales');
+                return $user->hasPermission(config('larapress.profiles.routes.users.name') . '.sales');
             },
             'sales_real' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.users.name').'.sales');
+                return $user->hasPermission(config('larapress.profiles.routes.users.name') . '.sales');
             },
             'sales_virtual' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.users.name').'.sales');
+                return $user->hasPermission(config('larapress.profiles.routes.users.name') . '.sales');
             },
         ];
     }
@@ -244,7 +277,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         }
 
         Cache::tags(['user:' . $object->id])->flush();
-        Cache::tags(['user.domains:'.$object->id])->flush();
+        Cache::tags(['user.domains:' . $object->id])->flush();
     }
 
     /**
@@ -341,7 +374,7 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 
         Cache::tags(['user:' . $object->id])->flush();
         Cache::tags(['user.roles:' . $object->id])->flush();
-        Cache::tags(['user.domains:'.$object->id])->flush();
+        Cache::tags(['user.domains:' . $object->id])->flush();
     }
 
     /**
@@ -355,11 +388,11 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         $user = Auth::user();
 
         if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
-            if ($user->hasRole(config('larapress.ecommerce.lms.support_role_id'))) {
+            if ($user->hasRole(config('larapress.lcms.support_role_id'))) {
                 $query->whereHas('form_entries', function ($q) use ($user) {
-                    $q->where('tags', 'support-group-'.$user->id);
+                    $q->where('tags', 'support-group-' . $user->id);
                 });
-            } elseif (!$user->hasRole(config('larapress.ecommerce.lms.owner_role_id'))) {
+            } elseif (!$user->hasRole(config('larapress.lcms.owner_role_id'))) {
                 $query->whereHas('domains', function (Builder $q) use ($user) {
                     $q->whereIn('id', $user->getAffiliateDomainIds());
                 });
@@ -370,13 +403,13 @@ class UserCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     }
 
     /**
-     * @param IProfileUser|ICRUDUser $object
+     * @param IProfileUser $object
      *
      * @return bool
      */
     public function onBeforeAccess($object)
     {
-        /** @var ICRUDUser|IProfileUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
 
         if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {

@@ -1,6 +1,5 @@
 <?php
 
-use Larapress\Profiles\Flags\DomainFlags;
 use Larapress\Profiles\Flags\UserDomainFlags;
 use Larapress\Profiles\Flags\UserFlags;
 use Larapress\Profiles\Models\PhoneNumber;
@@ -27,6 +26,6 @@ return [
         'flags' => [
             PhoneNumber::FLAGS_DO_NOT_CONTACT => 'تماس گرفته نشود',
             PhoneNumber::FLAGS_VERIFIED => 'تایید شده',
-        ]
-    ]
+        ],
+    ],
 ];

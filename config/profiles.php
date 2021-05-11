@@ -75,5 +75,8 @@ return [
         'activity-logs' => [
             'name' => 'activity-logs',
         ],
+        'segments' => [
+            'name' => 'segments',
+        ]
     ],
 ];

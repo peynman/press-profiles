@@ -2,10 +2,15 @@
 
 namespace Larapress\Profiles\Controllers;
 
-use Larapress\CRUD\CRUDControllers\BaseCRUDController;
+use Larapress\CRUD\Services\CRUD\BaseCRUDController;
 use Larapress\Profiles\CRUD\SettingsCRUDProvider;
 use Larapress\Profiles\CRUD\SettingsDuplicateDomainProvider;
 
+/**
+ * Standard CRUD Controller for Settings resource.
+ *
+ * @group User Settings Management
+ */
 class SettingsController extends BaseCRUDController
 {
     public static function registerRoutes()

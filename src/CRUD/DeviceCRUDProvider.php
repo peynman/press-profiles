@@ -5,9 +5,9 @@ namespace Larapress\Profiles\CRUD;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Larapress\CRUD\Services\BaseCRUDProvider;
-use Larapress\CRUD\Services\ICRUDProvider;
-use Larapress\CRUD\Services\IPermissionsMetadata;
+use Larapress\CRUD\Services\CRUD\BaseCRUDProvider;
+use Larapress\CRUD\Services\CRUD\ICRUDProvider;
+use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\Flags\UserDomainFlags;
 use Larapress\Profiles\IProfileUser;
@@ -20,6 +20,7 @@ class DeviceCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     use BaseCRUDProvider;
 
     public $name_in_config = 'larapress.profiles.routes.devices.name';
+    public $extend_in_config = 'larapress.profiles.routes.devices.extend.providers';
     public $verbs = [
         self::VIEW,
         self::DELETE,

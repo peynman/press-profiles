@@ -50,6 +50,7 @@ class DomainRepository implements IDomainRepository
     public function getRequestDomain(Request $request)
     {
         $domain_str = $request->getHost();
+
         return Helpers::getCachedValue(
             'domain:'.$domain_str,
             function () use ($domain_str) {
@@ -59,6 +60,11 @@ class DomainRepository implements IDomainRepository
                         $q->where('sub_domain', $domain_str);
                     });
                 })->first();
+
+                if (is_null($domain) && !is_null(config('larapress.auth.signup.default_domain'))) {
+                    return Domain::find(config('larapress.auth.signup.default_domain'));
+                }
+
                 return $domain;
             },
             ['domains'],

@@ -5,11 +5,10 @@ namespace Larapress\Profiles\Repository\Form;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
-use Larapress\CRUD\Services\ICRUDService;
+use Larapress\CRUD\Services\CRUD\ICRUDService;
 use Larapress\CRUD\Exceptions\AppException;
 use Larapress\Profiles\Models\Form;
 use Larapress\Profiles\Models\FormEntry;
-use Larapress\Profiles\Repository\Domain\IDomainRepository;
 use Mews\Captcha\Facades\Captcha;
 
 class FormRepository implements IFormRepository
@@ -124,7 +123,9 @@ class FormRepository implements IFormRepository
 
                         $methodArgs = [];
                         usort($args, function ($a, $b) {
-                            return $a['index'] > $b['index'];
+                            $aIndex = isset($a['index']) ? $a['index']:0;
+                            $bIndex = isset($b['index']) ? $b['index']:0;
+                            return $aIndex <=> $bIndex;
                         });
                         foreach ($args as $arg) {
                             if (isset($arg['type'])) {

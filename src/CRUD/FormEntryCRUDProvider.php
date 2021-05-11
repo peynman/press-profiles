@@ -6,9 +6,9 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Larapress\CRUD\Services\BaseCRUDProvider;
-use Larapress\CRUD\Services\ICRUDProvider;
-use Larapress\CRUD\Services\IPermissionsMetadata;
+use Larapress\CRUD\Services\CRUD\BaseCRUDProvider;
+use Larapress\CRUD\Services\CRUD\ICRUDProvider;
+use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\FormEntry;
@@ -23,6 +23,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     use BaseCRUDProvider;
 
     public $name_in_config = 'larapress.profiles.routes.form-entries.name';
+    public $extend_in_config = 'larapress.profiles.routes.form-entries.extend.providers';
     public $verbs = [
         self::VIEW,
         self::DELETE,
@@ -196,11 +197,11 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         $user = Auth::user();
 
         if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
-            if ($user->hasRole(config('larapress.ecommerce.lms.support_role_id'))) {
+            if ($user->hasRole(config('larapress.lcms.support_role_id'))) {
                 $query->whereHas('user.form_entries', function ($q) use ($user) {
                     $q->where('tags', 'support-group-' . $user->id);
                 });
-            } elseif ($user->hasRole(config('larapress.ecommerce.lms.owner_role_id'))) {
+            } elseif ($user->hasRole(config('larapress.lcms.owner_role_id'))) {
                 $flatten_array = function ($arr) {
                     $flatten = [];
                     foreach ($arr as $item) {

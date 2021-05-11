@@ -2,9 +2,14 @@
 
 namespace Larapress\Profiles\Controllers;
 
-use Larapress\CRUD\CRUDControllers\BaseCRUDController;
+use Larapress\CRUD\Services\CRUD\BaseCRUDController;
 use Larapress\Profiles\CRUD\FormCRUDProvider;
 
+/**
+ * Standard CRUD Controller for Form resource.
+ *
+ * @group Forms Management
+ */
 class FormController extends BaseCRUDController
 {
     public static function registerRoutes()

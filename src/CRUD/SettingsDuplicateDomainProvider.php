@@ -4,7 +4,7 @@ namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Larapress\Core\Exceptions\AppException;
+use Larapress\CRUD\Exceptions\AppException;
 
 class SettingsDuplicateDomainProvider extends SettingsCRUDProvider
 {
@@ -25,7 +25,7 @@ class SettingsDuplicateDomainProvider extends SettingsCRUDProvider
         $args['settings_id'] = $route->parameter('settings_id');
         $args['domain_id'] = $route->parameter('domain_id');
 
-        /** @var \Larapress\CRUD\ICRUDUser|\Larapress\Profiles\IProfileUser $user */
+        /** @var \Larapress\Profiles\IProfileUser $user */
         $user = Auth::user();
         if ($user->hasRole(config('larapress.profiles.security.roles.master'))) {
             if (! in_array($args['domain_id'], $user->getAffiliateDomainIds())) {

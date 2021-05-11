@@ -5,8 +5,8 @@ namespace Larapress\Profiles\Base;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Larapress\CRUD\Services\ICRUDExporter;
-use Larapress\CRUD\Services\ICRUDProvider;
+use Larapress\CRUD\Services\CRUD\ICRUDExporter;
+use Larapress\CRUD\Services\CRUD\ICRUDProvider;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BaseCRUDQueryExport implements ICRUDExporter

@@ -2,11 +2,13 @@
 
 namespace Larapress\Profiles\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Larapress\Core\Extend\Helpers;
 use Larapress\CRUD\ICRUDUser;
+use Larapress\Profiles\Factories\PhoneNumberFactory;
 
 /**
  * Class PhoneNumber.
@@ -24,6 +26,8 @@ use Larapress\CRUD\ICRUDUser;
  */
 class PhoneNumber extends Model
 {
+    use HasFactory;
+
     const FLAGS_VERIFIED = 1;
     const FLAGS_DO_NOT_CONTACT = 2;
 
@@ -37,6 +41,17 @@ class PhoneNumber extends Model
         'number',
         'flags',
     ];
+
+
+    /**
+     * Undocumented function
+     *
+     * @return Factory
+     */
+    protected static function newFactory()
+    {
+        return PhoneNumberFactory::new();
+    }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

@@ -53,7 +53,12 @@ interface IProfileUser extends ICRUDUser
     public function domains();
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function form_entries();
+    public function phones();
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function emails();
 }

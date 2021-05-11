@@ -5,10 +5,15 @@ namespace Larapress\Profiles\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Larapress\CRUD\CRUDControllers\BaseCRUDController;
+use Larapress\CRUD\Services\CRUD\BaseCRUDController;
 use Larapress\Profiles\CRUD\FormEntryCRUDProvider;
 use Larapress\Profiles\Services\FormEntry\IFormEntryService;
 
+/**
+ * Standard CRUD Controller for FormEntry resource.
+ *
+ * @group Form Entries Management
+ */
 class FormEntryController extends BaseCRUDController
 {
     public static function registerRoutes()

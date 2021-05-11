@@ -5,9 +5,9 @@ namespace Larapress\Profiles\CRUD;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Larapress\Core\Exceptions\AppException;
-use Larapress\CRUD\Services\BaseCRUDProvider;
-use Larapress\CRUD\Services\ICRUDProvider;
-use Larapress\CRUD\Services\IPermissionsMetadata;
+use Larapress\CRUD\Services\CRUD\BaseCRUDProvider;
+use Larapress\CRUD\Services\CRUD\ICRUDProvider;
+use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\ActivityLog;
@@ -17,6 +17,7 @@ class ActivityLogCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     use BaseCRUDProvider;
 
     public $name_in_config = 'larapress.profiles.routes.activity-logs.name';
+    public $extend_in_config = 'larapress.profiles.routes.activity-logs.extend.providers';
     public $verbs = [
         self::VIEW,
     ];

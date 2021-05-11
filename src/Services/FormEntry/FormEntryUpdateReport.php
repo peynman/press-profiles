@@ -3,14 +3,14 @@
 namespace Larapress\Profiles\Services\FormEntry;
 
 use Illuminate\Support\Facades\Log;
-use Larapress\CRUD\Services\IReportSource;
+use Larapress\CRUD\Services\CRUD\ICRUDReportSource;
 use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\Repository\IRoleRepository;
 use Larapress\Reports\Services\BaseReportSource;
 use Larapress\Reports\Services\IReportsService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class FormEntryUpdateReport implements IReportSource, ShouldQueue
+class FormEntryUpdateReport implements ICRUDReportSource, ShouldQueue
 {
     use BaseReportSource;
 
@@ -80,7 +80,7 @@ class FormEntryUpdateReport implements IReportSource, ShouldQueue
         }
 
         if (!is_null($user)) {
-            if ($form->id === config('larapress.ecommerce.lms.profile_form_id')) {
+            if ($form->id === config('larapress.profiles.default_profile_form_id')) {
                 $tags['profile'] = true;
             }
         }

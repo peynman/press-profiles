@@ -20,6 +20,6 @@ class ActivityLogTypes
 
     public static function getTitle($flag)
     {
-        return self::__getFlagProperty($flag, 'models.activity-logs.types');
+        return self::__getFlagProperty($flag, 'larapress::models.activity-logs.types');
     }
 }

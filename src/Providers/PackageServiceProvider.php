@@ -3,10 +3,11 @@
 namespace Larapress\Profiles\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Larapress\CRUD\Services\ICRUDExporter;
-use Larapress\CRUD\Services\ICRUDFilterStorage;
+use Larapress\CRUD\Services\CRUD\ICRUDExporter;
+use Larapress\CRUD\Services\CRUD\ICRUDFilterStorage;
 use Larapress\Profiles\Base\BaseCRUDFilterStorage;
 use Larapress\Profiles\Base\BaseCRUDQueryExport;
+use Larapress\Profiles\Commands\CreateDomain;
 use Larapress\Profiles\Repository\Domain\DomainRepository;
 use Larapress\Profiles\Repository\Domain\IDomainRepository;
 use Larapress\Profiles\Repository\Form\FormRepository;
@@ -67,5 +68,12 @@ class PackageServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../../config/profiles.php' => config_path('larapress/profiles.php'),
         ], ['config', 'larapress', 'larapress-profiles']);
+
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                CreateDomain::class,
+            ]);
+        }
     }
 }

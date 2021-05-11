@@ -6,7 +6,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Larapress\CRUD\Events\CRUDCreated;
 use Larapress\CRUD\Events\CRUDDeleted;
 use Larapress\CRUD\Events\CRUDUpdated;
-use Larapress\CRUD\Services\ICRUDProvider;
+use Larapress\CRUD\Services\CRUD\ICRUDProvider;
 use Larapress\Profiles\Models\ActivityLog;
 
 class ActivityLogListener implements ShouldQueue

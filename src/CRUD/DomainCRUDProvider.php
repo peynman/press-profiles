@@ -5,10 +5,9 @@ namespace Larapress\Profiles\CRUD;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Larapress\CRUD\Services\BaseCRUDProvider;
-use Larapress\CRUD\Services\ICRUDProvider;
-use Larapress\CRUD\Services\IPermissionsMetadata;
-use Larapress\CRUD\ICRUDUser;
+use Larapress\CRUD\Services\CRUD\BaseCRUDProvider;
+use Larapress\CRUD\Services\CRUD\ICRUDProvider;
+use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
 use Larapress\Profiles\Flags\UserDomainFlags;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\Domain;
@@ -19,6 +18,7 @@ class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     use BaseCRUDProvider;
 
     public $name_in_config = 'larapress.profiles.routes.domains.name';
+    public $extend_in_config = 'larapress.profiles.routes.domains.extend.providers';
     public $verbs = [
         self::VIEW,
         self::CREATE,
@@ -93,7 +93,7 @@ class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onBeforeQuery($query)
     {
-        /** @var ICRUDUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
         if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
             $query->where('author_id', $user->id);
@@ -109,7 +109,7 @@ class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onBeforeAccess($object)
     {
-        /** @var ICRUDUser|IProfileUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
         if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
             return in_array($object->id, $user->getAffiliateDomainIds());
@@ -125,7 +125,7 @@ class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      */
     public function onBeforeCreate($args)
     {
-        /** @var ICRUDUser|IProfileUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
 
         $args['author_id'] = $user->id;

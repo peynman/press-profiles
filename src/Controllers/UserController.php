@@ -2,9 +2,14 @@
 
 namespace Larapress\Profiles\Controllers;
 
-use Larapress\CRUD\CRUDControllers\BaseCRUDController;
+use Larapress\CRUD\Services\CRUD\BaseCRUDController;
 use Larapress\Profiles\CRUD\UserCRUDProvider;
 
+/**
+ * Standard CRUD Controller for User management
+ *
+ * @group User Management
+ */
 class UserController extends BaseCRUDController
 {
     public static function registerRoutes()

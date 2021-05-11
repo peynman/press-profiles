@@ -27,20 +27,6 @@ use Larapress\Profiles\Models\PhoneNumber;
  */
 trait BaseProfileUser
 {
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function roles()
-    {
-        return $this->belongsToMany(
-            Role::class,
-            'user_role',
-            'user_id',
-            'role_id'
-        );
-    }
-
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */

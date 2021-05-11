@@ -3,8 +3,8 @@
 namespace Larapress\Profiles\Base;
 
 use Illuminate\Support\Str;
-use Larapress\CRUD\Services\ICRUDFilterStorage;
-use Larapress\CRUD\Services\ICRUDProvider;
+use Larapress\CRUD\Services\CRUD\ICRUDFilterStorage;
+use Larapress\CRUD\Services\CRUD\ICRUDProvider;
 use Larapress\Profiles\Repository\Settings\ISettingsRepository;
 
 class BaseCRUDFilterStorage implements ICRUDFilterStorage

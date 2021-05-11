@@ -18,7 +18,7 @@ class DomainMetricsProvider implements IReportsServiceProvider
         $filters = [];
 
         if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
-            if ($user->hasRole(config('larapress.ecommerce.lms.support_role_id'))) {
+            if ($user->hasRole(config('larapress.lcms.support_role_id'))) {
                 $filters['support'] = $user->id;
             } else {
                 $filters['domain'] = $user->getAffiliateDomainIds();
