@@ -11,7 +11,7 @@ use Larapress\CRUD\Services\CRUD\ICRUDVerb;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\EmailAddress;
 
-class EmailAddressCRUDProvider implements ICRUDProvider
+class PhysicalAddressCRUDProvider implements ICRUDProvider
 {
     use CRUDProviderTrait;
 
@@ -44,26 +44,20 @@ class EmailAddressCRUDProvider implements ICRUDProvider
         'updated_at',
         'deleted_at',
     ];
+    public $validRelations = [
+        'user',
+        'domain',
+    ];
+    public $defaultShowRelations = [
+        'user',
+        'domain'
+    ];
     public $searchColumns = [
         'email'
     ];
 
     /**
-     * Undocumented function
-     *
-     * @return array
-     */
-    public function getValidRelations(): array
-    {
-        return [
-            'user' => config('larapress.crud.user.provider'),
-            'domain' => config('larapress.profiles.routes.domains.provider'),
-        ];
-    }
-
-    /**
      * @param Builder $query
-     *
      * @return Builder
      */
     public function onBeforeQuery(Builder $query): Builder
@@ -82,7 +76,6 @@ class EmailAddressCRUDProvider implements ICRUDProvider
 
     /**
      * @param EmailAddress $object
-     *
      * @return bool
      */
     public function onBeforeAccess($object): bool
@@ -93,7 +86,7 @@ class EmailAddressCRUDProvider implements ICRUDProvider
             return $user->id === $object->user_id;
         }
         if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
-            return in_array($object->domain_id, $user->getAffiliateDomainIds());
+            return in_array($object->user_id, $user->getAffiliateDomainIds());
         }
 
         return true;

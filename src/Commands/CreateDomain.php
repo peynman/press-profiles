@@ -50,7 +50,7 @@ class CreateDomain extends Command
         ]);
 
         /** @var Builder $user_quer */
-        $user_query = call_user_func([config('larapress.crud.user.class'), 'query']);
+        $user_query = call_user_func([config('larapress.crud.user.model'), 'query']);
         /** @var IProfileUser $user */
         $users = $user_query->whereHas('roles', function ($q) {
             $q->where('id', 1);

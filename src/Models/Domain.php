@@ -68,7 +68,7 @@ class Domain extends Model
      */
     public function author()
     {
-        return $this->belongsTo(config('larapress.crud.user.class'), 'author_id');
+        return $this->belongsTo(config('larapress.crud.user.model'), 'author_id');
     }
 
     /**
@@ -77,7 +77,7 @@ class Domain extends Model
     public function users()
     {
         return $this->belongsToMany(
-            config('larapress.crud.user.class'),
+            config('larapress.crud.user.model'),
             'user_domain',
             'domain_id',
             'user_id'

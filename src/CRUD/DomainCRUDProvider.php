@@ -2,30 +2,33 @@
 
 namespace Larapress\Profiles\CRUD;
 
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Larapress\CRUD\Services\CRUD\BaseCRUDProvider;
+use Larapress\CRUD\Extend\Helpers;
+use Larapress\CRUD\Services\CRUD\Traits\CRUDProviderTrait;
 use Larapress\CRUD\Services\CRUD\ICRUDProvider;
-use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
+use Larapress\CRUD\Services\CRUD\ICRUDVerb;
+use Larapress\CRUD\Services\CRUD\Traits\CRUDRelationSyncTrait;
 use Larapress\Profiles\Flags\UserDomainFlags;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\Domain;
 use Larapress\Profiles\Models\DomainSub;
 
-class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
+class DomainCRUDProvider implements ICRUDProvider
 {
-    use BaseCRUDProvider;
+    use CRUDProviderTrait;
+    use CRUDRelationSyncTrait;
 
     public $name_in_config = 'larapress.profiles.routes.domains.name';
-    public $extend_in_config = 'larapress.profiles.routes.domains.extend.providers';
+    public $model_in_config = 'larapress.profiles.routes.domains.model';
+    public $compositions_in_config = 'larapress.profiles.routes.domains.compositions';
+
     public $verbs = [
-        self::VIEW,
-        self::CREATE,
-        self::EDIT,
-        self::DELETE,
+        ICRUDVerb::VIEW,
+        ICRUDVerb::CREATE,
+        ICRUDVerb::EDIT,
+        ICRUDVerb::DELETE,
     ];
-    public $model = Domain::class;
     public $createValidations = [
         'domain' => 'required|string|domain|' .
             // unique in domains table
@@ -76,27 +79,35 @@ class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'nameservers',
         'created_at',
         'updated_at',
+        'deleted_at',
     ];
-    public $validRelations = [
-        'author',
-        'sub_domains',
-    ];
-    public $defaultShowRelations = [
-        'author',
-        'sub_domains',
-    ];
+
+    /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function getValidRelations(): array
+    {
+        return [
+            'author' => config('larapress.crud.user.provider'),
+            'sub_domains' => config('larapress.profiles.routes.domains.provider'),
+        ];
+    }
+
 
     /**
      * @param Builder $query
      *
-     * @return \Illuminate\Database\Query\Builder
+     * @return Builder
      */
-    public function onBeforeQuery($query)
+    public function onBeforeQuery(Builder $query): Builder
     {
         /** @var IProfileUser $user */
         $user = Auth::user();
-        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
-            $query->where('author_id', $user->id);
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
+            $query->orWhere('author_id', $user->id);
+            $query->onWhereIn('id', $user->getAffiliateDomainIds());
         }
 
         return $query;
@@ -107,11 +118,11 @@ class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      *
      * @return bool
      */
-    public function onBeforeAccess($object)
+    public function onBeforeAccess($object): bool
     {
         /** @var IProfileUser $user */
         $user = Auth::user();
-        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             return in_array($object->id, $user->getAffiliateDomainIds());
         }
 
@@ -123,7 +134,7 @@ class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      *
      * @return array
      */
-    public function onBeforeCreate($args)
+    public function onBeforeCreate($args): array
     {
         /** @var IProfileUser $user */
         $user = Auth::user();
@@ -137,25 +148,25 @@ class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      * @param Domain $object
      * @param array  $input_data
      *
-     * @return array|void
+     * @return void
      */
-    public function onAfterCreate($object, $input_data)
+    public function onAfterCreate($object, array $input_data): void
     {
         /** @var IProfileUser $user */
         $user = Auth::user();
 
-        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             $user->domains()->attach($object->id, [
                 'flags' => UserDomainFlags::AFFILIATE_DOMAIN,
             ]);
         } else {             // allow super user to create domains in place of other users
             if (isset($input_data['target_user_id']) && !is_null($input_data['target_user_id'])) {
-                $targetUser = call_user_func([config('larapress.crud.user.class'), 'find'], $input_data['target_user_id']);
+                $targetUser = call_user_func([config('larapress.crud.user.model'), 'find'], $input_data['target_user_id']);
                 if (!is_null($targetUser)) {
                     $targetUser->domains()->attach(
                         $object->id,
                         [
-                        'flags' => UserDomainFlags::AFFILIATE_DOMAIN,
+                            'flags' => UserDomainFlags::AFFILIATE_DOMAIN,
                         ]
                     );
                 }
@@ -173,17 +184,17 @@ class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      * @param Domain $object
      * @param array $input_data
      *
-     * @return array|void
+     * @return void
      */
-    public function onAfterUpdate($object, $input_data)
+    public function onAfterUpdate($object, array $input_data): void
     {
         /** @var IProfileUser $user */
         $user = Auth::user();
 
         // allow super user to create domains in place of other users
-        if ($user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if ($user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             if (isset($input_data['target_user_id']) && !is_null($input_data['target_user_id'])) {
-                $targetUser = call_user_func([config('larapress.crud.user.class'), 'find'], $input_data['target_user_id']);
+                $targetUser = call_user_func([config('larapress.crud.user.model'), 'find'], $input_data['target_user_id']);
                 if (!is_null($targetUser)) {
                     $targetUser->domains()->attach(
                         $object->id,
@@ -201,6 +212,6 @@ class DomainCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         }
 
         $user->forgetDomainsCache();
-        Cache::tags(['domains'])->flush();
+        Helpers::forgetCachedValues(['domains']);
     }
 }

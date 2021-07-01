@@ -3,7 +3,7 @@
 
 namespace Larapress\Profiles\Controllers;
 
-use Larapress\CRUD\Services\CRUD\BaseCRUDController;
+use Larapress\CRUD\Services\CRUD\CRUDController;
 use Larapress\Profiles\CRUD\FilterCRUDProvider;
 
 /**
@@ -11,14 +11,14 @@ use Larapress\Profiles\CRUD\FilterCRUDProvider;
  *
  * @group Filters Management
  */
-class FilterController extends BaseCRUDController
+class FilterController extends CRUDController
 {
     public static function registerRoutes()
     {
         parent::registerCrudRoutes(
             config('larapress.profiles.routes.filters.name'),
             self::class,
-            FilterCRUDProvider::class
+            config('larapress.profiles.routes.filters.provider'),
         );
     }
 }

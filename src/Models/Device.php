@@ -4,6 +4,7 @@ namespace Larapress\Profiles\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Larapress\Profiles\IProfileUser;
 
 /**
  * @property \Carbon\Carbon $created_at
@@ -13,6 +14,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property int $flags
  * @property int $user_id
+ * @property int $domain_id
+ * @property Domain $domain
+ * @property IProfileUser $user
  * @property string $client_type
  * @property string $client_agent
  * @property string $client_ip
@@ -25,6 +29,7 @@ class Device extends Model
 
     public $fillable = [
         'user_id',
+        'domain_id',
         'client_type',
         'client_agent',
         'client_ip',
@@ -36,6 +41,16 @@ class Device extends Model
      */
     public function user()
     {
-        return $this->belongsTo(config('larapress.crud.user.class'), 'user_id');
+        return $this->belongsTo(config('larapress.crud.user.model'), 'user_id');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function domain()
+    {
+        return $this->belongsTo(Domain::class, 'domain_id');
+    }
+
+
 }

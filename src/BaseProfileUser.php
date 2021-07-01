@@ -6,12 +6,13 @@ use Illuminate\Support\Facades\Cache;
 use Larapress\CRUD\BaseFlags;
 use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\Models\Role;
-use Larapress\Profiles\Base\FormEntryUserSupportProfileRelationship;
 use Larapress\Profiles\Flags\UserDomainFlags;
 use Larapress\Profiles\Models\Domain;
 use Larapress\Profiles\Models\EmailAddress;
 use Larapress\Profiles\Models\FormEntry;
 use Larapress\Profiles\Models\PhoneNumber;
+use Larapress\Profiles\Models\PhysicalAddress;
+use Illuminate\Support\Collection;
 
 /**
  * Trait BaseProfileUser.
@@ -19,8 +20,8 @@ use Larapress\Profiles\Models\PhoneNumber;
  * @property int $id
  * @property string $name
  * @property string $password
- * @property Domain $domains
- * @property Role[] $roles
+ * @property Collection|Domain[] $domains
+ * @property Collection|Role[] $roles
  * @property \Carbon\Carbon $deleted_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $created_at
@@ -62,6 +63,18 @@ trait BaseProfileUser
         );
     }
 
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function addresses()
+    {
+        return $this->hasMany(
+            PhysicalAddress::class,
+            'user_id',
+        );
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -71,6 +84,19 @@ trait BaseProfileUser
             FormEntry::class,
             'user_id'
         );
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function form_profile_default()
+    {
+        return $this->hasOne(
+            FormEntry::class,
+            'user_id'
+        )->where('form_id', config('larapress.profiles.default_profile_form_id'));
     }
 
     /**
@@ -152,26 +178,20 @@ trait BaseProfileUser
         return $ids;
     }
 
-
-    protected $cachedDomains = null;
-
     /**
      * @return Domain[]
      */
     public function getDomains()
     {
-        if (is_null($this->cachedDomains)) {
-            $this->cachedDomains = Helpers::getCachedValue(
-                'larapress.cached.user.'.$this->id.'.domains',
-                function () {
-                    return $this->domains()->get();
-                },
-                ['user.domains:'.$this->id],
-                null
-            );
-        }
-
-        return $this->cachedDomains;
+        return Helpers::getCachedValue(
+            'larapress.profiles.user.'.$this->id.'.domains',
+            ['user.domains:'.$this->id],
+            3600,
+            true,
+            function () {
+                return $this->domains()->get();
+            }
+        );
     }
 
     /**
@@ -179,6 +199,6 @@ trait BaseProfileUser
      */
     public function forgetDomainsCache()
     {
-        Cache::tags(['user.domains:'.$this->id])->flush();
+        Helpers::forgetCachedValues(['user.domains:'.$this->id]);
     }
 }

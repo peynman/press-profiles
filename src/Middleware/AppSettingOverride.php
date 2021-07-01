@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Larapress\Profiles\Repository\Domain\IDomainRepository;
 use Larapress\Profiles\Services\Settings\ISettingsService;
+use Larapress\Profiles\IProfileUser;
 
 class AppSettingOverride
 {
@@ -18,7 +19,7 @@ class AppSettingOverride
 
         /** @var ISettingsService $service  */
         $service = app(ISettingsService::class);
-        $service->applyGlobalSettingsForDomain($domain);
+        $service->applyDomainSettings($domain);
 
         /** @var IProfileUser $user */
         $user = Auth::user();

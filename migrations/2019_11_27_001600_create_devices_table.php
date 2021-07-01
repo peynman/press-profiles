@@ -16,6 +16,7 @@ class CreateDevicesTable extends Migration
         Schema::create('devices', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->bigInteger('user_id', false, true)->nullable();
+            $table->bigInteger('domain_id', false, true)->nullable();
             $table->string('client_type');
             $table->string('client_agent');
             $table->string('client_ip');
@@ -29,6 +30,7 @@ class CreateDevicesTable extends Migration
                     'created_at',
                     'updated_at',
                     'user_id',
+                    'domain_id',
                     'client_type',
                     'flags'
                 ],
@@ -36,6 +38,7 @@ class CreateDevicesTable extends Migration
             );
 
             $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('domain_id')->references('id')->on('domains');
         });
     }
 

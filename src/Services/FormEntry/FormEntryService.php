@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 use Larapress\CRUD\Exceptions\AppException;
 use Larapress\CRUD\Exceptions\ValidationException;
+use Larapress\CRUD\Extend\Helpers;
 use Larapress\FileShare\Services\FileUpload\IFileUploadService;
 use Larapress\Profiles\Models\Form;
 use Larapress\Profiles\Models\FormEntry;
@@ -112,7 +113,8 @@ class FormEntryService implements IFormEntryService
             !is_null($request) ? $request->ip() : 'local',
             time()
         );
-        Cache::tags(['user.form.' . $form->id . '.entry:' . $user->id])->flush();
+
+        Helpers::forgetCachedValues(['user.form.' . $form->id . '.entry:' . $user->id]);
 
         return $entry;
     }
@@ -209,7 +211,7 @@ class FormEntryService implements IFormEntryService
             !is_null($request) ? $request->ip() : 'local',
             time()
         );
-        Cache::tags(['user.form.' . $form->id . '.entry:' . $user->id])->flush();
+        Helpers::forgetCachedValues(['user.form.' . $form->id . '.entry:' . $user->id]);
 
         return $entry;
     }

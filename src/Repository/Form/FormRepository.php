@@ -94,7 +94,7 @@ class FormRepository implements IFormRepository
      * @param array $sources
      * @return array
      */
-    public function getFormDataSources($user, Request $request, Route $route, $inputSources)
+    public function getFormDataSources($user, Request $request, $route, $inputSources)
     {
         $sources = [];
         /** @var ICRUDService */
@@ -131,7 +131,7 @@ class FormRepository implements IFormRepository
                             if (isset($arg['type'])) {
                                 switch ($arg['type']) {
                                     case 'json':
-                                        $methodArgs[] = json_decode($arg['value']);
+                                        $methodArgs[] = is_string($arg['value']) ? json_decode($arg['value']) : $arg['value'];
                                         break;
                                     case 'request':
                                         $methodArgs[] = $request;

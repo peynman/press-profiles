@@ -5,27 +5,29 @@ namespace Larapress\Profiles\CRUD;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Larapress\CRUD\Services\CRUD\BaseCRUDProvider;
+use Larapress\CRUD\Services\CRUD\Traits\CRUDProviderTrait;
 use Larapress\CRUD\Services\CRUD\ICRUDProvider;
 use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
+use Larapress\CRUD\Services\CRUD\ICRUDVerb;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\Form;
 
-class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
+class FormCRUDProvider implements ICRUDProvider
 {
-    use BaseCRUDProvider;
+    use CRUDProviderTrait;
 
     public $name_in_config = 'larapress.profiles.routes.forms.name';
-    public $extend_in_config = 'larapress.profiles.routes.forms.extend.providers';
+    public $model_in_config = 'larapress.profiles.routes.forms.model';
+    public $compositions_in_config = 'larapress.profiles.routes.forms.compositions';
+
     public $verbs = [
-        self::VIEW,
-        self::CREATE,
-        self::EDIT,
-        self::DELETE,
-        self::REPORTS,
+        ICRUDVerb::VIEW,
+        ICRUDVerb::CREATE,
+        ICRUDVerb::EDIT,
+        ICRUDVerb::DELETE,
+        ICRUDVerb::REPORTS,
     ];
-    public $model = Form::class;
     public $createValidations = [
         'name' => 'required|unique:forms,name',
         'data.title' => 'required',
@@ -36,43 +38,39 @@ class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'data.title' => 'required|string',
         'flags' => 'nullable|numeric',
     ];
-    public $autoSyncRelations = [
-        'author' => 'auth::user',
-    ];
     public $validSortColumns = [
         'id',
         'name',
         'created_at',
         'updated_at',
-    ];
-    public $validRelations = [
-        'author',
-        'entries',
-    ];
-    public $validFilters = [
-
-    ];
-    public $defaultShowRelations = [
-
-    ];
-    public $excludeIfNull = [
+        'deleted_at',
     ];
     public $searchColumns = [
         'name',
         'data',
     ];
-    public $filterDefaults = [
-    ];
-    public $filterFields = [
-    ];
+
+    /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function getValidRelations(): array
+    {
+        return [
+            'author' => config('larapress.crud.user.provider'),
+            'entries' => config('larapress.profiles.routes.form_entries.provider'),
+        ];
+    }
 
     /**
      * Exclude current id in name unique request
      *
      * @param Request $request
-     * @return void
+     *
+     * @return array
      */
-    public function getUpdateRules(Request $request)
+    public function getUpdateRules(Request $request): array
     {
         $this->updateValidations['name'] .= ',' . $request->route('id');
         return $this->updateValidations;
@@ -82,10 +80,11 @@ class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     /**
      * Undocumented function
      *
-     * @param [type] $args
-     * @return void
+     * @param array $args
+     *
+     * @return array
      */
-    public function onBeforeCreate($args)
+    public function onBeforeCreate(array $args): array
     {
         $args['author_id'] = Auth::user()->id;
         return $args;
@@ -93,14 +92,15 @@ class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 
     /**
      * @param Form $object
+     *
      * @return bool
      */
-    public function onBeforeAccess($object)
+    public function onBeforeAccess($object): bool
     {
         /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
 
-        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (! $user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             return $user->id === $object->author_id;
         }
 
@@ -108,15 +108,15 @@ class FormCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param Builder $query
+     * @return Builder
      */
-    public function onBeforeQuery($query)
+    public function onBeforeQuery(Builder $query): Builder
     {
-        /** @var ICRUDUser|IProfileUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
 
-        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (! $user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             $query->where('author_id', $user->id);
         }
 

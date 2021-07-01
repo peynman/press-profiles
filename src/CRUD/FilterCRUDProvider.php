@@ -5,26 +5,28 @@ namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Larapress\CRUD\Services\CRUD\BaseCRUDProvider;
+use Larapress\CRUD\Services\CRUD\Traits\CRUDProviderTrait;
 use Larapress\CRUD\Services\CRUD\ICRUDProvider;
 use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
+use Larapress\CRUD\Services\CRUD\ICRUDVerb;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\Filter;
 
-class FilterCRUDProvider implements ICRUDProvider, IPermissionsMetadata
+class FilterCRUDProvider implements ICRUDProvider
 {
-    use BaseCRUDProvider;
+    use CRUDProviderTrait;
 
     public $name_in_config = 'larapress.profiles.routes.filters.name';
-    public $extend_in_config = 'larapress.profiles.routes.filters.extend.providers';
+    public $model_in_config = 'larapress.profiles.routes.filters.model';
+    public $compositions_in_config = 'larapress.profiles.routes.filters.compositions';
+
     public $verbs = [
-        self::VIEW,
-        self::CREATE,
-        self::EDIT,
-        self::DELETE,
+        ICRUDVerb::VIEW,
+        ICRUDVerb::CREATE,
+        ICRUDVerb::EDIT,
+        ICRUDVerb::DELETE,
     ];
-    public $model = Filter::class;
     public $createValidations = [
         'data.title' => 'required|string|max:190',
         'name' => 'required|string|max:190',
@@ -45,19 +47,32 @@ class FilterCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'created_at',
         'updated_at',
     ];
-    public $validRelations = [
-        'author',
-    ];
-    public $defaultShowRelations = [
-        'author',
-    ];
     public $searchColumns = [
         'id' => 'equals:id',
-        'name',
-        'type',
+        'name' => 'equals:name',
+        'type' => 'euqlas:type',
     ];
 
-    public function onBeforeCreate($args)
+    /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function getValidRelations(): array
+    {
+        return [
+            'author' => config('larapress.crud.user.provider'),
+        ];
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param array $args
+     *
+     * @return array
+     */
+    public function onBeforeCreate(array $args): array
     {
         /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
@@ -70,13 +85,13 @@ class FilterCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     /**
      * @param Builder $query
      *
-     * @return \Illuminate\Database\Query\Builder
+     * @return Builder
      */
-    public function onBeforeQuery($query)
+    public function onBeforeQuery(Builder $query): Builder
     {
         /** @var ICRUDUser $user */
         $user = Auth::user();
-        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (! $user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             $query->where('author_id', $user->id);
         }
 
@@ -88,11 +103,11 @@ class FilterCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      *
      * @return bool
      */
-    public function onBeforeAccess($object)
+    public function onBeforeAccess($object): bool
     {
         /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
-        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (! $user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             return $user->id === $object->author_id;
         }
 

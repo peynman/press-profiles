@@ -2,34 +2,31 @@
 
 namespace Larapress\Profiles\CRUD;
 
-use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Larapress\Core\Exceptions\AppException;
-use Larapress\CRUD\Services\CRUD\BaseCRUDProvider;
+use Larapress\CRUD\Services\CRUD\Traits\CRUDProviderTrait;
 use Larapress\CRUD\Services\CRUD\ICRUDProvider;
 use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
-use Larapress\CRUD\ICRUDUser;
+use Larapress\CRUD\Services\CRUD\ICRUDVerb;
 use Larapress\Profiles\IProfileUser;
-use Larapress\Profiles\Models\ActivityLog;
 
-class ActivityLogCRUDProvider implements ICRUDProvider, IPermissionsMetadata
+class ActivityLogCRUDProvider implements ICRUDProvider
 {
-    use BaseCRUDProvider;
+    use CRUDProviderTrait;
 
-    public $name_in_config = 'larapress.profiles.routes.activity-logs.name';
-    public $extend_in_config = 'larapress.profiles.routes.activity-logs.extend.providers';
+    public $name_in_config = 'larapress.profiles.routes.activity_logs.name';
+    public $model_in_config = 'larapress.profiles.routes.activity_logs.model';
+    public $compositions_in_config = 'larapress.profiles.routes.activity_logs.compositions';
+
     public $verbs = [
-        self::VIEW,
+        ICRUDVerb::VIEW,
     ];
-    public $model = ActivityLog::class;
     public $validSortColumns = [
         'id',
         'type',
         'subject',
-        'created_at'
+        'created_at',
     ];
-    public $validRelations = ['user', 'domain'];
-    public $defaultShowRelations = ['user', 'domain'];
     public $searchColumns = [
         'subject',
         'description',
@@ -42,16 +39,30 @@ class ActivityLogCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     ];
 
     /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function getValidRelations(): array
+    {
+        return [
+            'user' => config('larapress.crud.user.provider'),
+            'domain' => config('larapress.profiles.routes.domains.provider'),
+        ];
+    }
+
+    /**
      * @param Builder $query
      *
-     * @return \Illuminate\Database\Query\Builder
+     * @return Builder
      */
-    public function onBeforeQuery($query)
+    public function onBeforeQuery(Builder $query): Builder
     {
-        /** @var ICRUDUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
-        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
-            $query->where('user_id', $user->id);
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
+            $query->orWhere('user_id', $user->id);
+            $query->onWhereIn('domain_id', $user->getAffiliateDomainIds());
         }
 
         return $query;
@@ -62,11 +73,11 @@ class ActivityLogCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      *
      * @return bool
      */
-    public function onBeforeAccess($object)
+    public function onBeforeAccess($object): bool
     {
-        /** @var ICRUDUser|IProfileUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
-        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             return in_array($object->domain_id, $user->getAffiliateDomainIds());
         }
 

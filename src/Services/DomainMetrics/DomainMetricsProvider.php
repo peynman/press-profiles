@@ -2,14 +2,15 @@
 
 namespace Larapress\Profiles\Services\DomainMetrics;
 
-use Larapress\Reports\Services\IReportsServiceProvider;
+use Larapress\Reports\Services\Reports\IReportsServiceProvider;
+use Larapress\Profiles\IProfileUser;
 
 class DomainMetricsProvider implements IReportsServiceProvider
 {
     /**
      * Undocumented function
      *
-     * @param ICRUDUser $user
+     * @param IProfileUser $user
      * @param array $options
      * @return array
      */
@@ -17,12 +18,8 @@ class DomainMetricsProvider implements IReportsServiceProvider
     {
         $filters = [];
 
-        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
-            if ($user->hasRole(config('larapress.lcms.support_role_id'))) {
-                $filters['support'] = $user->id;
-            } else {
-                $filters['domain'] = $user->getAffiliateDomainIds();
-            }
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
+            $filters['domain'] = $user->getAffiliateDomainIds();
         }
 
         return $filters;

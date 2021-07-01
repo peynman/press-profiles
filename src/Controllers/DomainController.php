@@ -2,7 +2,7 @@
 
 namespace Larapress\Profiles\Controllers;
 
-use Larapress\CRUD\Services\CRUD\BaseCRUDController;
+use Larapress\CRUD\Services\CRUD\CRUDController;
 use Larapress\Profiles\CRUD\DomainCRUDProvider;
 
 /**
@@ -10,14 +10,14 @@ use Larapress\Profiles\CRUD\DomainCRUDProvider;
  *
  * @group Domains Management
  */
-class DomainController extends BaseCRUDController
+class DomainController extends CRUDController
 {
     public static function registerRoutes()
     {
         parent::registerCrudRoutes(
             config('larapress.profiles.routes.domains.name'),
             self::class,
-            DomainCRUDProvider::class
+            config('larapress.profiles.routes.domains.provider'),
         );
     }
 }

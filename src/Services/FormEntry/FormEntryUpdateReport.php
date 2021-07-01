@@ -2,89 +2,89 @@
 
 namespace Larapress\Profiles\Services\FormEntry;
 
-use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 use Larapress\CRUD\Services\CRUD\ICRUDReportSource;
-use Larapress\CRUD\Extend\Helpers;
-use Larapress\CRUD\Repository\IRoleRepository;
-use Larapress\Reports\Services\BaseReportSource;
-use Larapress\Reports\Services\IReportsService;
+use Larapress\Reports\Services\Reports\ReportSourceTrait;
+use Larapress\Reports\Services\Reports\IReportsService;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Larapress\Reports\Services\Reports\IMetricsService;
+use Larapress\Reports\Services\Reports\MetricsSourceProperties;
 
 class FormEntryUpdateReport implements ICRUDReportSource, ShouldQueue
 {
-    use BaseReportSource;
+    use ReportSourceTrait;
+
+    const MEASUREMENT_TYPE = 'form_entries';
 
     /** @var IReportsService */
     private $reports;
+    /** @var IMetricsService */
+    private $metrics;
 
     /** @var array */
     private $avReports;
 
-    public function __construct(IReportsService $reports)
+
+    // start dot groups from 1 position_1.position_2.position_3...
+    private $metricsDotGroups = [
+        'form' => 2,
+        'user' => 4,
+        'domain' => 'domain_id',
+    ];
+
+    public function __construct()
     {
-        $this->reports = $reports;
+        $this->reports = app(IReportsService::class);
+        $this->metrics = app(IMetricsService::class);
+
         $this->avReports = [
-            'form-entries.updated.total' => function ($user, array $options = []) {
-                [$filters, $fromC, $toC] = $this->getCommonReportProps($user, $options);
-                return $this->reports->queryMeasurement(
-                    'form-entry.updated',
-                    $filters,
-                    ["domain"],
-                    ["domain", "_value"],
-                    $fromC,
-                    $toC,
-                    'count()'
+            'metrics.total.form_fill' => function ($user, array $options = []) {
+                $props = MetricsSourceProperties::fromReportSourceOptions($user, $options, $this->metricsDotGroups);
+                return $this->metrics->queryMeasurement(
+                    'form_entires\.[0-9]*\.user\.[0-0]*$',
+                    self::MEASUREMENT_TYPE,
+                    null,
+                    $props->filters,
+                    $props->groups,
+                    $props->domains,
+                    $props->from,
+                    $props->to,
                 );
             },
-            'form-entries.updated.windowed' => function ($user, array $options = []) {
-                [$filters, $fromC, $toC] = $this->getCommonReportProps($user, $options);
-                $window = isset($options['window']) ? $options['window'] : '1h';
-                return $this->reports->queryMeasurement(
-                    'form-entry.updated',
-                    $filters,
-                    ["domain"],
-                    ["domain", "_value", "_time"],
-                    $fromC,
-                    $toC,
-                    'aggregateWindow(every: '.$window.', fn: sum)'
+            'metrics.windowed.form_fill' => function ($user, array $options = []) {
+                $props = MetricsSourceProperties::fromReportSourceOptions($user, $options, $this->metricsDotGroups);
+                return $this->metrics->aggregateMeasurement(
+                    'form_entires\.[0-9]*\.user\.[0-0]*$',
+                    self::MEASUREMENT_TYPE,
+                    null,
+                    $props->filters,
+                    $props->groups,
+                    $props->domains,
+                    $props->from,
+                    $props->to,
+                    $props->window
                 );
             }
         ];
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param FormEntryUpdateEvent $event
+     * @return void
+     */
     public function handle(FormEntryUpdateEvent $event)
     {
-        $user = $event->getUser();
-        $form = $event->getForm();
-
-        $supportProfileId = is_null($user) ? null : $user->getSupportUserId();
-
-        $highRole = is_null($user) ? null : $user->getUserHighestRole()->name;
-
-        $tags = [
-            'domain' => $event->domainId,
-            'role' => is_null($highRole) ? 'guest' : $highRole,
-            'form' => $event->formId,
-            'created' => $event->created,
-            'support' => $supportProfileId,
-        ];
-
-        if (isset($form->data['report_tags'])) {
-            $entry = $event->getFormEntry();
-            $values = $entry->data['values'];
-            $askedTags = explode(',', $form->data['report_tags']);
-            foreach ($askedTags as $tag) {
-                $val = Helpers::getArrayWithPath($values, $tag);
-                $tags[$tag] = $val;
-            }
+        if (config('larapress.reports.metrics')) {
+            $this->metrics->pushMeasurement(
+                $event->domainId,
+                self::MEASUREMENT_TYPE,
+                'form:'.$event->formId,
+                'form_entries.'.$event->formId.'.user.'.$event->userId,
+                1,
+                Carbon::now()
+            );
         }
-
-        if (!is_null($user)) {
-            if ($form->id === config('larapress.profiles.default_profile_form_id')) {
-                $tags['profile'] = true;
-            }
-        }
-
-        $this->reports->pushMeasurement('form-entry.updated', 1, $tags, [], $event->timestamp);
     }
 }

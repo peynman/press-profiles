@@ -2,27 +2,30 @@
 
 namespace Larapress\Profiles\CRUD;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Larapress\CRUD\Services\CRUD\BaseCRUDProvider;
+use Larapress\CRUD\Services\CRUD\Traits\CRUDProviderTrait;
 use Larapress\CRUD\Services\CRUD\ICRUDProvider;
 use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
+use Larapress\CRUD\Services\CRUD\ICRUDVerb;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\Settings;
 
-class SettingsCRUDProvider implements ICRUDProvider, IPermissionsMetadata
+class SettingsCRUDProvider implements ICRUDProvider
 {
-    use BaseCRUDProvider;
+    use CRUDProviderTrait;
 
     public $name_in_config = 'larapress.profiles.routes.settings.name';
-    public $extend_in_config = 'larapress.profiles.routes.settings.extend.providers';
+    public $model_in_config = 'larapress.profiles.routes.settings.model';
+    public $compositions_in_config = 'larapress.profiles.routes.settings.compositions';
+
     public $verbs = [
-        self::VIEW,
-        self::CREATE,
-        self::EDIT,
-        self::DELETE,
+        ICRUDVerb::VIEW,
+        ICRUDVerb::CREATE,
+        ICRUDVerb::EDIT,
+        ICRUDVerb::DELETE,
     ];
-    public $model = Settings::class;
     public $createValidations = [
         'key' => 'required|string',
         'val' => 'required',
@@ -65,14 +68,15 @@ class SettingsCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 
     /**
      * @param Settings $object
+     *
      * @return bool
      */
-    public function onBeforeAccess($object)
+    public function onBeforeAccess($object): bool
     {
         /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
 
-        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (! $user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             return $user->id === $object->author_id;
         }
 
@@ -80,15 +84,14 @@ class SettingsCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param Builder $query
+     * @return Builder
      */
-    public function onBeforeQuery($query)
+    public function onBeforeQuery(Builder $query): Builder
     {
-        /** @var ICRUDUser|IProfileUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
-
-        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (! $user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             $query
             ->whereHas('domains', function ($q) use ($user) {
                 $q->whereIn('id', $user->getAffiliateDomainIds());
@@ -103,9 +106,10 @@ class SettingsCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      * Undocumented function
      *
      * @param array $args
+     *
      * @return array
      */
-    public function onBeforeCreate($args)
+    public function onBeforeCreate($args): array
     {
         $args['author_id'] = Auth::user()->id;
         return $args;
@@ -115,9 +119,10 @@ class SettingsCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      * Undocumented function
      *
      * @param array $args
+     *
      * @return array
      */
-    public function onBeforeUpdate($args)
+    public function onBeforeUpdate($args): array
     {
         $args['author_id'] = Auth::user()->id;
         return $args;
@@ -127,10 +132,9 @@ class SettingsCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      * @param Settings $object
      * @param array  $input_data
      *
-     * @return object
+     * @return void
      */
-    public function onAfterUpdate($object, $input_data)
+    public function onAfterUpdate($object, array $input_data): void
     {
-        return $object;
     }
 }

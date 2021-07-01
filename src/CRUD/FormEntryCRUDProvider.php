@@ -2,36 +2,37 @@
 
 namespace Larapress\Profiles\CRUD;
 
-use Exception;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Larapress\CRUD\Services\CRUD\BaseCRUDProvider;
+use Larapress\CRUD\Extend\Helpers;
+use Larapress\CRUD\Services\CRUD\Traits\CRUDProviderTrait;
 use Larapress\CRUD\Services\CRUD\ICRUDProvider;
 use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
-use Larapress\CRUD\ICRUDUser;
+use Larapress\CRUD\Services\CRUD\ICRUDVerb;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\FormEntry;
 use Larapress\Profiles\Services\FormEntry\FormEntryUpdateEvent;
 use Larapress\Profiles\Services\FormEntry\FormEntryUpdateReport;
-use Larapress\Reports\Services\IReportsService;
 use Larapress\Profiles\Services\FormEntry\IFormEntryService;
 use Larapress\ECommerce\IECommerceUser;
 
-class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
+class FormEntryCRUDProvider implements ICRUDProvider
 {
-    use BaseCRUDProvider;
+    use CRUDProviderTrait;
 
-    public $name_in_config = 'larapress.profiles.routes.form-entries.name';
-    public $extend_in_config = 'larapress.profiles.routes.form-entries.extend.providers';
+    public $name_in_config = 'larapress.profiles.routes.form_entries.name';
+    public $model_in_config = 'larapress.profiles.routes.form_entries.model';
+    public $compositions_in_config = 'larapress.profiles.routes.form_entries.compositions';
+
     public $verbs = [
-        self::VIEW,
-        self::DELETE,
-        self::REPORTS,
-        self::CREATE,
-        self::EDIT,
+        ICRUDVerb::VIEW,
+        ICRUDVerb::DELETE,
+        ICRUDVerb::REPORTS,
+        ICRUDVerb::CREATE,
+        ICRUDVerb::EDIT,
     ];
-    public $model = FormEntry::class;
     public $createValidations = [
         'user_id' => 'required|exists:users,id',
         'form_id' => 'required|exists:forms,id',
@@ -79,48 +80,53 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      *
      * @return array
      */
-    public function getValidRelations()
+    public function getValidRelations(): array
     {
         return [
-            'user' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.users.name').'.view');
-            },
-            'domain' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.domains.name').'.view');
-            },
-            'user.phones' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.phone-numbers.name').'.view');
-            },
-            'user.form_support_user_profile' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
-            },
-            'user.form_profile_default' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
-            },
-            'user.form_profile_support' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
-            },
-            'user.form_support_registration_entry' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
-            },
-            'user.wallet_balance' => function ($user) {
-                return $user->hasPermission(config('larapress.ecommerce.routes.wallet_transactions.name').'.view');
-            },
-            'form',
-            'entry_tag_resolve',
+            'user' => config('larapress.crud.user.provider'),
+            'domain' => config('larapress.profiles.routes.domains.provider'),
+            'form' => config('larapress.profiles.routes.forms.provider'),
         ];
     }
 
     /**
+     * Undocumented function
      *
+     * @return array
      */
-    public function getReportSources()
+    public function getReportSources(): array
     {
-        /** @var IReportsService */
-        $service = app(IReportsService::class);
         return [
-            new FormEntryUpdateReport($service),
+            new FormEntryUpdateReport(),
         ];
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param array $args
+     *
+     * @return array
+     */
+    public function onBeforeCreate(array $args): array
+    {
+        $request = Request::createFromGlobals();
+
+        /** @var IFormEntryService */
+        $service = app(IFormEntryService::class);
+        $args['data'] = [
+            'admin' => Auth::user()->id,
+            'ip' => $request->ip(),
+            'agent' => $request->userAgent(),
+            'values' => $service->replaceBase64ImagesInInputs($args['formValues']),
+        ];
+
+        $class = config('larapress.crud.user.model');
+        /** @var IProfileUser */
+        $tUser = call_user_func([$class, 'find'], $args['user_id']);
+        $args['domain_id'] = $tUser->getMembershipDomainId();
+
+        return $args;
     }
 
     /**
@@ -129,7 +135,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      * @param array $args
      * @return array
      */
-    public function onBeforeCreate($args)
+    public function onBeforeUpdate(array $args): array
     {
         $request = Request::createFromGlobals();
 
@@ -142,28 +148,7 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             'values' => $service->replaceBase64ImagesInInputs($args['formValues']),
         ];
 
-        $class = config('larapress.crud.user.class');
-        /** @var IProfileUser */
-        $tUser = call_user_func([$class, 'find'], $args['user_id']);
-        $args['domain_id'] = $tUser->getMembershipDomainId();
-
-        return $args;
-    }
-
-    public function onBeforeUpdate($args)
-    {
-        $request = Request::createFromGlobals();
-
-        /** @var IFormEntryService */
-        $service = app(IFormEntryService::class);
-        $args['data'] = [
-            'admin' => Auth::user()->id,
-            'ip' => $request->ip(),
-            'agent' => $request->userAgent(),
-            'values' => $service->replaceBase64ImagesInInputs($args['formValues']),
-        ];
-
-        $class = config('larapress.crud.user.class');
+        $class = config('larapress.crud.user.model');
         /** @var IProfileUser */
         $tUser = call_user_func([$class, 'find'], $args['user_id']);
         $args['domain_id'] = $tUser->getMembershipDomainId();
@@ -173,14 +158,15 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
 
     /**
      * @param FormEntry $object
+     *
      * @return bool
      */
-    public function onBeforeAccess($object)
+    public function onBeforeAccess($object): bool
     {
         /** @var IProfileUser $user */
         $user = Auth::user();
 
-        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             return in_array($object->domain_id, $user->getAffiliateDomainIds());
         }
 
@@ -188,39 +174,16 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param Builder $query
+     * @return Builder
      */
-    public function onBeforeQuery($query)
+    public function onBeforeQuery($query): Builder
     {
         /** @var IECommerceUser $user */
         $user = Auth::user();
 
-        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
-            if ($user->hasRole(config('larapress.lcms.support_role_id'))) {
-                $query->whereHas('user.form_entries', function ($q) use ($user) {
-                    $q->where('tags', 'support-group-' . $user->id);
-                });
-            } elseif ($user->hasRole(config('larapress.lcms.owner_role_id'))) {
-                $flatten_array = function ($arr) {
-                    $flatten = [];
-                    foreach ($arr as $item) {
-                        if (gettype($item) === 'string') {
-                            $flatten[] = $item;
-                        } else {
-                            foreach ($item as $inner) {
-                                $flatten[] = $inner;
-                            }
-                        }
-                    }
-                    return $flatten;
-                };
-
-                $ownerEntries = $flatten_array(collect($user->getOwenedProductsIds())->map(function ($id) {
-                    return ['course-'.$id.'-presence', 'course-'.$id.'-taklif', 'azmoon-'.$id];
-                })->toArray());
-                $query->whereIn('tags', $ownerEntries);
-            } else {
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
+            if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
                 $query->whereIn('domain_id', $user->getAffiliateDomainIds());
             }
         }
@@ -231,13 +194,14 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     /**
      * Undocumented function
      *
-     * @param [type] $object
-     * @param [type] $input_data
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param FormEntry $object
+     * @param array $input_data
+     *
+     * @return void
      */
-    public function onAfterCreate($object, $input_data)
+    public function onAfterCreate($object, array $input_data): void
     {
-        Cache::tags(['user.forms:' . $object->user_id])->flush();
+        Helpers::forgetCachedValues(['user.forms:' . $object->user_id]);
 
         FormEntryUpdateEvent::dispatch(
             $object->user,
@@ -246,44 +210,20 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             $object->form,
             true,
             'admin:' . Auth::user()->id,
-            time()
+            Carbon::now()
         );
     }
 
     /**
      * Undocumented function
      *
-     * @param [type] $object
-     * @param [type] $input_data
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function onAfterUpdate($object, $input_data)
-    {
-        Cache::tags(['user.forms:' . $object->user_id])->flush();
-
-        FormEntryUpdateEvent::dispatch(
-            $object->user,
-            $object->user->getMembershipDomain(),
-            $object,
-            $object->form,
-            false,
-            'admin:' . Auth::user()->id,
-            time()
-        );
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param [type] $object
+     * @param FormEntry $object
+     * @param array $input_data
      * @return void
      */
-    public function onAfterDestroy($object)
+    public function onAfterUpdate($object, $input_data): void
     {
-        Cache::tags(['user.forms:' . $object->user_id])->flush();
-        Cache::tags(['user.profile:' . $object->user_id])->flush();
-        Cache::tags(['user.support:' . $object->user_id])->flush();
-        Cache::tags(['user.introducer:' . $object->user_id])->flush();
+        Helpers::forgetCachedValues(['user.forms:' . $object->user_id]);
 
         FormEntryUpdateEvent::dispatch(
             $object->user,
@@ -292,7 +232,34 @@ class FormEntryCRUDProvider implements ICRUDProvider, IPermissionsMetadata
             $object->form,
             false,
             'admin:' . Auth::user()->id,
-            time()
+            Carbon::now()
+        );
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param FormEntry $object
+     *
+     * @return void
+     */
+    public function onAfterDestroy($object): void
+    {
+        Helpers::forgetCachedValues([
+            'user.forms:' . $object->user_id,
+            'user.profile:' . $object->user_id,
+            'user.support:' . $object->user_id,
+            'user.introducer:' . $object->user_id
+        ]);
+
+        FormEntryUpdateEvent::dispatch(
+            $object->user,
+            $object->user->getMembershipDomain(),
+            $object,
+            $object->form,
+            false,
+            'admin:' . Auth::user()->id,
+            Carbon::now(),
         );
     }
 }

@@ -31,9 +31,9 @@ interface IFormRepository
      *
      * @param [type] $user
      * @param Request $request
-     * @param Route $route
+     * @param Route|null $route
      * @param array $sources
      * @return array
      */
-    public function getFormDataSources($user, Request $request, Route $route, $sources);
+    public function getFormDataSources($user, Request $request, $route, $sources);
 }

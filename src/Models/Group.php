@@ -4,39 +4,46 @@ namespace Larapress\Profiles\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Larapress\Profiles\IProfileUser;
+use Larapress\CRUD\ICRUDUser;
 
 /**
- * Class Segment.
+ * Class Group.
  *
  * @property $id
  * @property string $name
- * @property int    $score
+ * @property string $title
  * @property int    $flags
  * @property int    $author_id
- * @property array  $data
- * @property IProfileUser[] $members
- * @property IProfileUser $author
+ * @property ICRUDUser[] $members
+ * @property ICRUDUser[] $owners
+ * @property ICRUDUser[] $admins
+ * @property ICRUDUser $author
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $deleted_at
  */
-class Segment extends Model
+class Group extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'segments';
+    const FLAGS_OWNER = 1;
+    const FLAGS_ADMIN = 2;
+
+    protected $table = 'groups';
 
     protected $fillable = [
         'author_id',
         'name',
-        'score',
-        'flags',
         'data',
+        'flags',
     ];
 
     public $casts = [
         'data' => 'array',
+    ];
+
+    public $appends = [
+        'owner_ids',
     ];
 
     /**
@@ -46,11 +53,28 @@ class Segment extends Model
     {
         return $this->belongsToMany(
             config('larapress.crud.user.model'),
-            'user_segment',
-            'segment_id',
+            'user_group',
+            'group_id',
             'user_id'
-        )->withPivot('created_at');
+        )->withPivot(['flags']);
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function owners()
+    {
+        return $this->members()->where('flags', '&', Group::FLAGS_OWNER);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function admins()
+    {
+        return $this->members()->where('flags', '&', Group::FLAGS_ADMIN);
+    }
+
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

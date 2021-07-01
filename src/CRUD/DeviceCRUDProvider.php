@@ -2,30 +2,27 @@
 
 namespace Larapress\Profiles\CRUD;
 
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Larapress\CRUD\Services\CRUD\BaseCRUDProvider;
+use Larapress\CRUD\Services\CRUD\Traits\CRUDProviderTrait;
 use Larapress\CRUD\Services\CRUD\ICRUDProvider;
 use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
-use Larapress\CRUD\ICRUDUser;
-use Larapress\Profiles\Flags\UserDomainFlags;
+use Larapress\CRUD\Services\CRUD\ICRUDVerb;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\Device;
-use Larapress\Profiles\Models\Domain;
-use Larapress\Profiles\Models\DomainSub;
 
-class DeviceCRUDProvider implements ICRUDProvider, IPermissionsMetadata
+class DeviceCRUDProvider implements ICRUDProvider
 {
-    use BaseCRUDProvider;
+    use CRUDProviderTrait;
 
     public $name_in_config = 'larapress.profiles.routes.devices.name';
-    public $extend_in_config = 'larapress.profiles.routes.devices.extend.providers';
+    public $model_in_config = 'larapress.profiles.routes.devices.model';
+    public $compositions_in_config = 'larapress.profiles.routes.devices.compositions';
+
     public $verbs = [
-        self::VIEW,
-        self::DELETE,
+        ICRUDVerb::VIEW,
+        ICRUDVerb::DELETE,
     ];
-    public $model = Device::class;
     public $searchColumns = [
         'domain',
         'id',
@@ -40,42 +37,51 @@ class DeviceCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'client_ip',
         'created_at',
         'updated_at',
+        'deleted_at',
     ];
-    public $validRelations = [
-        'user',
-        'domain'
-    ];
-    public $defaultShowRelations = [
-        'user',
-    ];
+
+    /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function getValidRelations(): array
+    {
+        return [
+            'user' => config('larapress.crud.user.provider'),
+            'domain' => config('larapress.profiles.routes.domains.provider'),
+        ];
+    }
+
 
     /**
      * @param Builder $query
      *
-     * @return \Illuminate\Database\Query\Builder
+     * @return Builder
      */
-    public function onBeforeQuery($query)
+    public function onBeforeQuery(Builder $query): Builder
     {
-        /** @var ICRUDUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
-        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
-            $query->where('user_id', $user->id);
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
+            $query->orWhere('user_id', $user->id);
+            $query->orWhereIn('domain_id', $user->getAffiliateDomainIds());
         }
 
         return $query;
     }
 
     /**
-     * @param Domain $object
+     * @param Device $object
      *
      * @return bool
      */
-    public function onBeforeAccess($object)
+    public function onBeforeAccess($object): bool
     {
         /** @var IProfileUser $user */
         $user = Auth::user();
-        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
-            return in_array($object->id, $user->getAffiliateDomainIds());
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
+            return in_array($object->domain_id, $user->getAffiliateDomainIds());
         }
 
         return true;

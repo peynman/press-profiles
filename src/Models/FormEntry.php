@@ -64,14 +64,4 @@ class FormEntry extends Model
     {
         return $this->belongsTo(Domain::class, 'domain_id');
     }
-
-    /**
-     * Undocumented function
-     *
-     * @return FormEntryTagResolveRelationship
-     */
-    public function entry_tag_resolve()
-    {
-        return new FormEntryTagResolveRelationship($this, Product::query());
-    }
 }

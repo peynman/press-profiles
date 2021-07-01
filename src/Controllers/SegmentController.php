@@ -2,7 +2,7 @@
 
 namespace Larapress\Profiles\Controllers;
 
-use Larapress\CRUD\Services\CRUD\BaseCRUDController;
+use Larapress\CRUD\Services\CRUD\CRUDController;
 use Larapress\Profiles\CRUD\SegmentCRUDProvider;
 
 /**
@@ -10,14 +10,14 @@ use Larapress\Profiles\CRUD\SegmentCRUDProvider;
  *
  * @group Segments Management
  */
-class SegmentController extends BaseCRUDController
+class SegmentController extends CRUDController
 {
     public static function registerRoutes()
     {
         parent::registerCrudRoutes(
             config('larapress.profiles.routes.segments.name'),
             self::class,
-            SegmentCRUDProvider::class,
+            config('larapress.profiles.routes.segments.provider'),
         );
     }
 }

@@ -10,12 +10,14 @@ interface ISettingsService
     /**
      * Undocumented function
      *
+     * @param integer $domainId
      * @param string $key
-     * @param object $value
-     * @param string|null $type
+     * @param mixed $value
+     * @param string $type
+     *
      * @return Settings
      */
-    public function updateGlobalSettings(string $key, $value, $type);
+    public function updateDomainlSettings(int $domainId, string $key, $value, string $type);
 
     /**
      * Undocumented function
@@ -23,10 +25,11 @@ interface ISettingsService
      * @param string $key
      * @param IProfileUser $user
      * @param object $value
-     * @param string|null $type
+     * @param string $type
+     *
      * @return Settings
      */
-    public function updateUserSettings(string $key, IProfileUser $user, $value, $type);
+    public function updateUserSettings(IProfileUser $user, string $key, $value, string $type);
 
 
     /**
@@ -35,7 +38,7 @@ interface ISettingsService
      * @param Domain $domain
      * @return void
      */
-    public function applyGlobalSettingsForDomain($domain);
+    public function applyDomainSettings(Domain $domain);
 
     /**
      * Undocumented function
@@ -44,4 +47,21 @@ interface ISettingsService
      * @return void
      */
     public function applyUserSettings(IProfileUser $user);
+
+    /**
+     * Undocumented function
+     *
+     * @param int $userId
+     *
+     * @return void
+     */
+    public function forgetUserSettingsCache($userId);
+
+    /**
+     * Undocumented function
+     *
+     * @param int $domainId
+     * @return void
+     */
+    public function forgetDomainSettingsCache($domainId);
 }

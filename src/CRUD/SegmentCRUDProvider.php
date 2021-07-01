@@ -2,28 +2,29 @@
 
 namespace Larapress\Profiles\CRUD;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Larapress\CRUD\Services\CRUD\BaseCRUDProvider;
+use Larapress\CRUD\Services\CRUD\Traits\CRUDProviderTrait;
 use Larapress\CRUD\Services\CRUD\ICRUDProvider;
 use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
 use Larapress\CRUD\ICRUDUser;
+use Larapress\CRUD\Services\CRUD\ICRUDVerb;
 use Larapress\Profiles\IProfileUser;
-use Larapress\Profiles\Models\Segment;
-use Larapress\Profiles\Models\Settings;
 
-class SegmentCRUDProvider implements ICRUDProvider, IPermissionsMetadata
+class SegmentCRUDProvider implements ICRUDProvider
 {
-    use BaseCRUDProvider;
+    use CRUDProviderTrait;
 
     public $name_in_config = 'larapress.profiles.routes.segments.name';
-    public $extend_in_config = 'larapress.profiles.routes.segments.extend.providers';
+    public $model_in_config = 'larapress.profiles.routes.segments.model';
+    public $compositions_in_config = 'larapress.profiles.routes.segments.compositions';
+
     public $verbs = [
-        self::VIEW,
-        self::CREATE,
-        self::EDIT,
-        self::DELETE,
+        ICRUDVerb::VIEW,
+        ICRUDVerb::CREATE,
+        ICRUDVerb::EDIT,
+        ICRUDVerb::DELETE,
     ];
-    public $model = Segment::class;
     public $createValidations = [
     ];
     public $updateValidations = [
@@ -50,15 +51,16 @@ class SegmentCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     ];
 
     /**
-     * @param Settings $object
+     * @param Segment $object
+     *
      * @return bool
      */
-    public function onBeforeAccess($object)
+    public function onBeforeAccess($object): bool
     {
         /** @var ICRUDUser|IProfileUser $user */
         $user = Auth::user();
 
-        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (! $user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             return $user->id === $object->author_id;
         }
 
@@ -66,15 +68,16 @@ class SegmentCRUDProvider implements ICRUDProvider, IPermissionsMetadata
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param Builder $query
+     *
+     * @return Builder
      */
-    public function onBeforeQuery($query)
+    public function onBeforeQuery($query): Builder
     {
         /** @var IProfileUser $user */
         $user = Auth::user();
 
-        if (! $user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (! $user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             $query->where('author_id', $user->id);
         }
 
@@ -85,9 +88,10 @@ class SegmentCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      * Undocumented function
      *
      * @param array $args
+     *
      * @return array
      */
-    public function onBeforeCreate($args)
+    public function onBeforeCreate(array $args): array
     {
         $args['author_id'] = Auth::user()->id;
         return $args;

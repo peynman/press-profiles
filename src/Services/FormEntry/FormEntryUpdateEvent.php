@@ -13,17 +13,17 @@ class FormEntryUpdateEvent implements ShouldQueue
 {
     use Dispatchable, SerializesModels;
 
-    /** @var \Larapress\Profiles\IProfileUser */
+    /** @var int */
     public $userId;
-    /** @var \Larapress\Profiles\Models\Domain */
+    /** @var int */
     public $domainId;
     /** @var string */
     public $ip;
     /** @var int */
     public $timestamp;
-    /** @var \Larapress\Profiles\Models\FormEntry */
+    /** @var int */
     public $entryId;
-    /** @var \Larapress\Profiles\Models\Form */
+    /** @var int */
     public $formId;
     /** @var boolean */
     public $created;
@@ -41,7 +41,6 @@ class FormEntryUpdateEvent implements ShouldQueue
     public function __construct($user, $domain, $entry, $form, $created, $ip, $timestamp)
     {
         $this->userId = is_numeric($user) ? $user : $user->id;
-        $this->supportId = $user->getSupportUserId();
         $this->domainId = is_numeric($domain) || is_null($domain) ? $domain : $domain->id;
         $this->formId = is_numeric($form) || is_null($form) ? $form : $form->id;
         $this->entryId = is_numeric($entry) || is_null($entry) ? $entry : $entry->id;
@@ -50,17 +49,31 @@ class FormEntryUpdateEvent implements ShouldQueue
         $this->created = $created;
     }
 
-
+    /**
+     * Undocumented function
+     *
+     * @return IECommerceUser
+     */
     public function getUser(): IECommerceUser
     {
-        return call_user_func([config('larapress.crud.user.class'), "find"], $this->userId);
+        return call_user_func([config('larapress.crud.user.model'), "find"], $this->userId);
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return Form
+     */
     public function getForm() : Form
     {
         return Form::find($this->formId);
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return FormEntry
+     */
     public function getFormEntry() : FormEntry
     {
         return FormEntry::find($this->entryId);

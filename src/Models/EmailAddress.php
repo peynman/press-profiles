@@ -44,7 +44,7 @@ class EmailAddress extends Model
     public function user()
     {
         return $this->belongsTo(
-            config('larapress.crud.user.class'),
+            config('larapress.crud.user.model'),
             'user_id',
             'id'
         );

@@ -52,7 +52,10 @@ class DomainRepository implements IDomainRepository
         $domain_str = $request->getHost();
 
         return Helpers::getCachedValue(
-            'domain:'.$domain_str,
+            'larapress.profiles.domain:'.$domain_str,
+            ['domains'],
+            3600,
+            true,
             function () use ($domain_str) {
                 $domain = Domain::where(function (Builder $q) use ($domain_str) {
                     $q->orWhere('domain', $domain_str);
@@ -66,9 +69,7 @@ class DomainRepository implements IDomainRepository
                 }
 
                 return $domain;
-            },
-            ['domains'],
-            null
+            }
         );
     }
 

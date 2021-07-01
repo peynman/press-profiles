@@ -2,29 +2,30 @@
 
 namespace Larapress\Profiles\CRUD;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Larapress\CRUD\Extend\Helpers;
-use Larapress\CRUD\Services\CRUD\BaseCRUDProvider;
+use Larapress\CRUD\Services\CRUD\Traits\CRUDProviderTrait;
 use Larapress\CRUD\Services\CRUD\ICRUDProvider;
 use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
-use Larapress\CRUD\ICRUDUser;
+use Larapress\CRUD\Services\CRUD\ICRUDVerb;
 use Larapress\Profiles\Models\PhoneNumber;
 use Larapress\Profiles\IProfileUser;
 
-class PhoneNumberCRUDProvider implements ICRUDProvider, IPermissionsMetadata
+class PhoneNumberCRUDProvider implements ICRUDProvider
 {
-    use BaseCRUDProvider;
+    use CRUDProviderTrait;
 
-    public $name_in_config = 'larapress.profiles.routes.phone-numbers.name';
-    public $extend_in_config = 'larapress.profiles.routes.phone-numbers.extend.providers';
+    public $name_in_config = 'larapress.profiles.routes.phone_numbers.name';
+    public $model_in_config = 'larapress.profiles.routes.phone_numbers.model';
+    public $compositions_in_config = 'larapress.profiles.routes.phone_numbers.compositions';
+
     public $verbs = [
-        self::VIEW,
-        self::CREATE,
-        self::EDIT,
-        self::DELETE,
-        self::REPORTS,
+        ICRUDVerb::VIEW,
+        ICRUDVerb::CREATE,
+        ICRUDVerb::EDIT,
+        ICRUDVerb::DELETE,
+        ICRUDVerb::REPORTS,
     ];
-    public $model = PhoneNumber::class;
     public $createValidations = [
         'user_id' => 'required|numeric|exists:users,id',
         'number' => 'required|numeric_farsi|unique:phone_numbers,number',
@@ -37,72 +38,49 @@ class PhoneNumberCRUDProvider implements ICRUDProvider, IPermissionsMetadata
         'flags' => 'numeric',
         'data' => 'nullable|json',
     ];
-    public $autoSyncRelations = [
-    ];
     public $validSortColumns = [
         'id',
         'number',
-        'created_at',
-        'updated_at',
         'flags',
         'domain_id',
         'user_id',
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
-    public $validFilters = [];
-    public $defaultShowRelations = [
-        'user',
-        'domain'
-    ];
-    public $excludeIfNull = [];
     public $searchColumns = [
         'number',
     ];
-    public $filterDefaults = [];
     public $filterFields = [
         'created_from' => 'after:created_at',
         'created_to' => 'before:created_at',
+        'updated_from' => 'after:upated_at',
+        'updated_to' => 'before:updated_at',
     ];
 
-    public function getValidRelations()
+    /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function getValidRelations(): array
     {
         return [
-            'user' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.users.name').'.view');
-            },
-            'domain' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.domains.name').'.view');
-            },
-            'user.phones' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.phone-numbers.name').'.view');
-            },
-            'user.form_support_user_profile' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
-            },
-            'user.form_profile_default' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
-            },
-            'user.form_profile_support' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
-            },
-            'user.form_support_registration_entry' => function ($user) {
-                return $user->hasPermission(config('larapress.profiles.routes.form-entries.name').'.view');
-            },
-            'user.wallet_balance'  => function ($user) {
-                return $user->hasPermission(config('larapress.ecommerce.routes.wallet_transactions.name').'.view');
-            },
+            'user' => config('larapress.crud.user.provider'),
+            'domain' => config('larapress.profiles.routes.domains.provider'),
         ];
     }
 
     /**
      * @param Builder $query
      *
-     * @return \Illuminate\Database\Query\Builder
+     * @return Builder
      */
-    public function onBeforeQuery($query)
+    public function onBeforeQuery($query): Builder
     {
-        /** @var ICRUDUser|IProfileUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
-        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             $query->orWhereIn('domain_id', $user->getAffiliateDomainIds());
             $query->orWhereHas('user.form_entries', function ($q) use ($user) {
                 $q->where('tags', 'support-group-'.$user->id);
@@ -117,11 +95,11 @@ class PhoneNumberCRUDProvider implements ICRUDProvider, IPermissionsMetadata
      *
      * @return bool
      */
-    public function onBeforeAccess($object)
+    public function onBeforeAccess($object): bool
     {
-        /** @var ICRUDUser|IProfileUser $user */
+        /** @var IProfileUser $user */
         $user = Auth::user();
-        if (!$user->hasRole(config('larapress.profiles.security.roles.super-role'))) {
+        if (!$user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             return in_array($object->domain_id, $user->getAffiliateDomainIds());
         }
 
