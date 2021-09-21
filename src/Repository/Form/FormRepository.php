@@ -5,14 +5,22 @@ namespace Larapress\Profiles\Repository\Form;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
-use Larapress\CRUD\Services\CRUD\ICRUDService;
 use Larapress\CRUD\Exceptions\AppException;
+use Larapress\CRUD\Services\RepoSources\IRepositorySources;
 use Larapress\Profiles\Models\Form;
 use Larapress\Profiles\Models\FormEntry;
-use Mews\Captcha\Facades\Captcha;
 
 class FormRepository implements IFormRepository
 {
+
+    /** @var IRepositorySources */
+    protected $sources;
+
+    public function __construct(IRepositorySources $sources)
+    {
+        $this->sources = $sources;
+    }
+
     /**
      * Undocumented function
      *
@@ -67,7 +75,7 @@ class FormRepository implements IFormRepository
         }
 
         $form['sources'] = isset($form->data['sources']) && count($form->data['sources']) > 0 ?
-            $this->getFormDataSources($user, $request, $route, $form->data['sources']) : [];
+            $this->sources->fetchRepositorySources($user, $form->data['sources'], $request, $route) : [];
 
         if (!is_null($user)) {
             $entry = FormEntry::query()
@@ -82,79 +90,5 @@ class FormRepository implements IFormRepository
         }
 
         return $form;
-    }
-
-
-    /**
-     * Undocumented function
-     *
-     * @param [type] $user
-     * @param Request $request
-     * @param Route $route
-     * @param array $sources
-     * @return array
-     */
-    public function getFormDataSources($user, Request $request, $route, $inputSources)
-    {
-        $sources = [];
-        /** @var ICRUDService */
-        $crudService = app(ICRUDService::class);
-        foreach ($inputSources as $source) {
-            $res = [];
-            switch ($source['resource']) {
-                case 'object':
-                    switch ($source['class']) {
-                        case 'captcha':
-                            $res = Captcha::create('default', true);
-                            break;
-                        default:
-                            $provider = new $source['class'];
-                            $crudService->useProvider($provider);
-                            $res = $crudService->show($request, $route->parameter($source['param']));
-                            break;
-                    }
-                    break;
-                case 'repository':
-                    $repo = $source['class'];
-                    $safeRepos = config('larapress.pages.safe-sources');
-                    if (in_array($repo, $safeRepos)) {
-                        $args =  isset($source['args']) ? $source['args'] : [];
-                        $repoRef = app()->make($repo);
-
-                        $methodArgs = [];
-                        usort($args, function ($a, $b) {
-                            $aIndex = isset($a['index']) ? $a['index']:0;
-                            $bIndex = isset($b['index']) ? $b['index']:0;
-                            return $aIndex <=> $bIndex;
-                        });
-                        foreach ($args as $arg) {
-                            if (isset($arg['type'])) {
-                                switch ($arg['type']) {
-                                    case 'json':
-                                        $methodArgs[] = is_string($arg['value']) ? json_decode($arg['value']) : $arg['value'];
-                                        break;
-                                    case 'request':
-                                        $methodArgs[] = $request;
-                                        break;
-                                    case 'route':
-                                        $methodArgs[] = $route;
-                                        break;
-                                    case 'param':
-                                        $methodArgs[] = $route->parameter($arg['value']);
-                                        break;
-                                }
-                            }
-                        }
-                        $res = call_user_func([$repoRef,  $source['method']], $user, ...$methodArgs);
-                    }
-                    break;
-            }
-
-            $sources[] = [
-                'resource' => $res,
-                'path' => $source['path']
-            ];
-        }
-        return $sources;
     }
 }

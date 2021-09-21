@@ -3,7 +3,7 @@
 namespace Larapress\Profiles\Services\FormEntry;
 
 use Illuminate\Http\Request;
-use Symfony\Component\Routing\Route;
+use Larapress\Profiles\Models\Form;
 
 interface IFormEntryService
 {
@@ -15,12 +15,12 @@ interface IFormEntryService
      *
      * @param Request|null $request
      * @param mixed $user
-     * @param int $formId
+     * @param int|Form $form
      * @param string|null $tags
      * @param callable $onProvide
      * @return FormEntry
      */
-    public function updateFormEntry($request, $user, $formId, $tags = null, $onProvide = null);
+    public function updateFormEntry($request, $user, $form, $tags = null, $onProvide = null);
 
 
     /**
@@ -29,26 +29,29 @@ interface IFormEntryService
      *
      * @param Request|null $request
      * @param mixed $user
-     * @param int $formId
+     * @param int|Form $form
      * @param string|null $tags
      * @param callable $onProvide
      * @return FormEntry
      */
-    public function updateUserFormEntryTag($request, $user, $formId, $tags, $onProvide = null);
-
-    /**
-     * Undocumented function
-     *
-     * @param array $values
-     * @return array
-     */
-    public function replaceBase64ImagesInInputs($values);
+    public function updateUserFormEntryTag($request, $user, $form, $tags, $onProvide = null);
 
     /**
      * Undocumented function
      *
      * @param int|Form $form
+     *
      * @return array
      */
     public function getFormValidationRules($form);
+
+    /**
+     * Undocumented function
+     *
+     * @param Request $request
+     * @param Form $form
+     *
+     * @return array
+     */
+    public function getValidatedFormInputs(Request $request, Form $form);
 }

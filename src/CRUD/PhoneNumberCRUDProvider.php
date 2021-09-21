@@ -3,10 +3,11 @@
 namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Larapress\CRUD\Exceptions\AppException;
 use Larapress\CRUD\Services\CRUD\Traits\CRUDProviderTrait;
 use Larapress\CRUD\Services\CRUD\ICRUDProvider;
-use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
 use Larapress\CRUD\Services\CRUD\ICRUDVerb;
 use Larapress\Profiles\Models\PhoneNumber;
 use Larapress\Profiles\IProfileUser;
@@ -30,13 +31,7 @@ class PhoneNumberCRUDProvider implements ICRUDProvider
         'user_id' => 'required|numeric|exists:users,id',
         'number' => 'required|numeric_farsi|unique:phone_numbers,number',
         'flags' => 'numeric',
-        'data' => 'nullable|json',
-    ];
-    public $updateValidations = [
-        'user_id' => 'required|numeric|exists:users,id',
-        'number' => 'required|numeric_farsi|unique:phone_numbers,number',
-        'flags' => 'numeric',
-        'data' => 'nullable|json',
+        'data' => 'nullable|json_object',
     ];
     public $validSortColumns = [
         'id',
@@ -72,6 +67,63 @@ class PhoneNumberCRUDProvider implements ICRUDProvider
     }
 
     /**
+     * Undocumented function
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function getUpdateRules(Request $request): array
+    {
+        return [
+            'user_id' => 'required|numeric|exists:users,id',
+            'number' => 'required|numeric_farsi|unique:phone_numbers,number,'.$request->route('id'),
+            'flags' => 'numeric',
+            'data' => 'nullable|json_object',
+        ];
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param array $args
+     * @return array
+     */
+    public function onBeforeCreate(array $args): array
+    {
+        $class = config('larapress.crud.user.model');
+        /** @var IProfileUser */
+        $targetUser = call_user_func([$class, 'find'], $args['user_id']);
+
+        /** @var IProfileUser $user */
+        $user = Auth::user();
+        if ($user->hasRole(config('larapress.profiles.security.roles.customer'))) {
+            if ($args['user_id'] !== $user->id) {
+                throw new AppException(AppException::ERR_ACCESS_DENIED);
+            }
+        }
+        if ($user->hasRole(config('larapress.profiles.security.roles.affiliate'))) {
+            if (is_null($targetUser) || !in_array($targetUser->getMembershipDomainId(), $user->getAffiliateDomainIds())) {
+                throw new AppException(AppException::ERR_ACCESS_DENIED);
+            }
+        }
+
+        $args['domain_id'] = $targetUser->getMembershipDomainId();
+
+        return $args;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param array $args
+     * @return array
+     */
+    public function onBeforeUpdate($args): array
+    {
+        return $this->onBeforeCreate($args);
+    }
+
+    /**
      * @param Builder $query
      *
      * @return Builder
@@ -81,10 +133,7 @@ class PhoneNumberCRUDProvider implements ICRUDProvider
         /** @var IProfileUser $user */
         $user = Auth::user();
         if (!$user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
-            $query->orWhereIn('domain_id', $user->getAffiliateDomainIds());
-            $query->orWhereHas('user.form_entries', function ($q) use ($user) {
-                $q->where('tags', 'support-group-'.$user->id);
-            });
+            $query->whereIn('domain_id', $user->getAffiliateDomainIds());
         }
 
         return $query;

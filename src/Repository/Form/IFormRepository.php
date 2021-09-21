@@ -25,15 +25,4 @@ interface IFormRepository
      * @return Form
      */
     public function getForm($user, Request $request, Route $route, $formId);
-
-    /**
-     * Undocumented function
-     *
-     * @param [type] $user
-     * @param Request $request
-     * @param Route|null $route
-     * @param array $sources
-     * @return array
-     */
-    public function getFormDataSources($user, Request $request, $route, $sources);
 }

@@ -80,6 +80,4 @@ interface IProfileUser extends ICRUDUser
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function form_profile_default();
-
-
 }

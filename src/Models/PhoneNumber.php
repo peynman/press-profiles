@@ -40,8 +40,12 @@ class PhoneNumber extends Model
         'domain_id',
         'number',
         'flags',
+        'data',
     ];
 
+    public $casts = [
+        'data' => 'array',
+    ];
 
     /**
      * Undocumented function

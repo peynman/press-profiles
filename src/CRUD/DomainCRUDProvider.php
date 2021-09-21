@@ -3,6 +3,7 @@
 namespace Larapress\Profiles\CRUD;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\Services\CRUD\Traits\CRUDProviderTrait;
@@ -35,35 +36,17 @@ class DomainCRUDProvider implements ICRUDProvider
             'unique:domains,domain,NULL,id,deleted_at,NULL|' .
             // unique in sub domains table
             'unique:domains_subs,sub_domain,NULL,id,deleted_at,NULL',
-        'sub_domains.*.sub_domain' => 'required|string|domain|' .
+        'sub_domains.*' => 'nullable|string|domain|' .
             // unique in domains table
             'unique:domains,domain,NULL,id,deleted_at,NULL|' .
             // unique in sub domains table
             'unique:domains_subs,sub_domain,NULL,id,deleted_at,NULL',
-        'ips' => 'required|string|ip_list',
+        'ips' => 'nullable|string|ip_list',
         'nameservers' => 'nullable|string',
         'flags' => 'nullable|numeric',
-        'data' => 'nullable|json',
+        'data' => 'nullable|json_object',
         // used by super-role account to create domains in place of other users
-        'target_user_id' => 'nullable|exists:users,id',
-    ];
-    public $updateValidations = [
-        'domain' => 'required|string|domain|' .
-            // unique in domains table
-            'unique:domains,domain,NULL,id,deleted_at,NULL|' .
-            // unique in sub domains table
-            'unique:domains_subs,sub_domain,NULL,id,deleted_at,NULL',
-        'sub_domains.*.sub_domain' => 'required|string|domain|' .
-            // unique in domains table
-            'unique:domains,domain,NULL,id,deleted_at,NULL|' .
-            // unique in sub domains table
-            'unique:domains_subs,sub_domain,NULL,id,deleted_at,NULL',
-        'ips' => 'required|string|ip_list',
-        'nameservers' => 'required|string',
-        'flags' => 'nullable|numeric',
-        'data' => 'nullable|json',
-        // used by super-role account to create domains in place of other users
-        'target_user_id' => 'nullable|exists:users,id',
+        'targetUserId' => 'nullable|exists:users,id',
     ];
     public $searchColumns = [
         'domain',
@@ -81,6 +64,35 @@ class DomainCRUDProvider implements ICRUDProvider
         'updated_at',
         'deleted_at',
     ];
+
+    /**
+     * Exclude current id in name unique request
+     *
+     * @param Request $request
+     *
+     * @return array
+     */
+    public function getUpdateRules(Request $request): array
+    {
+        return [
+            'domain' => 'required|string|domain|' .
+                // unique in domains table
+                'unique:domains,domain,NULL,id,deleted_at,NULL,'.$request->route('id').'|' .
+                // unique in sub domains table
+                'unique:domains_subs,sub_domain,NULL,id,deleted_at,NULL,'.$request->route('id'),
+            'sub_domains.*' => 'nullable|string|domain|' .
+                // unique in domains table
+                'unique:domains,domain,NULL,id,deleted_at,NULL,'.$request->route('id').'|' .
+                // unique in sub domains table
+                'unique:domains_subs,sub_domain,NULL,id,deleted_at,NULL,'.$request->route('id'),
+            'ips' => 'nullable|string|ip_list',
+            'nameservers' => 'nullable|string',
+            'flags' => 'nullable|numeric',
+            'data' => 'nullable|json_object',
+            // used by super-role account to create domains in place of other users
+            'targetUserId' => 'nullable|exists:users,id',
+        ];
+    }
 
     /**
      * Undocumented function
@@ -160,8 +172,8 @@ class DomainCRUDProvider implements ICRUDProvider
                 'flags' => UserDomainFlags::AFFILIATE_DOMAIN,
             ]);
         } else {             // allow super user to create domains in place of other users
-            if (isset($input_data['target_user_id']) && !is_null($input_data['target_user_id'])) {
-                $targetUser = call_user_func([config('larapress.crud.user.model'), 'find'], $input_data['target_user_id']);
+            if (isset($input_data['targetUserId']) && !is_null($input_data['targetUserId'])) {
+                $targetUser = call_user_func([config('larapress.crud.user.model'), 'find'], $input_data['targetUserId']);
                 if (!is_null($targetUser)) {
                     $targetUser->domains()->attach(
                         $object->id,
@@ -193,8 +205,8 @@ class DomainCRUDProvider implements ICRUDProvider
 
         // allow super user to create domains in place of other users
         if ($user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
-            if (isset($input_data['target_user_id']) && !is_null($input_data['target_user_id'])) {
-                $targetUser = call_user_func([config('larapress.crud.user.model'), 'find'], $input_data['target_user_id']);
+            if (isset($input_data['targetUserId']) && !is_null($input_data['targetUserId'])) {
+                $targetUser = call_user_func([config('larapress.crud.user.model'), 'find'], $input_data['targetUserId']);
                 if (!is_null($targetUser)) {
                     $targetUser->domains()->attach(
                         $object->id,

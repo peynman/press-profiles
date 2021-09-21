@@ -4,6 +4,11 @@ return [
     // form id for customer profile
     'default_profile_form_id' => 1,
 
+    // role based profile form id
+    'form_role_profiles' => [
+        'super_role' => 1,
+    ],
+
     // role groups used in domain based access controls
     'security' => [
         'roles' => [
@@ -105,19 +110,4 @@ return [
         \Larapress\Profiles\CRUD\GroupCRUDProvider::class,
         \Larapress\Profiles\CRUD\PhysicalAddressCRUDProvider::class,
     ],
-
-    'controllers' => [
-        \Larapress\Profiles\Controllers\UserController::class,
-        \Larapress\Profiles\Controllers\ActivityLogController::class,
-        \Larapress\Profiles\Controllers\DomainController::class,
-        \Larapress\Profiles\Controllers\EmailAddressController::class,
-        \Larapress\Profiles\Controllers\PhoneNumberController::class,
-        \Larapress\Profiles\Controllers\SettingsController::class,
-        \Larapress\Profiles\Controllers\FilterController::class,
-        \Larapress\Profiles\Controllers\FormController::class,
-        \Larapress\Profiles\Controllers\FormEntryController::class,
-        \Larapress\Profiles\Controllers\GroupController::class,
-        \Larapress\Profiles\Controllers\PhysicalAddressController::class,
-    ],
-
 ];

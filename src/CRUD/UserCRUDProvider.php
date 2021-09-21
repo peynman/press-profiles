@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Larapress\CRUD\Services\CRUD\Traits\CRUDProviderTrait;
 use Larapress\CRUD\Services\CRUD\ICRUDProvider;
-use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
 use Larapress\CRUD\Exceptions\AppException;
 use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\ICRUDUser;
@@ -58,10 +57,12 @@ class UserCRUDProvider implements ICRUDProvider
         'domains' => 'required|array',
         'phones' => 'nullable|array',
         'emails' => 'nullable|array',
-        'roles.*.id' => 'required|exists:roles,id',
+        'roles.*' => 'required|exists:roles,id',
         'domains.*.id' => 'required|exists:domains,id',
         'phones.*.number' => 'nullable|numeric|regex:/(09)[0-9]{9}/',
         'emails.*.email' => 'nullable|email',
+        'addresses.*.address' => 'nullable|string',
+        'addresses.*.postal_code' => 'nullable|string',
         'flags' => 'nullable|numeric',
     ];
 
@@ -89,6 +90,14 @@ class UserCRUDProvider implements ICRUDProvider
         'roles' => 'has:roles',
         'phones' => 'has:phones:number',
         'domains' => 'has:domains',
+    ];
+    public $defaultShowRelations = [
+        'form_profile_default',
+        'roles',
+        'domains',
+        'emails',
+        'addresses',
+        'phones',
     ];
 
     /**
@@ -120,6 +129,8 @@ class UserCRUDProvider implements ICRUDProvider
             'domains.*.id' => 'required|exists:domains,id',
             'phones.*.number' => 'nullable|numeric|regex:/(09)[0-9]{9}/',
             'emails.*.email' => 'nullable|email',
+            'addresses.*.address' => 'nullable|string',
+            'addresses.*.postal_code' => 'nullable|string',
             'flags' => 'nullable|numeric',
         ];
         $updateValidations['name'] .= ',' . $request->route('id') . ',id';
@@ -163,85 +174,19 @@ class UserCRUDProvider implements ICRUDProvider
      */
     public function onAfterCreate($object, array $args): void
     {
-        /** @var IRoleRepository */
-        $repo = app(IRoleRepository::class);
+        $this->syncRoles($object, $args);
+        $this->syncDomains($object, $args);
 
-        /** @var ICRUDUser $user */
-        $user = Auth::user();
-
-        if ($user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
-            // sync for super role with no limit
-            $this->syncBelongsToManyRelation('roles', $object, $args);
-        } else {
-            // sync roles in visible roles to user only
-            $validRoles = $repo->getVisibleRoles($user);
-            $this->syncBelongsToManyRelation('roles', $object, $args, function ($arg) use ($validRoles) {
-                // return true if role in $arg can be included in users sync
-                foreach ($validRoles as $validRole) {
-                    if ($validRole->id === $arg['id']) {
-                        return true;
-                    }
-                }
-                return false;
-            });
+        if (isset($args['addresses'])) {
+            $this->syncAddresses($object, $args);
         }
 
-        // sync domains with their attributes in pivot tables
-        $this->syncBelongsToManyRelation('domains', $object, $args, null, function ($arg) {
-            return [
-                'flags' => isset($arg['pivot']['flags']) ? $arg['pivot']['flags'] : 0,
-            ];
-        });
-
-        if (isset($args['flags']) && is_null($args['flags'])) {
-            unset($args['flags']);
+        if (isset($args['emails'])) {
+            $this->syncEmails($object, $args);
         }
 
         if (isset($args['phones'])) {
-            /** @var IDomainRepository */
-            $domainRepo = app(IDomainRepository::class);
-            $domain = $domainRepo->getCurrentRequestDomain();
-            foreach ($args['phones'] as $phone) {
-                $dbPhone = null;
-                if (isset($phone['id'])) {
-                    $dbPhone = PhoneNumber::find($phone['id']);
-                } else {
-                    $dbPhone = PhoneNumber::query()
-                        ->where('user_id', $object->id)
-                        ->where('domain_id', $domain->id)
-                        ->where('number', $phone['number'])
-                        ->first();
-                }
-                if (is_null($dbPhone)) {
-                    // check for same number in this domain;
-                    //   dont create a new phone if someone in the same domain has this phone
-                    $sameNumber = PhoneNumber::query()
-                        ->where('number', $phone['number'])
-                        ->where('domain_id', $domain->id)
-                        ->first();
-                    if (!is_null($sameNumber)) {
-                        if (is_null($sameNumber->user_id)) {
-                            $sameNumber->update([
-                                'user_id' => $object->id,
-                                'flags' => isset($phone['flags']) && !is_null($phone['flags']) ? $phone['flags'] : 0,
-                            ]);
-                        } else {
-                            throw new AppException(AppException::ERR_NUMBER_ALREADY_EXISTS);
-                        }
-                    } else {
-                        $dbPhone = PhoneNumber::create([
-                            'number' => $phone['number'],
-                            'flags' => isset($phone['flags']) && !is_null($phone['flags']) ? $phone['flags'] : 0,
-                            'user_id' => $object->id,
-                            'domain_id' => $domain->id,
-                        ]);
-                    }
-                } else {
-                    $dbPhone->update([
-                        'flags' => isset($phone['flags']) && !is_null($phone['flags']) ? $phone['flags'] : 0,
-                    ]);
-                }
-            }
+            $this->syncPhones($object, $args['phones']);
         }
 
         Helpers::forgetCachedValues([
@@ -263,6 +208,10 @@ class UserCRUDProvider implements ICRUDProvider
             unset($args['password']);
         }
 
+        if (isset($args['flags']) && is_null($args['flags'])) {
+            unset($args['flags']);
+        }
+
         return $args;
     }
 
@@ -274,74 +223,19 @@ class UserCRUDProvider implements ICRUDProvider
      */
     public function onAfterUpdate($object, $args): void
     {
-        /** @var IRoleRepository */
-        $repo = app(IRoleRepository::class);
+        $this->syncRoles($object, $args);
+        $this->syncDomains($object, $args);
 
-        /** @var ICRUDUser $user */
-        $user = Auth::user();
-        if ($user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
-            $this->syncBelongsToManyRelation('roles', $object, $args);
-        } else {
-            $validRoles = $repo->getVisibleRoles($user);
-            $this->syncBelongsToManyRelation('roles', $object, $args, function ($arg) use ($validRoles) {
-                foreach ($validRoles as $validRole) {
-                    if ($validRole->id === $arg['id']) {
-                        return true;
-                    }
-                }
-                return false;
-            });
+        if (isset($args['addresses'])) {
+            $this->syncAddresses($object, $args);
         }
-        // sync domains with their attributes in pivot tables
-        $this->syncBelongsToManyRelation('domains', $object, $args, null, function ($arg) {
-            return [
-                'flags' => isset($arg['pivot']['flags']) ? $arg['pivot']['flags'] : 0,
-            ];
-        });
 
-        if (isset($args['flags']) && is_null($args['flags'])) {
-            unset($args['flags']);
+        if (isset($args['emails'])) {
+            $this->syncEmails($object, $args);
         }
 
         if (isset($args['phones'])) {
-            /** @var IDomainRepository */
-            $domainRepo = app(IDomainRepository::class);
-            $domain = $domainRepo->getCurrentRequestDomain();
-            foreach ($args['phones'] as $phone) {
-                $dbPhone = null;
-                if (isset($phone['id'])) {
-                    $dbPhone = PhoneNumber::find($phone['id']);
-                } else {
-                    $dbPhone = PhoneNumber::query()
-                        ->where('user_id', $object->id)
-                        ->where('domain_id', $domain->id)
-                        ->where('number', $phone['number'])
-                        ->first();
-                }
-                if (is_null($dbPhone)) {
-                    // check for same number in this domain;
-                    //   dont create a new phone if someone in the same domain has this phone
-                    $sameNumbers = PhoneNumber::query()
-                        ->where('number', $phone['number'])
-                        ->where('domain_id', $domain->id)
-                        ->count();
-                    if ($sameNumbers > 0) {
-                        throw new AppException(AppException::ERR_NUMBER_ALREADY_EXISTS);
-                    } else {
-                        $dbPhone = PhoneNumber::create([
-                            'number' => $phone['number'],
-                            'flags' => isset($phone['flags']) && !is_null($phone['flags']) ? $phone['flags'] : 0,
-                            'user_id' => $object->id,
-                            'domain_id' => $domain->id,
-                        ]);
-                    }
-                } else {
-                    $dbPhone->update([
-                        'number' => $phone['number'],
-                        'flags' => isset($phone['flags']) && !is_null($phone['flags']) ? $phone['flags'] : 0,
-                    ]);
-                }
-            }
+            $this->syncPhones($object, $args['phones']);
         }
 
         Helpers::forgetCachedValues([
@@ -387,5 +281,124 @@ class UserCRUDProvider implements ICRUDProvider
         }
 
         return true;
+    }
+
+    /*
+     * Undocumented function
+     *
+     * @param IProfileUser $user
+     * @param array[] $args
+     * @return void
+     */
+    public function syncRoles($user, $args)
+    {
+        /** @var IRoleRepository */
+        $repo = app(IRoleRepository::class);
+        /** @var ICRUDUser $user */
+        $user = Auth::user();
+        if ($user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
+            $this->syncBelongsToManyRelation('roles', $user, $args);
+        } else {
+            $validRoles = $repo->getVisibleRoles($user);
+            $this->syncBelongsToManyRelation('roles', $user, $args, function ($arg) use ($validRoles) {
+                foreach ($validRoles as $validRole) {
+                    if ($validRole->id === $arg) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param IProfileUser $user
+     * @param array $args
+     *
+     * @return void
+     */
+    public function syncDomains($user, $args)
+    {
+        // sync domains with their attributes in pivot tables
+        $this->syncBelongsToManyRelation('domains', $user, $args, null, function ($arg) {
+            return [
+                'flags' => isset($arg['pivot']['flags']) ? $arg['pivot']['flags'] : 0,
+            ];
+        }, function ($arg) {
+            return $arg['id'];
+        });
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param IProfileUser $user
+     * @param array[] $phones
+     * @return void
+     */
+    public function syncPhones($user, $phones)
+    {
+        /** @var IDomainRepository */
+        $domainRepo = app(IDomainRepository::class);
+        $domain = $domainRepo->getCurrentRequestDomain();
+        foreach ($phones as $phone) {
+            $dbPhone = null;
+            if (isset($phone['id'])) {
+                $dbPhone = PhoneNumber::find($phone['id']);
+            } else {
+                $dbPhone = PhoneNumber::query()
+                    ->where('user_id', $user->id)
+                    ->where('domain_id', $domain->id)
+                    ->where('number', $phone['number'])
+                    ->first();
+            }
+            if (is_null($dbPhone)) {
+                // check for same number in this domain;
+                //   dont create a new phone if someone in the same domain has this phone
+                $sameNumbers = PhoneNumber::query()
+                    ->where('number', $phone['number'])
+                    ->where('domain_id', $domain->id)
+                    ->count();
+                if ($sameNumbers > 0) {
+                    throw new AppException(AppException::ERR_NUMBER_ALREADY_EXISTS);
+                } else {
+                    $dbPhone = PhoneNumber::create([
+                        'number' => $phone['number'],
+                        'flags' => isset($phone['flags']) && !is_null($phone['flags']) ? $phone['flags'] : 0,
+                        'user_id' => $user->id,
+                        'domain_id' => $domain->id,
+                    ]);
+                }
+            } else {
+                $dbPhone->update([
+                    'number' => $phone['number'],
+                    'flags' => isset($phone['flags']) && !is_null($phone['flags']) ? $phone['flags'] : 0,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param IProfileUser $user
+     * @param array $args
+     * @return void
+     */
+    public function syncAddresses($user, $args)
+    {
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param IProfileUser $user
+     * @param array $args
+     * @return void
+     */
+    public function syncEmails($user, $args)
+    {
     }
 }

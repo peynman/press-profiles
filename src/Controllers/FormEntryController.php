@@ -3,27 +3,16 @@
 namespace Larapress\Profiles\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Larapress\CRUD\Services\CRUD\CRUDController;
 use Larapress\Profiles\Services\FormEntry\IFormEntryService;
 
 /**
- * Standard CRUD Controller for FormEntry resource.
- *
  * @group Form Entries Management
  */
-class FormEntryController extends CRUDController
+class FormEntryController extends Controller
 {
-    public static function registerRoutes()
-    {
-        parent::registerCrudRoutes(
-            config('larapress.profiles.routes.form_entries.name'),
-            self::class,
-            config('larapress.profiles.routes.form_entries.provider'),
-        );
-    }
-
     public static function registerPublicApiRoutes()
     {
         Route::post(config('larapress.profiles.routes.form_entries.name') . '/update/{form_id}', '\\' . self::class . '@updateEntry')

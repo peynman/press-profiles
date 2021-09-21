@@ -33,9 +33,12 @@ class EmailAddress extends Model
         'user_id',
         'domain_id',
         'email',
-        'type',
         'flags',
-        'desc',
+        'data',
+    ];
+
+    public $casts = [
+        'data' => 'array',
     ];
 
     /**

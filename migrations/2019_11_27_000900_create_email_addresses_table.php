@@ -17,7 +17,11 @@ class CreateEmailAddressesTable extends Migration
             $table->bigIncrements('id');
             $table->bigInteger('user_id', false, true)->nullable();
             $table->bigInteger('domain_id', false, true)->nullable();
-            $table->string('email');
+            $table->bigInteger('country_code')->nullable();
+            $table->bigInteger('province_code')->nullable();
+            $table->bigInteger('city_code')->nullable();
+            $table->string('postal_code')->nullable();
+            $table->string('address');
             $table->integer('flags', false, true)->default(0);
             $table->json('data')->nullable();
             $table->timestamps();
@@ -30,7 +34,10 @@ class CreateEmailAddressesTable extends Migration
                     'created_at',
                     'updated_at',
                     'domain_id',
-                    'email',
+                    'country_code',
+                    'province_code',
+                    'city_code',
+                    'postal_code',
                     'flags'
                 ],
                 'email_addresses_full_index'

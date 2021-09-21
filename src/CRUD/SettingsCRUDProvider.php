@@ -67,6 +67,19 @@ class SettingsCRUDProvider implements ICRUDProvider
     ];
 
     /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function getValidRelations(): array {
+        return [
+            'author' => config('larapress.crud.user.provider'),
+            'user' => config('larapress.crud.user.provider'),
+            'domain' => config('larapress.profiles.routes.domains.provider'),
+        ];
+    }
+
+    /**
      * @param Settings $object
      *
      * @return bool

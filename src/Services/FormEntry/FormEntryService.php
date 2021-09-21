@@ -25,22 +25,24 @@ class FormEntryService implements IFormEntryService
 
     /**
      * @param Request|null $request
-     * @param int $formId
+     * @param int|Form $form
      * @param IProfileUser $user
      * @param string|null $tags
      * @param callable $onProvide
      * @return FormEntry
      */
-    public function updateFormEntry($request, $user, $formId, $tags = null, $onProvide = null)
+    public function updateFormEntry($request, $user, $form, $tags = null, $onProvide = null)
     {
-        /** @var Form */
-        $form = Form::find($formId);
+        if (is_numeric($form)) {
+            /** @var Form */
+            $form = Form::find($form);
+        }
 
         if (is_null($form)) {
             throw new AppException(AppException::ERR_OBJECT_NOT_FOUND);
         }
 
-        $inputNames = !is_null($request) ? $this->validateFormEntryRequestAndGetInputs($request, $form) : [];
+        $inputNames = !is_null($request) ? $this->getValidatedFormInputs($request, $form) : [];
 
         if (is_null($request)) {
             $domain = $user->getMembershipDomain();
@@ -124,21 +126,23 @@ class FormEntryService implements IFormEntryService
      *
      * @param Request $request
      * @param IProfileUser $user
-     * @param int $formId
+     * @param int|Form $form
      * @param string $tags
      * @param callable $onProvide
      * @return FormEntry
      */
-    public function updateUserFormEntryTag($request, $user, $formId, $tags, $onProvide = null)
+    public function updateUserFormEntryTag($request, $user, $form, $tags, $onProvide = null)
     {
-        /** @var Form */
-        $form = Form::find($formId);
+        if (is_numeric($form)) {
+            /** @var Form */
+            $form = Form::find($form);
+        }
 
         if (is_null($form)) {
             throw new AppException(AppException::ERR_OBJECT_NOT_FOUND);
         }
 
-        $inputNames = !is_null($request) ? $this->validateFormEntryRequestAndGetInputs($request, $form) : [];
+        $inputNames = !is_null($request) ? $this->getValidatedFormInputs($request, $form) : [];
 
         if (is_null($request)) {
             $domain = $user->getMembershipDomain();
@@ -222,24 +226,10 @@ class FormEntryService implements IFormEntryService
      * @param array $values
      * @return array
      */
-    public function replaceBase64ImagesInInputs($values)
+    protected function replaceBase64ImagesInInputs($values)
     {
-        $values = $this->fileService->replaceBase64WithFilePathInArray($values, 'profile');
-        $values = $this->fileService->replaceBase64WithFilePathInArray($values, 'image');
-        $values = $this->fileService->replaceBase64WithFilePathInArray($values, 'melli_card', 'local', 'melli_cards');
-
-        $unsets = [
-            'p0',
-            'submit',
-            'cancel',
-            'alert',
-            'actions',
-        ];
-        foreach ($unsets as $unset) {
-            if (isset($values[$unset])) {
-                unset($values[$unset]);
-            }
-        }
+        $values = $this->fileService->replaceBase64WithFilePathValuesRecursuve($values, 'melli_card', 'local', 'melli_cards');
+        $values = $this->fileService->replaceBase64WithFilePathValuesRecursuve($values, null);
         return $values;
     }
 
@@ -323,9 +313,10 @@ class FormEntryService implements IFormEntryService
      *
      * @param Request $request
      * @param Form $form
-     * @return void
+     *
+     * @return array
      */
-    protected function validateFormEntryRequestAndGetInputs(Request $request, Form $form)
+    public function getValidatedFormInputs(Request $request, Form $form)
     {
         [$rules, $inputNames] = $this->getFormValidationRules($form);
         $validate = Validator::make($request->all($inputNames), $rules);

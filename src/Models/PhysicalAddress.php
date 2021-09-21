@@ -13,10 +13,14 @@ use Larapress\CRUD\ICRUDUser;
  * @property int            $id
  * @property int            $user_id
  * @property int            $domain_id
- * @property string         $email
+ * @property int            $country_code
+ * @property int            $city_code
+ * @property int            $privnice_code
+ * @property int            $postal_code
  * @property int            $flags
+ * @property string         $address
+ * @property array          $data
  * @property ICRUDUser      $user
- * @property Domain         $domain
  */
 class PhysicalAddress extends Model
 {
@@ -29,14 +33,17 @@ class PhysicalAddress extends Model
     public $fillable = [
         'user_id',
         'domain_id',
-        'type',
         'country_code',
-        'city_code',
         'province_code',
-        'address',
-        'desc',
+        'city_code',
         'postal_code',
-        'flags'
+        'address',
+        'flags',
+        'data',
+    ];
+
+    public $casts = [
+        'data' => 'array',
     ];
 
     /**

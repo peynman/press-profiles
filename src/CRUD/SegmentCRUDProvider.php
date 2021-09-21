@@ -35,12 +35,6 @@ class SegmentCRUDProvider implements ICRUDProvider
         'created_at',
         'updated_at',
     ];
-    public $validRelations = [
-        'author',
-        'members',
-        'owners',
-        'admins',
-    ];
     public $searchColumns = [
         'name',
         'data',
@@ -49,6 +43,18 @@ class SegmentCRUDProvider implements ICRUDProvider
         'name' => 'like:name',
         'author_id' => 'equals:author_id',
     ];
+
+    /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function getValidRelations(): array {
+        return [
+            'author' => config('larapress.crud.user.provider'),
+            'members' => config('larapress.crud.user.provider'),
+        ];
+    }
 
     /**
      * @param Segment $object

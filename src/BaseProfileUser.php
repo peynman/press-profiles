@@ -93,10 +93,15 @@ trait BaseProfileUser
      */
     public function form_profile_default()
     {
+        $highRoleName = $this->getUserHighestRole()->name;
+        $profileFormId = config('larapress.profiles.form_role_profiles.'.$highRoleName);
+        if (is_null($profileFormId)) {
+            $profileFormId = config('larapress.profiles.default_profile_form_id');
+        }
         return $this->hasOne(
             FormEntry::class,
             'user_id'
-        )->where('form_id', config('larapress.profiles.default_profile_form_id'));
+        )->where('form_id', $profileFormId);
     }
 
     /**
@@ -184,8 +189,8 @@ trait BaseProfileUser
     public function getDomains()
     {
         return Helpers::getCachedValue(
-            'larapress.profiles.user.'.$this->id.'.domains',
-            ['user.domains:'.$this->id],
+            'larapress.profiles.user.' . $this->id . '.domains',
+            ['user.domains:' . $this->id],
             3600,
             true,
             function () {
@@ -199,6 +204,6 @@ trait BaseProfileUser
      */
     public function forgetDomainsCache()
     {
-        Helpers::forgetCachedValues(['user.domains:'.$this->id]);
+        Helpers::forgetCachedValues(['user.domains:' . $this->id]);
     }
 }

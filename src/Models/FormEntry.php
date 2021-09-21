@@ -4,8 +4,6 @@ namespace Larapress\Profiles\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Larapress\ECommerce\Models\Product;
-use Larapress\Profiles\Services\FormEntry\FormEntryTagResolveRelationship;
 
 /**
  * @property \Carbon\Carbon $created_at

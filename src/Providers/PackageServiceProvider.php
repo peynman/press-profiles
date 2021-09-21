@@ -20,6 +20,8 @@ use Larapress\Profiles\Repository\User\IUserRepository;
 use Larapress\Profiles\Repository\User\UserRepository;
 use Larapress\Profiles\Services\FormEntry\FormEntryService;
 use Larapress\Profiles\Services\FormEntry\IFormEntryService;
+use Larapress\Profiles\Services\ProfileUser\IProfileUserServices;
+use Larapress\Profiles\Services\ProfileUser\ProfileUserServices;
 use Larapress\Profiles\Services\Settings\ISettingsService;
 use Larapress\Profiles\Services\Settings\SettingsService;
 use Larapress\Profiles\Validations\DomainValidator;
@@ -43,6 +45,7 @@ class PackageServiceProvider extends ServiceProvider
         $this->app->bind(IFormRepository::class, FormRepository::class);
         $this->app->bind(IFormEntryService::class, FormEntryService::class);
         $this->app->bind(ISettingsService::class, SettingsService::class);
+        $this->app->bind(IProfileUserServices::class, ProfileUserServices::class);
 
         $this->app->bind(ICRUDFilterStorage::class, BaseCRUDFilterStorage::class);
         $this->app->bind(ICRUDExporter::class, BaseCRUDQueryExport::class);
@@ -64,6 +67,7 @@ class PackageServiceProvider extends ServiceProvider
 
         $this->loadMigrationsFrom(__DIR__.'/../../migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../resources/lang', 'larapress');
+        $this->loadRoutesFrom(__DIR__.'/../../routes/api.php');
 
         $this->publishes([
             __DIR__.'/../../config/profiles.php' => config_path('larapress/profiles.php'),

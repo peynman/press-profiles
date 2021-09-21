@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Auth;
 use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\Services\CRUD\Traits\CRUDProviderTrait;
 use Larapress\CRUD\Services\CRUD\ICRUDProvider;
-use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
 use Larapress\CRUD\Services\CRUD\ICRUDVerb;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\FormEntry;
@@ -17,6 +16,8 @@ use Larapress\Profiles\Services\FormEntry\FormEntryUpdateEvent;
 use Larapress\Profiles\Services\FormEntry\FormEntryUpdateReport;
 use Larapress\Profiles\Services\FormEntry\IFormEntryService;
 use Larapress\ECommerce\IECommerceUser;
+use Larapress\FileShare\Services\FileUpload\IFileUploadService;
+use Larapress\Profiles\Models\Form;
 
 class FormEntryCRUDProvider implements ICRUDProvider
 {
@@ -110,15 +111,30 @@ class FormEntryCRUDProvider implements ICRUDProvider
      */
     public function onBeforeCreate(array $args): array
     {
-        $request = Request::createFromGlobals();
+        /** @var IFileUploadService */
+        $service = app(IFileUploadService::class);
 
-        /** @var IFormEntryService */
-        $service = app(IFormEntryService::class);
+        /** @var Form */
+        $form = Form::find($args['form_id']);
+        $values = $args['formValues'];
+        if (isset($form->data['uploads']) && is_array($form->data['uploads'])) {
+            foreach ($form->data['uploads'] as $uploadMeta) {
+                $values = $service->replaceBase64WithFilePathValuesRecursuve(
+                    $values,
+                    $uploadMeta['prop'],
+                    $uploadMeta['disk'],
+                    $uploadMeta['folder']
+                );
+            }
+        }
+        $values = $service->replaceBase64WithFilePathValuesRecursuve(
+            $values,
+            null
+        );
+
         $args['data'] = [
-            'admin' => Auth::user()->id,
-            'ip' => $request->ip(),
-            'agent' => $request->userAgent(),
-            'values' => $service->replaceBase64ImagesInInputs($args['formValues']),
+            'filledBy' => Auth::user()->id,
+            'values' => $values,
         ];
 
         $class = config('larapress.crud.user.model');
@@ -137,23 +153,7 @@ class FormEntryCRUDProvider implements ICRUDProvider
      */
     public function onBeforeUpdate(array $args): array
     {
-        $request = Request::createFromGlobals();
-
-        /** @var IFormEntryService */
-        $service = app(IFormEntryService::class);
-        $args['data'] = [
-            'admin' => Auth::user()->id,
-            'ip' => $request->ip(),
-            'agent' => $request->userAgent(),
-            'values' => $service->replaceBase64ImagesInInputs($args['formValues']),
-        ];
-
-        $class = config('larapress.crud.user.model');
-        /** @var IProfileUser */
-        $tUser = call_user_func([$class, 'find'], $args['user_id']);
-        $args['domain_id'] = $tUser->getMembershipDomainId();
-
-        return $args;
+        return $this->onBeforeCreate($args);
     }
 
     /**
