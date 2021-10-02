@@ -17,15 +17,12 @@ class CreateEmailAddressesTable extends Migration
             $table->bigIncrements('id');
             $table->bigInteger('user_id', false, true)->nullable();
             $table->bigInteger('domain_id', false, true)->nullable();
-            $table->bigInteger('country_code')->nullable();
-            $table->bigInteger('province_code')->nullable();
-            $table->bigInteger('city_code')->nullable();
-            $table->string('postal_code')->nullable();
-            $table->string('address');
+            $table->string('email');
             $table->integer('flags', false, true)->default(0);
             $table->json('data')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
 
             $table->unique(['deleted_at', 'domain_id', 'email']);
             $table->index(
@@ -34,10 +31,7 @@ class CreateEmailAddressesTable extends Migration
                     'created_at',
                     'updated_at',
                     'domain_id',
-                    'country_code',
-                    'province_code',
-                    'city_code',
-                    'postal_code',
+                    'email',
                     'flags'
                 ],
                 'email_addresses_full_index'
