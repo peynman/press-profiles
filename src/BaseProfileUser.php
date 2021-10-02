@@ -2,6 +2,7 @@
 
 namespace Larapress\Profiles;
 
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Cache;
 use Larapress\CRUD\BaseFlags;
 use Larapress\CRUD\Extend\Helpers;
@@ -13,6 +14,7 @@ use Larapress\Profiles\Models\FormEntry;
 use Larapress\Profiles\Models\PhoneNumber;
 use Larapress\Profiles\Models\PhysicalAddress;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Trait BaseProfileUser.
@@ -93,15 +95,27 @@ trait BaseProfileUser
      */
     public function form_profile_default()
     {
-        $highRoleName = $this->getUserHighestRole()->name;
-        $profileFormId = config('larapress.profiles.form_role_profiles.'.$highRoleName);
-        if (is_null($profileFormId)) {
-            $profileFormId = config('larapress.profiles.default_profile_form_id');
+        $roleProfileFormCases = [];
+        $profileFormIds = config('larapress.profiles.form_role_profiles');
+        foreach ($profileFormIds as $roleName => $formId) {
+            $roleProfileFormCases[] = "WHEN `roles`.`name` = '$roleName' THEN $formId";
         }
+        $roleProfileFormCases[] = "ELSE ".config('larapress.profiles.default_profile_form_id');
+
+        $caseString = "CASE\n".implode("\n", $roleProfileFormCases)."\nEND";
+
         return $this->hasOne(
             FormEntry::class,
             'user_id'
-        )->where('form_id', $profileFormId);
+        )
+            ->leftJoin('user_role', function (JoinClause $join) {
+                $join->on('user_role.user_id', '=', 'form_entries.user_id')
+                    ->orderBy('priority', 'desc');
+            })
+            ->leftJoin('roles', function (JoinClause $join) {
+                $join->on('roles.id', '=', 'user_role.role_id');
+            })
+            ->whereRaw("`form_entries`.`form_id` = ($caseString)");
     }
 
     /**

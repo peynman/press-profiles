@@ -4,11 +4,21 @@ namespace Larapress\Profiles;
 
 use Larapress\CRUD\ICRUDUser;
 use Larapress\Profiles\Models\Domain;
+use Larapress\Profiles\Models\PhoneNumber;
+use Larapress\Profiles\Models\PhysicalAddress;
+use Larapress\Profiles\Models\EmailAddress;
+use Larapress\Profiles\Models\FormEntry;
 
 /**
  * Interface IProfileUser.
  *
- * @property int        $flags
+ * @property int                $flags
+ * @property Domain[]           $domains
+ * @property PhoneNumber[]      $phones
+ * @property PhysicalAddress[]  $addresses
+ * @property EmailAddress[]     $emails
+ * @property FormEntry[]        $form_entries
+ * @property FormEntry          $form_profile_default
  */
 interface IProfileUser extends ICRUDUser
 {
@@ -80,4 +90,11 @@ interface IProfileUser extends ICRUDUser
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function form_profile_default();
+
+    /**
+     * Undocumented function
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function form_entries();
 }

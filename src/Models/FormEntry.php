@@ -44,7 +44,7 @@ class FormEntry extends Model
      */
     public function user()
     {
-        return $this->belongsTo(config('larapress.crud.user.class'), 'user_id');
+        return $this->belongsTo(config('larapress.crud.user.model'), 'user_id');
     }
 
     /**

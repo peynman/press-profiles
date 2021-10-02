@@ -21,6 +21,7 @@ class DeviceCRUDProvider implements ICRUDProvider
 
     public $verbs = [
         ICRUDVerb::VIEW,
+        ICRUDVerb::SHOW,
         ICRUDVerb::DELETE,
     ];
     public $searchColumns = [

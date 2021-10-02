@@ -15,7 +15,7 @@ use Larapress\CRUD\ICRUDUser;
  * @property int            $domain_id
  * @property int            $country_code
  * @property int            $city_code
- * @property int            $privnice_code
+ * @property int            $province_code
  * @property int            $postal_code
  * @property int            $flags
  * @property string         $address

@@ -29,6 +29,7 @@ class FormEntryCRUDProvider implements ICRUDProvider
 
     public $verbs = [
         ICRUDVerb::VIEW,
+        ICRUDVerb::SHOW,
         ICRUDVerb::DELETE,
         ICRUDVerb::REPORTS,
         ICRUDVerb::CREATE,

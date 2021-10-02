@@ -20,6 +20,7 @@ class ActivityLogCRUDProvider implements ICRUDProvider
 
     public $verbs = [
         ICRUDVerb::VIEW,
+        ICRUDVerb::SHOW,
     ];
     public $validSortColumns = [
         'id',
