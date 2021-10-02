@@ -53,13 +53,6 @@ interface IProfileUser extends ICRUDUser
     public function getAffiliateDomainIds();
 
     /**
-     * Undocumented function
-     *
-     * @return int|null
-     */
-    public function getIntroducerId();
-
-    /**
      * @return void
      */
     public function forgetDomainsCache();
