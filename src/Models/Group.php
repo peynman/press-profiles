@@ -42,9 +42,13 @@ class Group extends Model
         'data' => 'array',
     ];
 
-    public $appends = [
-        'owner_ids',
-    ];
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function author()
+    {
+        return $this->belongsTo(config('larapress.crud.user.model'), 'author_id');
+    }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
@@ -62,28 +66,8 @@ class Group extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function owners()
-    {
-        return $this->members()->where('flags', '&', Group::FLAGS_OWNER);
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
     public function admins()
     {
         return $this->members()->where('flags', '&', Group::FLAGS_ADMIN);
-    }
-
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function author()
-    {
-        return $this->belongsTo(
-            config('larapress.crud.user.model'),
-            'author_id',
-        );
     }
 }

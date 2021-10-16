@@ -20,43 +20,8 @@ use Larapress\Profiles\Models\FormEntry;
  * @property FormEntry[]        $form_entries
  * @property FormEntry          $form_profile_default
  */
-interface IProfileUser extends ICRUDUser
+interface IProfileUser extends ICRUDUser, IDomainUser, IGroupUser
 {
-    /**
-     * @return Domain
-     */
-    public function getRegistrationDomain();
-
-    /**
-     * @return int
-     */
-    public function getRegistrationDomainId();
-
-    /**
-     * @return Domain
-     */
-    public function getMembershipDomain();
-
-    /**
-     * @return int
-     */
-    public function getMembershipDomainId();
-
-    /**
-     * @return Domain[]
-     */
-    public function getAffiliateDomains();
-
-    /**
-     * @return int[]
-     */
-    public function getAffiliateDomainIds();
-
-    /**
-     * @return void
-     */
-    public function forgetDomainsCache();
-
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
@@ -78,16 +43,17 @@ interface IProfileUser extends ICRUDUser
     public function addresses();
 
     /**
-     * Undocumented function
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function form_profile_default();
+    public function groups();
 
     /**
-     * Undocumented function
-     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function form_entries();
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function form_profile_default();
 }

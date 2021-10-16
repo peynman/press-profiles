@@ -27,7 +27,6 @@ class FormCRUDProvider implements ICRUDProvider
         ICRUDVerb::CREATE,
         ICRUDVerb::EDIT,
         ICRUDVerb::DELETE,
-        ICRUDVerb::REPORTS,
     ];
     public $createValidations = [
         'name' => 'required|unique:forms,name',

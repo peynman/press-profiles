@@ -1,20 +1,16 @@
 <?php
 
-namespace Larapress\Profiles;
+namespace Larapress\Profiles\Base;
 
 use Illuminate\Database\Query\JoinClause;
-use Illuminate\Support\Facades\Cache;
-use Larapress\CRUD\BaseFlags;
-use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\Models\Role;
-use Larapress\Profiles\Flags\UserDomainFlags;
 use Larapress\Profiles\Models\Domain;
 use Larapress\Profiles\Models\EmailAddress;
 use Larapress\Profiles\Models\FormEntry;
 use Larapress\Profiles\Models\PhoneNumber;
 use Larapress\Profiles\Models\PhysicalAddress;
+use Larapress\Profiles\Models\Group;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Trait BaseProfileUser.
@@ -24,12 +20,16 @@ use Illuminate\Support\Facades\DB;
  * @property string $password
  * @property Collection|Domain[] $domains
  * @property Collection|Role[] $roles
+ * @property Collection|Group[] $groups
  * @property \Carbon\Carbon $deleted_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $created_at
  */
 trait BaseProfileUser
 {
+    use BaseDomainUser;
+    use BaseGroupUser;
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
@@ -80,6 +80,19 @@ trait BaseProfileUser
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
+    public function groups()
+    {
+        return $this->belongsToMany(
+            Group::class,
+            'user_group',
+            'user_id',
+            'group_id'
+        )->withPivot('flags');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function form_entries()
     {
         return $this->hasMany(
@@ -116,108 +129,5 @@ trait BaseProfileUser
                 $join->on('roles.id', '=', 'user_role.role_id');
             })
             ->whereRaw("`form_entries`.`form_id` = ($caseString)");
-    }
-
-    /**
-     * @return Domain
-     */
-    public function getRegistrationDomain()
-    {
-        $domains = $this->getDomains();
-        foreach ($domains as $domain) {
-            if (BaseFlags::isActive($domain->pivot->flags, UserDomainFlags::REGISTRATION_DOMAIN)) {
-                return $domain;
-            }
-        }
-    }
-
-    /**
-     * @return int
-     */
-    public function getRegistrationDomainId()
-    {
-        $domain = $this->getRegistrationDomain();
-
-        return is_null($domain) ? null : $domain->id;
-    }
-
-    /**
-     * @return Domain
-     */
-    public function getMembershipDomain()
-    {
-        $domains = $this->getDomains();
-        foreach ($domains as $domain) {
-            if (BaseFlags::isActive($domain->pivot->flags, UserDomainFlags::REGISTRATION_DOMAIN)) {
-                return $domain;
-            }
-        }
-    }
-
-    /**
-     * @return int
-     */
-    public function getMembershipDomainId()
-    {
-        $domain = $this->getRegistrationDomain();
-
-        return is_null($domain) ? null : $domain->id;
-    }
-
-    /**
-     * @return Domain[]
-     */
-    public function getAffiliateDomains()
-    {
-        $domains = $this->getDomains();
-        $affDomains = [];
-
-        foreach ($domains as $domain) {
-            if (BaseFlags::isActive($domain->flags, UserDomainFlags::AFFILIATE_DOMAIN)) {
-                $affDomains[] = $domain;
-            }
-        }
-
-        return $affDomains;
-    }
-
-    /**
-     * @return int[]
-     */
-    public function getAffiliateDomainIds()
-    {
-        $domains = $this->getDomains();
-        $ids = [];
-        foreach ($domains as $domain) {
-            if (BaseFlags::isActive($domain->flags, UserDomainFlags::AFFILIATE_DOMAIN)) {
-                $ids[] = $domain->id;
-            }
-        }
-
-        return $ids;
-    }
-
-    /**
-     * @return Domain[]
-     */
-    public function getDomains()
-    {
-        return Helpers::getCachedValue(
-            'larapress.profiles.user.' . $this->id . '.domains',
-            ['user.domains:' . $this->id],
-            3600,
-            true,
-            function () {
-                return $this->domains()->get();
-            }
-        );
-    }
-
-    /**
-     * @return void
-     */
-    public function forgetDomainsCache()
-    {
-        Helpers::forgetCachedValues(['user.domains:' . $this->id]);
     }
 }

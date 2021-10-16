@@ -26,7 +26,6 @@ class PhoneNumberCRUDProvider implements ICRUDProvider
         ICRUDVerb::CREATE,
         ICRUDVerb::EDIT,
         ICRUDVerb::DELETE,
-        ICRUDVerb::REPORTS,
     ];
     public $createValidations = [
         'user_id' => 'required|numeric|exists:users,id',

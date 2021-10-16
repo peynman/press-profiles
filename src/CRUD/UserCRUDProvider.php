@@ -16,7 +16,7 @@ use Larapress\CRUD\Services\CRUD\ICRUDVerb;
 use Larapress\CRUD\Services\CRUD\Traits\CRUDRelationSyncTrait;
 use Larapress\Profiles\IProfileUser;
 use Larapress\Profiles\Models\PhoneNumber;
-use Larapress\Profiles\Repository\Domain\IDomainRepository;
+use Larapress\Reports\Services\Reports\ReportsVerb;
 
 /**
  * User CRUD rules and features
@@ -29,16 +29,6 @@ class UserCRUDProvider implements ICRUDProvider
     public $name_in_config = 'larapress.profiles.routes.users.name';
     public $model_in_config = 'larapress.crud.user.model';
     public $compositions_in_config = 'larapress.crud.user.compositions';
-
-    public $verbs = [
-        ICRUDVerb::VIEW,
-        ICRUDVerb::SHOW,
-        ICRUDVerb::CREATE,
-        ICRUDVerb::EDIT,
-        ICRUDVerb::DELETE,
-        ICRUDVerb::REPORTS,
-        ICRUDVerb::EXPORT,
-    ];
 
     /**
      * @bodyParam name string required The username to use for the new user. Example: user23124
@@ -60,8 +50,8 @@ class UserCRUDProvider implements ICRUDProvider
         'emails' => 'nullable|array',
         'roles.*' => 'required|exists:roles,id',
         'domains.*.id' => 'required|exists:domains,id',
-        'phones.*.number' => 'nullable|numeric|regex:/(09)[0-9]{9}/',
-        'emails.*.email' => 'nullable|email',
+        'phones.*.number' => 'nullable|numeric|regex:/(09)[0-9]{9}/|unique:phone_numbers,number',
+        'emails.*.email' => 'nullable|email|unique:emails,email',
         'addresses.*.address' => 'nullable|string',
         'addresses.*.postal_code' => 'nullable|string',
         'flags' => 'nullable|numeric',
@@ -112,6 +102,24 @@ class UserCRUDProvider implements ICRUDProvider
     }
 
     /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function getPermissionVerbs(): array
+    {
+        return [
+            ICRUDVerb::VIEW,
+            ICRUDVerb::SHOW,
+            ICRUDVerb::CREATE,
+            ICRUDVerb::EDIT,
+            ICRUDVerb::DELETE,
+            ICRUDVerb::EXPORT,
+            ReportsVerb::REPORTS => ReportsVerb::controllerVerb(config($this->name_in_config)),
+        ];
+    }
+
+    /**
      * @param Request $request
      *
      * @return array
@@ -151,6 +159,8 @@ class UserCRUDProvider implements ICRUDProvider
             'phones' => config('larapress.profiles.routes.phone_numbers.provider'),
             'emails' => config('larapress.profiles.routes.emails.provider'),
             'addresses' => config('larapress.profiles.routes.addresses.provider'),
+            'groups' => config('larapress.profiles.routes.groups.provider'),
+            'form_entries' => config('larapress.profiles.routes.form_entries.provider'),
             'form_profile_default' => config('larapress.profiles.routes.form_entries.provider'),
         ];
     }
@@ -341,9 +351,6 @@ class UserCRUDProvider implements ICRUDProvider
      */
     public function syncPhones($user, $phones)
     {
-        /** @var IDomainRepository */
-        $domainRepo = app(IDomainRepository::class);
-        $domain = $domainRepo->getCurrentRequestDomain();
         foreach ($phones as $phone) {
             $dbPhone = null;
             if (isset($phone['id'])) {
@@ -351,7 +358,7 @@ class UserCRUDProvider implements ICRUDProvider
             } else {
                 $dbPhone = PhoneNumber::query()
                     ->where('user_id', $user->id)
-                    ->where('domain_id', $domain->id)
+                    ->where('domain_id', $user->getMembershipDomainId())
                     ->where('number', $phone['number'])
                     ->first();
             }
@@ -360,7 +367,7 @@ class UserCRUDProvider implements ICRUDProvider
                 //   dont create a new phone if someone in the same domain has this phone
                 $sameNumbers = PhoneNumber::query()
                     ->where('number', $phone['number'])
-                    ->where('domain_id', $domain->id)
+                    ->where('domain_id', $user->getMembershipDomainId())
                     ->count();
                 if ($sameNumbers > 0) {
                     throw new AppException(AppException::ERR_NUMBER_ALREADY_EXISTS);
@@ -369,7 +376,7 @@ class UserCRUDProvider implements ICRUDProvider
                         'number' => $phone['number'],
                         'flags' => isset($phone['flags']) && !is_null($phone['flags']) ? $phone['flags'] : 0,
                         'user_id' => $user->id,
-                        'domain_id' => $domain->id,
+                        'domain_id' => $user->getMembershipDomainId(),
                     ]);
                 }
             } else {

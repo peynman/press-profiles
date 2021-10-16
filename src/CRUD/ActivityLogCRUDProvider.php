@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Larapress\CRUD\Services\CRUD\Traits\CRUDProviderTrait;
 use Larapress\CRUD\Services\CRUD\ICRUDProvider;
-use Larapress\CRUD\Services\RBAC\IPermissionsMetadata;
 use Larapress\CRUD\Services\CRUD\ICRUDVerb;
 use Larapress\Profiles\IProfileUser;
 

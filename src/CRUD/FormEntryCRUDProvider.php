@@ -31,7 +31,6 @@ class FormEntryCRUDProvider implements ICRUDProvider
         ICRUDVerb::VIEW,
         ICRUDVerb::SHOW,
         ICRUDVerb::DELETE,
-        ICRUDVerb::REPORTS,
         ICRUDVerb::CREATE,
         ICRUDVerb::EDIT,
     ];

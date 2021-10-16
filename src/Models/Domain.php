@@ -62,7 +62,6 @@ class Domain extends Model
         return DomainFactory::new();
     }
 
-
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
