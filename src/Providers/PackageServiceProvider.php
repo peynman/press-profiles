@@ -8,6 +8,8 @@ use Larapress\CRUD\Services\CRUD\ICRUDFilterStorage;
 use Larapress\Profiles\Base\BaseCRUDFilterStorage;
 use Larapress\Profiles\Base\BaseCRUDQueryExport;
 use Larapress\Profiles\Commands\CreateDomain;
+use Larapress\Profiles\Commands\ExportForms;
+use Larapress\Profiles\Commands\ImportForms;
 use Larapress\Profiles\Repository\Domain\DomainRepository;
 use Larapress\Profiles\Repository\Domain\IDomainRepository;
 use Larapress\Profiles\Repository\Form\FormRepository;
@@ -77,6 +79,8 @@ class PackageServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 CreateDomain::class,
+                ExportForms::class,
+                ImportForms::class,
             ]);
         }
     }
