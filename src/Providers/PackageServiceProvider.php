@@ -9,9 +9,12 @@ use Larapress\Profiles\Base\BaseCRUDFilterStorage;
 use Larapress\Profiles\Base\BaseCRUDQueryExport;
 use Larapress\Profiles\Commands\CreateDomain;
 use Larapress\Profiles\Commands\ExportForms;
+use Larapress\Profiles\Commands\ImportCountry;
 use Larapress\Profiles\Commands\ImportForms;
 use Larapress\Profiles\Repository\Domain\DomainRepository;
 use Larapress\Profiles\Repository\Domain\IDomainRepository;
+use Larapress\Profiles\Repository\Filter\FilterRepository;
+use Larapress\Profiles\Repository\Filter\IFilterRepository;
 use Larapress\Profiles\Repository\Form\FormRepository;
 use Larapress\Profiles\Repository\Form\IFormRepository;
 use Larapress\Profiles\Repository\PhoneNumber\IPhoneNumberRepository;
@@ -20,7 +23,9 @@ use Larapress\Profiles\Repository\Settings\ISettingsRepository;
 use Larapress\Profiles\Repository\Settings\SettingsRepository;
 use Larapress\Profiles\Repository\User\IUserRepository;
 use Larapress\Profiles\Repository\User\UserRepository;
+use Larapress\Profiles\Services\FormEntry\FormContentProviders\VuetifyFormContentProvider;
 use Larapress\Profiles\Services\FormEntry\FormEntryService;
+use Larapress\Profiles\Services\FormEntry\IFormContentProvider;
 use Larapress\Profiles\Services\FormEntry\IFormEntryService;
 use Larapress\Profiles\Services\ProfileUser\IProfileUserServices;
 use Larapress\Profiles\Services\ProfileUser\ProfileUserServices;
@@ -45,9 +50,11 @@ class PackageServiceProvider extends ServiceProvider
         $this->app->bind(IUserRepository::class, UserRepository::class);
         $this->app->bind(IPhoneNumberRepository::class, PhoneNumberRepository::class);
         $this->app->bind(IFormRepository::class, FormRepository::class);
-        $this->app->bind(IFormEntryService::class, FormEntryService::class);
+        $this->app->bind(IFilterRepository::class, FilterRepository::class);
         $this->app->bind(ISettingsService::class, SettingsService::class);
         $this->app->bind(IProfileUserServices::class, ProfileUserServices::class);
+        $this->app->bind(IFormEntryService::class, FormEntryService::class);
+        $this->app->bind(IFormContentProvider::class, VuetifyFormContentProvider::class);
 
         $this->app->bind(ICRUDFilterStorage::class, BaseCRUDFilterStorage::class);
         $this->app->bind(ICRUDExporter::class, BaseCRUDQueryExport::class);
@@ -81,6 +88,7 @@ class PackageServiceProvider extends ServiceProvider
                 CreateDomain::class,
                 ExportForms::class,
                 ImportForms::class,
+                ImportCountry::class,
             ]);
         }
     }

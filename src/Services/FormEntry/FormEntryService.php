@@ -3,7 +3,6 @@
 namespace Larapress\Profiles\Services\FormEntry;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 use Larapress\CRUD\Exceptions\AppException;
 use Larapress\CRUD\Exceptions\ValidationException;
@@ -11,46 +10,51 @@ use Larapress\CRUD\Extend\Helpers;
 use Larapress\FileShare\Services\FileUpload\IFileUploadService;
 use Larapress\Profiles\Models\Form;
 use Larapress\Profiles\Models\FormEntry;
-use Larapress\Profiles\Repository\Domain\IDomainRepository;
-use Larapress\Profiles\IProfileUser;
 
 class FormEntryService implements IFormEntryService
 {
-    /** @var IFileUploadService $fileService */
-    protected $fileService;
-    public function __construct(IFileUploadService $fileService)
-    {
-        $this->fileService = $fileService;
+    public function __construct(
+        public IFileUploadService $fileService,
+        public IFormContentProvider $contentProvider
+    ) {
     }
 
     /**
-     * @param Request|null $request
-     * @param int|Form $form
-     * @param IProfileUser $user
+     *
+     * @param mixed $user
+     * @param int $domainId
+     * @param int|string|Form $form
+     * @param string $ip
+     * @param string $agent
+     * @param array $data
      * @param string|null $tags
      * @param callable $onProvide
      * @return FormEntry
      */
-    public function updateFormEntry($request, $user, $form, $tags = null, $onProvide = null)
-    {
+    public function updateFormEntry(
+        $user,
+        $domainId,
+        $form,
+        $ip,
+        $agent,
+        $data = [],
+        $tags = null,
+        $onProvide = null
+    ) {
         if (is_numeric($form)) {
             /** @var Form */
             $form = Form::find($form);
+        } else if (is_string($form)) {
+            $form = Form::where('name', $form)->first();
         }
 
         if (is_null($form)) {
             throw new AppException(AppException::ERR_OBJECT_NOT_FOUND);
         }
 
-        $inputNames = !is_null($request) ? $this->getValidatedFormInputs($request, $form) : [];
+        $inputs = $this->getValidatedFormInputs($form, $data);
+        $inputs = $this->replaceBase64ImagesInInputs($inputs);
 
-        if (is_null($request)) {
-            $domain = $user->getMembershipDomain();
-        } else {
-            /** @var IDomainRepository */
-            $domainRepo = app(IDomainRepository::class);
-            $domain = $domainRepo->getRequestDomain($request);
-        }
         $entry = null;
         $created = true;
 
@@ -59,162 +63,65 @@ class FormEntryService implements IFormEntryService
             $form,
             $tags,
             true,
-            $domain,
-            function () use ($user, $form, $domain, $request, $onProvide, $inputNames, $tags) {
-                if (is_null($onProvide)) {
-                    if (is_null($request)) {
-                        $values = [];
-                    } else {
-                        $values = $this->replaceBase64ImagesInInputs($request->all($inputNames));
-                    }
-                } else {
-                    $values = $onProvide($request, $inputNames, $form, null);
-                }
-
+            $domainId,
+            function () use (
+                $user,
+                $form,
+                $domainId,
+                $onProvide,
+                $inputs,
+                $tags,
+                $ip,
+                $agent
+            ) {
+                $inputs = is_null($onProvide) ? $inputs : $onProvide($inputs, $form, null);
                 return FormEntry::create([
                     'user_id' => $user->id,
                     'form_id' => $form->id,
-                    'domain_id' => $domain->id,
+                    'domain_id' => $domainId,
                     'tags' => $tags,
                     'data' => [
-                        'ip' => !is_null($request) ? $request->ip() : null,
-                        'agent' => !is_null($request) ? $request->userAgent() : null,
-                        'values' => $values,
+                        'ip' => $ip,
+                        'agent' => $agent,
+                        'values' => $inputs,
                     ],
                     'flags' => 0,
                 ]);
             },
-            function ($entry) use ($form, $request, $onProvide, $inputNames, $tags, &$created) {
-                if (is_null($onProvide)) {
-                    if (is_null($request)) {
-                        $values = [];
-                    } else {
-                        $values = $this->replaceBase64ImagesInInputs($request->all($inputNames));
-                    }
-                } else {
-                    $values = $onProvide($request, $inputNames, $form, $entry);
-                }
+            function ($entry) use (
+                $form,
+                $onProvide,
+                $inputs,
+                $tags,
+                $ip,
+                $agent,
+                &$created,
+            ) {
+                $inputs = is_null($onProvide) ? $inputs : $onProvide($inputs, $form, $entry);
                 $created = false;
+
                 $entry->update([
                     'tags' => $tags,
                     'data' => [
-                        'ip' => !is_null($request) ? $request->ip() : null,
-                        'agent' => !is_null($request) ? $request->userAgent() : null,
-                        'values' => $values,
+                        'ip' => $ip,
+                        'agent' => $agent,
+                        'values' => $inputs,
                     ],
                 ]);
                 return $entry;
             }
         );
+
         FormEntryUpdateEvent::dispatch(
             $user,
-            $domain,
+            $domainId,
             $entry,
             $form,
             $created,
-            !is_null($request) ? $request->ip() : 'local',
+            $ip,
             time()
         );
 
-        Helpers::forgetCachedValues(['user.form.' . $form->id . '.entry:' . $user->id]);
-
-        return $entry;
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param Request $request
-     * @param IProfileUser $user
-     * @param int|Form $form
-     * @param string $tags
-     * @param callable $onProvide
-     * @return FormEntry
-     */
-    public function updateUserFormEntryTag($request, $user, $form, $tags, $onProvide = null)
-    {
-        if (is_numeric($form)) {
-            /** @var Form */
-            $form = Form::find($form);
-        }
-
-        if (is_null($form)) {
-            throw new AppException(AppException::ERR_OBJECT_NOT_FOUND);
-        }
-
-        $inputNames = !is_null($request) ? $this->getValidatedFormInputs($request, $form) : [];
-
-        if (is_null($request)) {
-            $domain = $user->getMembershipDomain();
-        } else {
-            /** @var IDomainRepository */
-            $domainRepo = app(IDomainRepository::class);
-            $domain = $domainRepo->getRequestDomain($request);
-        }
-
-        $entry = null;
-        $created = true;
-
-        $entry = $this->resolveFormEntryRequest(
-            $user,
-            $form,
-            $tags,
-            false,
-            $domain,
-            function () use ($user, $form, $domain, $request, $onProvide, $inputNames, $tags) {
-                if (is_null($onProvide)) {
-                    if (is_null($request)) {
-                        $values = [];
-                    } else {
-                        $values = $this->replaceBase64ImagesInInputs($request->all($inputNames));
-                    }
-                } else {
-                    $values = $onProvide($request, $inputNames, $form, null);
-                }
-                return FormEntry::create([
-                    'user_id' => $user->id,
-                    'form_id' => $form->id,
-                    'domain_id' => $domain->id,
-                    'tags' => $tags,
-                    'data' => [
-                        'ip' => !is_null($request) ? $request->ip() : null,
-                        'agent' => !is_null($request) ? $request->userAgent() : null,
-                        'values' => $values
-                    ],
-                    'flags' => 0,
-                ]);
-            },
-            function ($entry) use ($form, $request, $onProvide, $inputNames, $tags, &$created) {
-                if (is_null($onProvide)) {
-                    if (is_null($request)) {
-                        $values = [];
-                    } else {
-                        $values = $this->replaceBase64ImagesInInputs($request->all($inputNames));
-                    }
-                } else {
-                    $values = $onProvide($request, $inputNames, $form, $entry);
-                }
-                $created = false;
-                $entry->update([
-                    'tags' => $tags,
-                    'data' => [
-                        'ip' => !is_null($request) ? $request->ip() : null,
-                        'agent' => !is_null($request) ? $request->userAgent() : null,
-                        'values' => $values
-                    ],
-                ]);
-                return $entry;
-            }
-        );
-        FormEntryUpdateEvent::dispatch(
-            $user,
-            $domain,
-            $entry,
-            $form,
-            $created,
-            !is_null($request) ? $request->ip() : 'local',
-            time()
-        );
         Helpers::forgetCachedValues(['user.form.' . $form->id . '.entry:' . $user->id]);
 
         return $entry;
@@ -233,80 +140,18 @@ class FormEntryService implements IFormEntryService
         return $values;
     }
 
+
     /**
      * Undocumented function
      *
-     * @param int|Form $form
+     * @param Form $form
+     *
      * @return array
      */
-    public function getFormValidationRules($form)
+    public function getFormValidationRules(Form $form): array
     {
-        if (is_numeric($form)) {
-            $form = Form::find($form);
-        }
-
-        $rules = [];
-        $inputNames = [];
-        $feilds = isset($form->data['form']['schema']['fields']) ? $form->data['form']['schema']['fields'] : [];
-        $collectValidationsDeep = function ($root, $path, $callback) use (&$rules, &$inputNames) {
-            foreach ($root as $fieldName => $fieldObj) {
-                if (isset($fieldObj['validations'])) {
-                    $rules[$path . $fieldName] = [];
-                    foreach ($fieldObj['validations'] as $check => $val) {
-                        switch ($check) {
-                            case 'required':
-                                if ($val) {
-                                    $rules[$path . $fieldName][] = 'required';
-                                }
-                                break;
-                            case 'minLength':
-                                if (is_numeric($val)) {
-                                    if ($fieldObj['validations']['maxLength']) {
-                                        $rules[$path . $fieldName][] = 'digits_between:' . $val . ',' . $fieldObj['validations']['maxLength'];
-                                    } else {
-                                        $rules[$path . $fieldName][] = 'min:' . $val;
-                                    }
-                                }
-                                break;
-                            case 'maxLength':
-                                if (is_numeric($val)) {
-                                    if ($fieldObj['validations']['minLength']) {
-                                        $rules[$path . $fieldName][] = 'digits_between:' . $fieldObj['validations']['minLength'] . ',' . $val;
-                                    } else {
-                                        $rules[$path . $fieldName][] = 'max:' . $val;
-                                    }
-                                }
-                                break;
-                            case 'numeric':
-                                if ($val) {
-                                    $rules[$path . $fieldName][] = 'numeric';
-                                }
-                                break;
-                            case 'ascii':
-                                if ($val) {
-                                    $rules[$path . $fieldName][] = 'min:3|regex:/[^x00-x7F]*/';
-                                }
-                                break;
-                        }
-                    }
-                }
-                if (isset($fieldObj['fields'])) {
-                    $callback($fieldObj['fields'], $path . $fieldName . '.', $callback);
-                }
-                if (isset($fieldObj['groups'])) {
-                    $callback($fieldObj['groups'], $path . $fieldName . '.', $callback);
-                }
-
-                if (!isset($fieldObj['exclude']) || !$fieldObj['exclude']) {
-                    $inputNames[] = $fieldName;
-                }
-            }
-        };
-        $collectValidationsDeep($feilds, '', $collectValidationsDeep);
-
-        return [$rules, $inputNames];
+        return $this->contentProvider->getFormRules($form);
     }
-
 
     /**
      * Undocumented function
@@ -316,15 +161,16 @@ class FormEntryService implements IFormEntryService
      *
      * @return array
      */
-    public function getValidatedFormInputs(Request $request, Form $form)
+    public function getValidatedFormInputs(Form $form, $inputs): array
     {
-        [$rules, $inputNames] = $this->getFormValidationRules($form);
-        $validate = Validator::make($request->all($inputNames), $rules);
+        $rules = $this->getFormValidationRules($form);
+        $validInputs = $this->contentProvider->getFormValidInputs($form, $inputs);
+        $validate = Validator::make($validInputs, $rules);
         if ($validate->fails()) {
             throw new ValidationException($validate);
         }
 
-        return $inputNames;
+        return $validInputs;
     }
 
     /**
@@ -350,6 +196,7 @@ class FormEntryService implements IFormEntryService
                 ->where('user_id', $user->id)
                 ->where('form_id', $form->id)
                 ->where('domain_id', $domain->id);
+
             if ($checkTags) {
                 if (is_null($tags)) {
                     $entry->whereNull('tags');
@@ -357,6 +204,7 @@ class FormEntryService implements IFormEntryService
                     $entry->where('tags', $tags);
                 }
             }
+
             $entry = $entry->first();
 
             if (is_null($entry)) {
