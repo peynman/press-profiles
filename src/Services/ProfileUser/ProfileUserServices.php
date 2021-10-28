@@ -154,7 +154,14 @@ class ProfileUserServices implements IProfileUserServices
     public function updateDetails(IProfileUser $user, UpdateProfileRequest $request) {
         /** @var IFormEntryService */
         $formService = app(IFormEntryService::class);
-        $formService->updateFormEntry($request, $user, $request->getProfileForm());
+        $formService->updateFormEntry(
+            $user,
+            $user->getMembershipDomainId(),
+            $request->getProfileForm(),
+            $request->getClientIp(),
+            $request->userAgent(),
+            $request->all(),
+        );
 
         return $this->userDetails($user);
     }
