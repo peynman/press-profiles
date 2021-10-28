@@ -305,12 +305,12 @@ class UserCRUDProvider implements ICRUDProvider
     {
         /** @var IRoleRepository */
         $repo = app(IRoleRepository::class);
-        /** @var ICRUDUser $user */
-        $user = Auth::user();
-        if ($user->hasRole(config('larapress.profiles.security.roles.super_role'))) {
+        /** @var ICRUDUser */
+        $authUser = Auth::user();
+        if ($authUser->hasRole(config('larapress.profiles.security.roles.super_role'))) {
             $this->syncBelongsToManyRelation('roles', $user, $args);
         } else {
-            $validRoles = $repo->getVisibleRoles($user);
+            $validRoles = $repo->getVisibleRoles($authUser);
             $this->syncBelongsToManyRelation('roles', $user, $args, function ($arg) use ($validRoles) {
                 foreach ($validRoles as $validRole) {
                     if ($validRole->id === $arg) {
