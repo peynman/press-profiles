@@ -60,7 +60,7 @@ class VuetifyFormContentProvider implements IFormContentProvider
         $children = $form->data['content']['children'] ?? [];
         $traverseChildren($children, $traverseChildren);
 
-        return $validInputs;
+        return $inputs;
     }
 
     protected function getVuetifyBindingKey($key) {

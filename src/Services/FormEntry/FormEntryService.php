@@ -188,14 +188,24 @@ class FormEntryService implements IFormEntryService
      */
     protected function resolveFormEntryRequest($user, $form, $tags, $checkTags, $domain, $onCreateEntry, $onUpdateEntry)
     {
+        if (is_object($form)) {
+            $form = $form->id;
+        }
+        if (is_object($domain)) {
+            $domain = $domain->id;
+        }
+        if (is_object($user)) {
+            $user = $user->id;
+        }
+
         if (is_null($user)) {
             // handler open (no user) forms
             return $onCreateEntry();
         } else {
             $entry = FormEntry::query()
-                ->where('user_id', $user->id)
-                ->where('form_id', $form->id)
-                ->where('domain_id', $domain->id);
+                ->where('user_id', $user)
+                ->where('form_id', $form)
+                ->where('domain_id', $domain);
 
             if ($checkTags) {
                 if (is_null($tags)) {
