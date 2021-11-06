@@ -78,6 +78,8 @@ class UserCRUDProvider implements ICRUDProvider
         'created_to' => 'before:created_at',
         'updated_from' => 'after:upated_at',
         'updated_to' => 'before:updated_at',
+        'deleted_from' => 'after:deleted_at',
+        'deleted_to' => 'before:deleted_at',
         'roles' => 'has:roles',
         'phones' => 'has:phones:number',
         'domains' => 'has:domains',
