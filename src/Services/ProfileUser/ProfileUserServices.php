@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 use Larapress\CRUD\Exceptions\AppException;
 use Larapress\CRUD\Extend\Helpers;
 use Larapress\CRUD\Services\CRUD\ICRUDService;
+use Larapress\FileShare\Models\FileUpload;
+use Larapress\FileShare\Services\FileUpload\IFileUploadService;
 use Larapress\Profiles\Services\FormEntry\IFormEntryService;
 use Larapress\Profiles\Services\ProfileUser\Requests\AddressModifyRequest;
 use Larapress\Profiles\Services\ProfileUser\Requests\UpdateProfileRequest;
@@ -154,13 +156,27 @@ class ProfileUserServices implements IProfileUserServices
     public function updateDetails(IProfileUser $user, UpdateProfileRequest $request) {
         /** @var IFormEntryService */
         $formService = app(IFormEntryService::class);
+        /** @var IFileUploadService */
+        $fileService = app(IFileUploadService::class);
+
+        $values = $request->all();
+        $values = $fileService->replaceBase64WithFilePathValuesRecursive(
+            $user,
+            'user-'.$user->id.'-profile-pic',
+            $values,
+            'profilePic',
+            FileUpload::ACCESS_PUBLIC,
+            config('larapress.fileshare.default_public_disk'),
+            'images/avatars',
+        );
+
         $formService->updateFormEntry(
             $user,
             $user->getMembershipDomainId(),
             $request->getProfileForm(),
             $request->getClientIp(),
             $request->userAgent(),
-            $request->all(),
+            $values,
         );
 
         return $this->userDetails($user);

@@ -16,6 +16,7 @@ use Larapress\Profiles\Services\FormEntry\FormEntryUpdateEvent;
 use Larapress\Profiles\Services\FormEntry\FormEntryUpdateReport;
 use Larapress\Profiles\Services\FormEntry\IFormEntryService;
 use Larapress\ECommerce\IECommerceUser;
+use Larapress\FileShare\Models\FileUpload;
 use Larapress\FileShare\Services\FileUpload\IFileUploadService;
 use Larapress\Profiles\Models\Form;
 
@@ -111,29 +112,43 @@ class FormEntryCRUDProvider implements ICRUDProvider
      */
     public function onBeforeCreate(array $args): array
     {
+        /** @var IProfileUser */
+        $user = Auth::user();
         /** @var IFileUploadService */
         $service = app(IFileUploadService::class);
 
         /** @var Form */
         $form = Form::find($args['form_id']);
         $values = $args['formValues'];
+
+        // handle customized uploads in form definition
         if (isset($form->data['uploads']) && is_array($form->data['uploads'])) {
             foreach ($form->data['uploads'] as $uploadMeta) {
-                $values = $service->replaceBase64WithFilePathValuesRecursuve(
+                $values = $service->replaceBase64WithFilePathValuesRecursive(
+                    $user,
+                    'form-'.$form->id.'-custom-image-user-'.$user->id,
                     $values,
                     $uploadMeta['prop'],
-                    $uploadMeta['disk'],
-                    $uploadMeta['folder']
+                    FileUpload::ACCESS_PRIVATE,
+                    $uploadMeta['disk'] ?? config('larapress.fileshare.default_private_disk'),
+                    $uploadMeta['folder'] ?? 'uplaods'
                 );
             }
         }
-        $values = $service->replaceBase64WithFilePathValuesRecursuve(
+
+        // all other uploads in public folders
+        $values = $service->replaceBase64WithFilePathValuesRecursive(
+            $user,
+            'form-'.$form->id.'-image-user-'.$user->id,
             $values,
-            null
+            null,
+            FileUpload::ACCESS_PUBLIC,
+            config('larapress.fileshare.default_public_disk'),
+            'images'
         );
 
         $args['data'] = [
-            'filledBy' => Auth::user()->id,
+            'filledBy' => $user->id,
             'values' => $values,
         ];
 

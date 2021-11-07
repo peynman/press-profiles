@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use Larapress\CRUD\Exceptions\AppException;
 use Larapress\CRUD\Exceptions\ValidationException;
 use Larapress\CRUD\Extend\Helpers;
+use Larapress\FileShare\Models\FileUpload;
 use Larapress\FileShare\Services\FileUpload\IFileUploadService;
 use Larapress\Profiles\Models\Form;
 use Larapress\Profiles\Models\FormEntry;
@@ -53,7 +54,15 @@ class FormEntryService implements IFormEntryService
         }
 
         $inputs = $this->getValidatedFormInputs($form, $data);
-        $inputs = $this->replaceBase64ImagesInInputs($inputs);
+        $inputs = $this->fileService->replaceBase64WithFilePathValuesRecursive(
+            $user,
+            'form-'.$form.'-entry-user-'.$user->id,
+            $inputs,
+            null,
+            FileUpload::ACCESS_PRIVATE,
+            config('larapress.fileshare.default_private_disk'),
+            'uploads',
+        );
 
         $entry = null;
         $created = true;
@@ -126,20 +135,6 @@ class FormEntryService implements IFormEntryService
 
         return $entry;
     }
-
-    /**
-     * Undocumented function
-     *
-     * @param array $values
-     * @return array
-     */
-    protected function replaceBase64ImagesInInputs($values)
-    {
-        $values = $this->fileService->replaceBase64WithFilePathValuesRecursuve($values, 'melli_card', 'local', 'melli_cards');
-        $values = $this->fileService->replaceBase64WithFilePathValuesRecursuve($values, null);
-        return $values;
-    }
-
 
     /**
      * Undocumented function
