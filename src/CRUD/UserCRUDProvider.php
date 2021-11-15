@@ -15,7 +15,9 @@ use Larapress\CRUD\Repository\IRoleRepository;
 use Larapress\CRUD\Services\CRUD\ICRUDVerb;
 use Larapress\CRUD\Services\CRUD\Traits\CRUDRelationSyncTrait;
 use Larapress\Profiles\IProfileUser;
+use Larapress\Profiles\Models\EmailAddress;
 use Larapress\Profiles\Models\PhoneNumber;
+use Larapress\Profiles\Models\PhysicalAddress;
 use Larapress\Reports\Services\Reports\ReportsVerb;
 
 /**
@@ -191,11 +193,11 @@ class UserCRUDProvider implements ICRUDProvider
         $this->syncDomains($object, $args);
 
         if (isset($args['addresses'])) {
-            $this->syncAddresses($object, $args);
+            $this->syncAddresses($object, $args['addresses']);
         }
 
         if (isset($args['emails'])) {
-            $this->syncEmails($object, $args);
+            $this->syncEmails($object, $args['emails']);
         }
 
         if (isset($args['phones'])) {
@@ -240,11 +242,11 @@ class UserCRUDProvider implements ICRUDProvider
         $this->syncDomains($object, $args);
 
         if (isset($args['addresses'])) {
-            $this->syncAddresses($object, $args);
+            $this->syncAddresses($object, $args['addresses']);
         }
 
         if (isset($args['emails'])) {
-            $this->syncEmails($object, $args);
+            $this->syncEmails($object, $args['emails']);
         }
 
         if (isset($args['phones'])) {
@@ -332,7 +334,7 @@ class UserCRUDProvider implements ICRUDProvider
      *
      * @return void
      */
-    public function syncDomains($user, $args)
+    public function syncDomains(IProfileUser $user, array $args)
     {
         // sync domains with their attributes in pivot tables
         $this->syncBelongsToManyRelation('domains', $user, $args, null, function ($arg) {
@@ -348,10 +350,10 @@ class UserCRUDProvider implements ICRUDProvider
      * Undocumented function
      *
      * @param IProfileUser $user
-     * @param array[] $phones
+     * @param array $phones
      * @return void
      */
-    public function syncPhones($user, $phones)
+    public function syncPhones(IProfileUser $user, array $phones)
     {
         foreach ($phones as $phone) {
             $dbPhone = null;
@@ -394,21 +396,88 @@ class UserCRUDProvider implements ICRUDProvider
      * Undocumented function
      *
      * @param IProfileUser $user
-     * @param array $args
+     * @param array $addresses
      * @return void
      */
-    public function syncAddresses($user, $args)
+    public function syncAddresses(IProfileUser $user, array $addresses)
     {
+        foreach ($addresses as $address) {
+            if (isset($address['id'])) {
+                $dbAddress = PhysicalAddress::find($address['id']);
+                if (!is_null($dbAddress)) {
+                    $dbAddress->update([
+                        'country_code' => $address['country_code'] ?? null,
+                        'province_code' => $address['province_code'] ?? null,
+                        'city_code' => $address['city_code'] ?? null,
+                        'postal_code' => $address['postal_code'] ?? null,
+                        'address' => $address['address'] ?? null,
+                        'flags' => 0,
+                        'data' => [
+                            'location' => $address['location'] ?? null,
+                        ],
+                    ]);
+                }
+            } else {
+                PhysicalAddress::create([
+                    'user_id' => $user->id,
+                    'domain_id' => $user->getMembershipDomainId(),
+                    'country_code' => $address['country_code'] ?? null,
+                    'province_code' => $address['province_code'] ?? null,
+                    'city_code' => $address['city_code'] ?? null,
+                    'postal_code' => $address['postal_code'] ?? null,
+                    'address' => $address['address'] ?? null,
+                    'flags' => 0,
+                    'data' => [
+                        'location' => $address['location'] ?? null,
+                    ],
+                ]);
+            }
+        }
     }
 
     /**
      * Undocumented function
      *
      * @param IProfileUser $user
-     * @param array $args
+     * @param array $emails
      * @return void
      */
-    public function syncEmails($user, $args)
+    public function syncEmails(IProfileUser $user, array $emails)
     {
+        foreach ($emails as $email) {
+            $dbEmail = null;
+            if (isset($email['id'])) {
+                $dbEmail = EmailAddress::find($email['id']);
+            } else {
+                $dbEmail = EmailAddress::query()
+                    ->where('user_id', $user->id)
+                    ->where('domain_id', $user->getMembershipDomainId())
+                    ->where('number', $email['number'])
+                    ->first();
+            }
+            if (is_null($dbEmail)) {
+                // check for same email in this domain;
+                //   dont create a new email if someone in the same domain has this email
+                $sameEmail = EmailAddress::query()
+                    ->where('number', $email['number'])
+                    ->where('domain_id', $user->getMembershipDomainId())
+                    ->count();
+                if ($sameEmail > 0) {
+                    throw new AppException(AppException::ERR_NUMBER_ALREADY_EXISTS);
+                } else {
+                    $dbEmail = EmailAddress::create([
+                        'number' => $dbEmail['number'],
+                        'flags' => isset($email['flags']) && !is_null($email['flags']) ? $email['flags'] : 0,
+                        'user_id' => $user->id,
+                        'domain_id' => $user->getMembershipDomainId(),
+                    ]);
+                }
+            } else {
+                $dbEmail->update([
+                    'number' => $email['number'],
+                    'flags' => isset($email['flags']) && !is_null($email['flags']) ? $email['flags'] : 0,
+                ]);
+            }
+        }
     }
 }
