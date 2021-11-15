@@ -47,9 +47,11 @@ class VuetifyFormContentProvider implements IFormContentProvider
         $validInputs = [];
         $traverseChildren = function ($children, $traverseChildren) use(&$validInputs, $inputs) {
             foreach ($children as $child) {
-                $key = $this->getVuetifyBindingKey($child['props']['v-model']);
-                if (isset($inputs[$key])) {
-                    $validInputs[$key] = $inputs[$key];
+                if (isset($child['props']['v-model'])) {
+                    $key = $this->getVuetifyBindingKey($child['props']['v-model']);
+                    if (isset($inputs[$key])) {
+                        $validInputs[$key] = $inputs[$key];
+                    }
                 }
                 if (isset($child['children']) && count($child['children']) > 0) {
                     $traverseChildren($child['children'], $traverseChildren);
