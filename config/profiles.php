@@ -9,8 +9,9 @@ return [
         'super_role' => 1,
     ],
 
-    // role groups used in domain based access controls
+    // security options
     'security' => [
+        // role groups used in domain based access controls
         'roles' => [
             // super role users can access any resource
             'super_role' => [
@@ -24,6 +25,19 @@ return [
             // customer roles can access their own resources only
             'customer' => [
                 'customer',
+            ],
+        ],
+
+        // user address input options
+        'addresses' => [
+            // required fields to fill on an address
+            'required' => [
+                'city_code',
+                'province_code',
+                'address',
+                'location',
+                'country_code',
+                'postal_code',
             ],
         ],
     ],

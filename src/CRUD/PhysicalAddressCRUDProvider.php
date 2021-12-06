@@ -30,7 +30,7 @@ class PhysicalAddressCRUDProvider implements ICRUDProvider
     public $createValidations = [
         'user_id' => 'required|numeric|exists:users,id',
         'address' => 'required',
-        'country_code' => 'required|numeric',
+        'country_code' => 'nullable|numeric',
         'city_code' => 'nullable|numeric',
         'province_code' => 'nullable|numeric',
         'postal_code' => 'nullable|numeric',
@@ -41,7 +41,7 @@ class PhysicalAddressCRUDProvider implements ICRUDProvider
     public $updateValidations = [
         'user_id' => 'required|numeric|exists:users,id',
         'address' => 'required',
-        'country_code' => 'required|numeric',
+        'country_code' => 'nullable|numeric',
         'city_code' => 'nullable|numeric',
         'province_code' => 'nullable|numeric',
         'postal_code' => 'nullable|numeric',
