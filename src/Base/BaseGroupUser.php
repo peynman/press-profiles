@@ -47,7 +47,7 @@ trait BaseGroupUser
      *
      * @return Group[]
      */
-    public function getAdministrateGroups()
+    public function getAdministrationGroups()
     {
         $groups = $this->getMembershipGroups();
         $admins = [];

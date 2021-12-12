@@ -27,7 +27,7 @@ interface IGroupUser {
      *
      * @return Group[]
      */
-    public function getAdministrateGroups();
+    public function getAdministrationGroups();
 
     /**
      * Undocumented function
