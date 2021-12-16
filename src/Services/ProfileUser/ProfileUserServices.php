@@ -181,4 +181,6 @@ class ProfileUserServices implements IProfileUserServices
 
         return $this->userDetails($user);
     }
+
+    public function getAddressString(PhysicalAddress $address) {}
 }
