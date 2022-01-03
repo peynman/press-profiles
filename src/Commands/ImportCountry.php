@@ -45,51 +45,49 @@ class ImportCountry extends Command
 
         $countries = json_decode(file_get_contents($filepath), true);
 
-        $indexer = 0;
         foreach ($countries as $country) {
             Filter::updateOrCreate([
-                'name' => 'country-' . $indexer,
+                'name' => 'country-' . $country['id'],
                 'type' => 'country',
                 'author_id' => 1,
             ], [
                 'data' => [
                     'title' => $country['name'],
                 ],
-                'zorder' => $indexer,
+                'zorder' => $country['id'],
             ]);
+            $this->info("importing ".$country['name']." ".$country['id']);
 
-            $pindexer = 0;
-            foreach ($country['provinces'] as $province) {
+            foreach ($country['provinces'] as $pname => $province) {
                 Filter::updateOrCreate([
-                    'name' => 'province-' . $indexer . '-' . $pindexer,
+                    'name' => 'province-' . $country['id'] . '-' . $province['id'],
                     'type' => 'province',
                     'author_id' => 1,
                 ], [
                     'data' => [
-                        'title' => $province['name'],
+                        'title' => $pname,
+                        'country' => $country['name'],
                     ],
-                    'zorder' => $pindexer,
+                    'zorder' => $province['id'],
                 ]);
+                $this->info("importing ".$pname." ".$province['id']);
 
-                $cindexer = 0;
                 foreach ($province['cities'] as $city) {
                     Filter::updateOrCreate([
-                        'name' => 'city-' . $indexer . '-' . $pindexer . '-' . $cindexer,
+                        'name' => 'province-' . $country['id'] . '-' . $province['id'] . '-' . $city['id'],
                         'type' => 'city',
                         'author_id' => 1,
                     ], [
                         'data' => [
-                            'title' => $city,
+                            'title' => $city['name'],
+                            'province' => $pname,
+                            'country' => $country['name'],
                         ],
-                        'zorder' => $cindexer,
+                        'zorder' => $city['id'],
                     ]);
-                    $cindexer++;
+                    $this->info("importing ".$city['name']);
                 }
-
-                $pindexer++;
             }
-
-            $indexer++;
         }
 
         $this->info('Forms imported.');

@@ -4,7 +4,7 @@ namespace Larapress\Profiles\Services\DeviceMonitor;
 
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Larapress\Auth\Signin\SigninEvent;
+use Larapress\Auth\Services\Signin\SigninEvent;
 use Larapress\CRUD\Events\CRUDCreated;
 use Larapress\Profiles\CRUD\DeviceCRUDProvider;
 use Larapress\Profiles\Models\Device;

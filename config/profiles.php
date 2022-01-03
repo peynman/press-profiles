@@ -9,6 +9,13 @@ return [
         'super_role' => 1,
     ],
 
+    // profile reportings
+    'reports' => [
+        'group' => 'profiles',
+        'form_entries' => 1,
+        'devices' => 2,
+    ],
+
     // security options
     'security' => [
         // role groups used in domain based access controls
@@ -40,6 +47,10 @@ return [
                 'postal_code',
             ],
         ],
+
+        // header to look for visiting device client name,
+        // web is used if this header does not exists on request headers
+        'device_client_header' => 'X-DEVICE-CLIENT',
     ],
 
     // crud routes implemented in Larapress Profiles

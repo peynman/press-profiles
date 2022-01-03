@@ -23,7 +23,7 @@ class EventServiceProvider extends ServiceProvider
         'Larapress\CRUD\Events\CRUDDeleted' => [
             'Larapress\Profiles\Services\ActivityLog\ActivityLogListener',
         ],
-        'Larapress\Auth\Signin\SigninEvent' => [
+        'Larapress\Auth\Services\Signin\SigninEvent' => [
             'Larapress\Profiles\Services\DeviceMonitor\SigninEventListener',
         ]
     ];
