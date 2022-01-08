@@ -18,7 +18,7 @@ class SigninEventListener implements ShouldQueue
             'user_id' => $event->userId,
             'domain_id' => $user->getMembershipDomainId(),
             'client_type' => $event->requestClientType,
-            // 'client_agent' => $event->requestAgent,
+            'client_agent' => $event->requestAgent,
         ], [
             'client_ip' => $event->requestIp,
         ]);
