@@ -18,7 +18,7 @@ class CreateDevicesTable extends Migration
             $table->bigInteger('user_id', false, true)->nullable();
             $table->bigInteger('domain_id', false, true)->nullable();
             $table->string('client_type');
-            $table->string('client_agent');
+            $table->string('client_agent', 300);
             $table->string('client_ip');
             $table->integer('flags', false, true)->default(0);
             $table->timestamps();
