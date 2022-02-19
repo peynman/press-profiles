@@ -53,7 +53,7 @@ class GroupCRUDProvider implements ICRUDProvider
     public function getUpdateRules(Request $request): array
     {
         return [
-            'name' => 'required|string|unique:groups,name,'.$request->route('id'),
+            'name' => 'required|string|unique:groups,name,'.$request->route('id') . ',id,deleted_at,NULL',
             'data.title' => 'required|string',
             'admin_user_ids.*' => 'nullable|exists:users,id',
         ];
