@@ -39,7 +39,7 @@ class FormRepository implements IFormRepository
      * @param [type] $formId
      * @return Form
      */
-    public function getForm($user, Request $request, Route $route, $formId)
+    public function getForm($user, Request $request, $route, $formId)
     {
         $form = Form::find($formId);
         if (is_null($form)) {

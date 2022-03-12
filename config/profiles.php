@@ -51,6 +51,10 @@ return [
         // header to look for visiting device client name,
         // web is used if this header does not exists on request headers
         'device_client_header' => 'X-DEVICE-CLIENT',
+
+        // header to look for visiting device ip address,
+        // usefull if app is behind LB
+        'ip_client_header' => 'X-DEVICE-IP',
     ],
 
     // crud routes implemented in Larapress Profiles

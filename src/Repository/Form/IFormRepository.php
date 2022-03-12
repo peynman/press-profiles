@@ -24,5 +24,5 @@ interface IFormRepository
      * @param [type] $formId
      * @return Form
      */
-    public function getForm($user, Request $request, Route $route, $formId);
+    public function getForm($user, Request $request, $route, $formId);
 }
