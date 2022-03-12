@@ -16,12 +16,14 @@ class VuetifyFormContentProvider implements IFormContentProvider
     public function getFormRules(Form $form): array
     {
         $rules = [];
-        $traverseChildren = function ($children, $traverseChildren) use(&$rules) {
+        $traverseChildren = function ($children, $traverseChildren) use (&$rules) {
             foreach ($children as $child) {
                 if (isset($child['props']['rules'])) {
-                    $key = $this->getVuetifyBindingKey($child['props']['v-model']);
-                    foreach ($child['props']['rules'] as $rule) {
-                        $rules[$key] = $rule;
+                    $key = $this->getVuetifyBindingKey($child['props']['v-model'] ?? null);
+                    if (!is_null($key)) {
+                        foreach ($child['props']['rules'] as $rule) {
+                            $rules[$key] = $rule;
+                        }
                     }
                 }
                 if (isset($child['children']) && count($child['children']) > 0) {
@@ -45,11 +47,11 @@ class VuetifyFormContentProvider implements IFormContentProvider
     public function getFormValidInputs(Form $form, array $inputs): array
     {
         $validInputs = [];
-        $traverseChildren = function ($children, $traverseChildren) use(&$validInputs, $inputs) {
+        $traverseChildren = function ($children, $traverseChildren) use (&$validInputs, $inputs) {
             foreach ($children as $child) {
                 if (isset($child['props']['v-model'])) {
-                    $key = $this->getVuetifyBindingKey($child['props']['v-model']);
-                    if (isset($inputs[$key])) {
+                    $key = $this->getVuetifyBindingKey($child['props']['v-model'] ?? null);
+                    if (!is_null($key) && isset($inputs[$key])) {
                         $validInputs[$key] = $inputs[$key];
                     }
                 }
@@ -65,10 +67,16 @@ class VuetifyFormContentProvider implements IFormContentProvider
         return $inputs;
     }
 
-    protected function getVuetifyBindingKey($key) {
-        $len = Str::length('$(bindings.');
-        if (Str::startsWith($key, '$(bindings.')) {
-            return Str::substr($key, $len, Str::length($key) - $len - 1);
+    protected function getVuetifyBindingKey($key)
+    {
+        if (!is_null($key)) {
+            if (Str::startsWith($key, '$(bindings.')) {
+                $len = Str::length('$(bindings.');
+                return Str::substr($key, $len, Str::length($key) - $len - 1);
+            } else {
+                return $key;
+            }
         }
+        return null;
     }
 }
