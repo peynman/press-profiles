@@ -50,8 +50,8 @@ class FormFillRequest extends FormRequest
         $this->domain = $ds->getRequestDomain($this);
 
         return array_merge([
-            'formName' => 'required_without:form_id|string|exists:forms,name',
-            'formId' => 'required_without:form_name|numeric|exists:forms,id',
+            'formName' => 'required_without:formId|string|exists:forms,name',
+            'formId' => 'required_without:formName|numeric|exists:forms,id',
             'tags' => 'nullable|string',
             'data' => 'nullable|json_object',
         ], $dataRules);
