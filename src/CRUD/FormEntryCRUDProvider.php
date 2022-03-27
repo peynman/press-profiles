@@ -57,7 +57,6 @@ class FormEntryCRUDProvider implements ICRUDProvider
         'user',
         'form',
         'domain',
-        'entry_tag_resolve',
     ];
     public $searchColumns = [
         'equals:tags',
